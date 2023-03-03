@@ -1,0 +1,17 @@
+@import '../../assets/styles/variables';
+
+.pagination {
+	margin-top: 36px;
+	display: flex;
+	gap: 16px;
+
+	.page:hover {
+		cursor: pointer;
+	}
+
+	.active {
+		font-weight: 800;
+		text-decoration: underline 'red';
+		text-decoration-thickness: 5px;
+	}
+}
