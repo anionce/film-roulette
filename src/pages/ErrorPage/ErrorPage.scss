@@ -1,0 +1,11 @@
+.error-container {
+	display: flex;
+	flex-direction: column;
+	justify-items: center;
+	align-items: center;
+	gap: 0;
+
+	img {
+		width: 300px;
+	}
+}
