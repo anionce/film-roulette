@@ -1,0 +1,21 @@
+@import '../../assets/styles/variables';
+
+.not-found-container {
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+img {
+	box-shadow: none;
+}
+
+a {
+	color: $color-black;
+}
+
+span {
+	font-size: 8px;
+}
