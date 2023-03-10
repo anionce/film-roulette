@@ -1,0 +1,15 @@
+@import '../../assets/styles/variables';
+
+.loader-emoji {
+	font-size: $font-size-lg;
+	animation: rotation 1.5s infinite linear;
+}
+
+@keyframes rotation {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(359deg);
+	}
+}
