@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders correcly 1`] = `
+<div>
+  <div
+    class="error-container"
+  >
+    <h1>
+      Ooops!
+    </h1>
+    <h2>
+      There has been an error.
+    </h2>
+    <h3>
+      Please try again later...
+    </h3>
+    <img
+      alt="error"
+      src="errorimageurl"
+    />
+  </div>
+</div>
+`;
