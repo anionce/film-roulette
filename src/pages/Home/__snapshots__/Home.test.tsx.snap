@@ -1,0 +1,110 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders correcly 1`] = `
+<div>
+  <div
+    class="home-container"
+  >
+    <div
+      class="home-left-side"
+    >
+      <div
+        class="home-left-container"
+      >
+        <div
+          class="home-section-top"
+        >
+          <p
+            class="home-subtitle"
+          >
+            Film roulette
+          </p>
+          <p
+            class="home-label"
+          >
+            Today, I want
+          </p>
+          <p
+            class="home-label"
+          >
+            something...
+          </p>
+          <select>
+            <option
+              id="comedy"
+              value="comedy"
+            >
+              happy
+            </option>
+            <option
+              id="drama"
+              value="drama"
+            >
+              sad
+            </option>
+            <option
+              id="adventure"
+              value="adventure"
+            >
+              adventurous
+            </option>
+            <option
+              id="horror"
+              value="horror"
+            >
+              scary
+            </option>
+            <option
+              id="thriller"
+              value="thriller"
+            >
+              mysterious
+            </option>
+            <option
+              id="history"
+              value="history"
+            >
+              educational
+            </option>
+          </select>
+        </div>
+        <div
+          class="home-section-middle"
+        >
+          <p
+            class="home-label home-label-middle"
+          >
+            and i have...
+          </p>
+          <select>
+            <option
+              id="short"
+              value="short"
+            >
+              1.30h
+            </option>
+            <option
+              id="medium"
+              value="medium"
+            >
+              2h
+            </option>
+            <option
+              id="long"
+              value="long"
+            >
+              Plenty of time
+            </option>
+          </select>
+        </div>
+      </div>
+      <button>
+        PLAY
+      </button>
+    </div>
+    <div
+      class="home-right-side"
+    />
+  </div>
+</div>
+`;

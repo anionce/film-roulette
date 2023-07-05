@@ -10,7 +10,7 @@ export const Selector = ({ selectorValue, onChange }: SelectorProps) => {
 	return (
 		<select onChange={onChange}>
 			{getOptionsForSelector(selectorValue).map(({ text, value }) => (
-				<option id={value} value={value}>
+				<option key={value} id={value} value={value}>
 					{text}
 				</option>
 			))}
