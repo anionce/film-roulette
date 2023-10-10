@@ -97,10 +97,10 @@ exports[`renders correcly 1`] = `
             </option>
           </select>
         </div>
+        <button>
+          PLAY
+        </button>
       </div>
-      <button>
-        PLAY
-      </button>
     </div>
     <div
       class="home-right-side"

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { APIMovieResponse, Movie } from '../../models/MovieResponse';
+import { Movie } from '../../models/MovieResponse';
 import { useLazyGetDetailsQuery, useLazyGetRandomMovieQuery } from '../../services/api';
 import { Loader } from '../../components/Loader/Loader';
 import { Poster } from '../../components/Poster/Poster';
@@ -11,8 +11,8 @@ import './Home.scss';
 
 export const Home = () => {
 	const [randomMovie, setRandomMovie] = useState<Movie | undefined>(undefined);
-	const [duration, setDuration] = useState<MovieRuntime | undefined>(undefined);
-	const [genre, setGenre] = useState<MovieGenre | undefined>(undefined);
+	const [duration, setDuration] = useState<MovieRuntime | undefined>(MovieRuntime.Short);
+	const [genre, setGenre] = useState<MovieGenre | undefined>(MovieGenre.Comedy);
 	const [actualPage, setActualPage] = useState<number>(1);
 
 	const [trigger, { data: dataRandom, isLoading }] = useLazyGetRandomMovieQuery();
@@ -22,7 +22,7 @@ export const Home = () => {
 
 	useEffect(() => {
 		if (dataRandom) {
-			const { total_pages, results } = dataRandom as APIMovieResponse;
+			const { total_pages, results } = dataRandom;
 			setActualPage(prevPage => (total_pages === actualPage ? 1 : prevPage + 1));
 			setRandomMovie(results[Math.floor(Math.random() * results.length)]);
 
@@ -59,8 +59,8 @@ export const Home = () => {
 				<div className='home-left-container'>
 					<GenreSelection onMainGenreChange={onGenreChange} />
 					<RuntimeSelection onDurationChange={onDurationChange} />
+					<button onClick={onButtonClick}>PLAY</button>
 				</div>
-				<button onClick={onButtonClick}>PLAY</button>
 			</div>
 			<div className='home-right-side'>
 				{isLoading && <Loader />}
