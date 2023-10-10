@@ -31,7 +31,7 @@ export const Home = () => {
 			}
 		}
 		// eslint-disable-next-line
-	}, [dataRandom, randomMovie]);
+	}, [dataRandom]);
 
 	const onButtonClick = () => {
 		if (duration && genre) {
