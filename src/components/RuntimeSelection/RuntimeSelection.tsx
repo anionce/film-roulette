@@ -2,9 +2,10 @@ import React from 'react';
 import { SelectValue } from '../../constants/selector';
 import { Selector } from '../Selector/Selector';
 import '../../pages/Home/Home.scss';
+import { SelectChangeEvent } from '@mui/material/Select';
 
 export type RuntimeSelectionProps = {
-	onDurationChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+	onDurationChange: (event: SelectChangeEvent<SelectValue>) => void;
 };
 
 export const RuntimeSelection = ({ onDurationChange }: RuntimeSelectionProps) => {

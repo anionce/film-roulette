@@ -19,116 +19,56 @@ exports[`renders correcly 1`] = `
           >
             Today, I want...
           </p>
-          <select>
-            <option
-              id="action"
-              value="action"
+          <div
+            class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary  css-tkva0g-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
+          >
+            <div
+              aria-controls=":r0:"
+              aria-expanded="false"
+              aria-haspopup="listbox"
+              class="MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
+              role="combobox"
+              tabindex="0"
             >
-              action
-            </option>
-            <option
-              id="adventure"
-              value="adventure"
+              <span
+                class="notranslate"
+              >
+                ​
+              </span>
+            </div>
+            <input
+              aria-hidden="true"
+              aria-invalid="false"
+              class="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
+              tabindex="-1"
+              value=""
+            />
+            <svg
+              aria-hidden="true"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined css-hfutr2-MuiSvgIcon-root-MuiSelect-icon"
+              data-testid="ArrowDropDownIcon"
+              focusable="false"
+              viewBox="0 0 24 24"
             >
-              adventure
-            </option>
-            <option
-              id="animation"
-              value="animation"
+              <path
+                d="M7 10l5 5 5-5z"
+              />
+            </svg>
+            <fieldset
+              aria-hidden="true"
+              class="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
             >
-              animation
-            </option>
-            <option
-              id="comedy"
-              value="comedy"
-            >
-              comedy
-            </option>
-            <option
-              id="crime"
-              value="crime"
-            >
-              crime
-            </option>
-            <option
-              id="documentary"
-              value="documentary"
-            >
-              documentary
-            </option>
-            <option
-              id="drama"
-              value="drama"
-            >
-              drama
-            </option>
-            <option
-              id="family"
-              value="family"
-            >
-              family
-            </option>
-            <option
-              id="fantasy"
-              value="fantasy"
-            >
-              fantasy
-            </option>
-            <option
-              id="history"
-              value="history"
-            >
-              history
-            </option>
-            <option
-              id="horror"
-              value="horror"
-            >
-              horror
-            </option>
-            <option
-              id="music"
-              value="music"
-            >
-              music
-            </option>
-            <option
-              id="mistery"
-              value="mistery"
-            >
-              mistery
-            </option>
-            <option
-              id="romance"
-              value="romance"
-            >
-              romance
-            </option>
-            <option
-              id="scifi"
-              value="scifi"
-            >
-              scifi
-            </option>
-            <option
-              id="thriller"
-              value="thriller"
-            >
-              thriller
-            </option>
-            <option
-              id="war"
-              value="war"
-            >
-              war
-            </option>
-            <option
-              id="western"
-              value="western"
-            >
-              western
-            </option>
-          </select>
+              <legend
+                class="css-ihdtdm"
+              >
+                <span
+                  class="notranslate"
+                >
+                  ​
+                </span>
+              </legend>
+            </fieldset>
+          </div>
         </div>
         <div
           class="home-section-middle"
@@ -138,26 +78,56 @@ exports[`renders correcly 1`] = `
           >
             and i have...
           </p>
-          <select>
-            <option
-              id="short"
-              value="short"
+          <div
+            class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary  css-tkva0g-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
+          >
+            <div
+              aria-controls=":r1:"
+              aria-expanded="false"
+              aria-haspopup="listbox"
+              class="MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
+              role="combobox"
+              tabindex="0"
             >
-              1.30h
-            </option>
-            <option
-              id="medium"
-              value="medium"
+              <span
+                class="notranslate"
+              >
+                ​
+              </span>
+            </div>
+            <input
+              aria-hidden="true"
+              aria-invalid="false"
+              class="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
+              tabindex="-1"
+              value=""
+            />
+            <svg
+              aria-hidden="true"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined css-hfutr2-MuiSvgIcon-root-MuiSelect-icon"
+              data-testid="ArrowDropDownIcon"
+              focusable="false"
+              viewBox="0 0 24 24"
             >
-              2h
-            </option>
-            <option
-              id="long"
-              value="long"
+              <path
+                d="M7 10l5 5 5-5z"
+              />
+            </svg>
+            <fieldset
+              aria-hidden="true"
+              class="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
             >
-              Plenty of time
-            </option>
-          </select>
+              <legend
+                class="css-ihdtdm"
+              >
+                <span
+                  class="notranslate"
+                >
+                  ​
+                </span>
+              </legend>
+            </fieldset>
+          </div>
         </div>
         <button>
           PLAY
