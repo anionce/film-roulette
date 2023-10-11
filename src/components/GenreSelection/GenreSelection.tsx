@@ -2,9 +2,10 @@ import React from 'react';
 import { SelectValue } from '../../constants/selector';
 import { Selector } from '../Selector/Selector';
 import '../../pages/Home/Home.scss';
+import { SelectChangeEvent } from '@mui/material/Select';
 
 export type GenreSelectionProps = {
-	onMainGenreChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+	onMainGenreChange: (event: SelectChangeEvent<SelectValue>) => void;
 };
 
 export const GenreSelection = ({ onMainGenreChange }: GenreSelectionProps) => {

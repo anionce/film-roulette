@@ -10,12 +10,14 @@ import { RuntimeSelection } from '../../components/RuntimeSelection/RuntimeSelec
 import './Home.scss';
 import { Plot } from '../../components/Plot/Plot';
 import { Rating } from '../../components/Rating/Rating';
+import { SelectChangeEvent } from '@mui/material';
+import { SelectValue } from '../../constants/selector';
 
 export const Home = () => {
 	const [randomMovie, setRandomMovie] = useState<Movie | undefined>(undefined);
 
-	const [duration, setDuration] = useState<MovieRuntime | undefined>(MovieRuntime.Short);
-	const [genre, setGenre] = useState<MovieGenre | undefined>(MovieGenre.Action);
+	const [duration, setDuration] = useState<MovieRuntime | undefined>(undefined);
+	const [genre, setGenre] = useState<MovieGenre | undefined>(undefined);
 	const [actualPage, setActualPage] = useState<number>(1);
 
 	const [trigger, { data: dataRandom, isLoading }] = useLazyGetRandomMovieQuery();
@@ -49,12 +51,12 @@ export const Home = () => {
 		}
 	};
 
-	const onDurationChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+	const onDurationChange = (event: SelectChangeEvent<SelectValue>): void => {
 		setActualPage(1);
 		setDuration(event.target.value as MovieRuntime);
 	};
 
-	const onGenreChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+	const onGenreChange = (event: SelectChangeEvent<SelectValue>): void => {
 		setActualPage(1);
 		setGenre(event.target.value as MovieGenre);
 	};
