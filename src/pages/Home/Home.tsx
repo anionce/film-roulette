@@ -8,11 +8,14 @@ import { MovieRuntime, mapValueToMovieRuntime } from '../../constants/runtime';
 import { GenreSelection } from '../../components/GenreSelection/GenreSelection';
 import { RuntimeSelection } from '../../components/RuntimeSelection/RuntimeSelection';
 import './Home.scss';
+import { Plot } from '../../components/Plot/Plot';
+import { Rating } from '../../components/Rating/Rating';
 
 export const Home = () => {
 	const [randomMovie, setRandomMovie] = useState<Movie | undefined>(undefined);
+
 	const [duration, setDuration] = useState<MovieRuntime | undefined>(MovieRuntime.Short);
-	const [genre, setGenre] = useState<MovieGenre | undefined>(MovieGenre.Comedy);
+	const [genre, setGenre] = useState<MovieGenre | undefined>(MovieGenre.Action);
 	const [actualPage, setActualPage] = useState<number>(1);
 
 	const [trigger, { data: dataRandom, isLoading }] = useLazyGetRandomMovieQuery();
@@ -25,13 +28,16 @@ export const Home = () => {
 			const { total_pages, results } = dataRandom;
 			setActualPage(prevPage => (total_pages === actualPage ? 1 : prevPage + 1));
 			setRandomMovie(results[Math.floor(Math.random() * results.length)]);
-
-			if (randomMovie) {
-				triggerIMDBDetail({ id: randomMovie.id });
-			}
 		}
 		// eslint-disable-next-line
 	}, [dataRandom]);
+
+	useEffect(() => {
+		if (randomMovie) {
+			triggerIMDBDetail({ id: randomMovie.id });
+		}
+		// eslint-disable-next-line
+	}, [randomMovie]);
 
 	const onButtonClick = () => {
 		if (duration && genre) {
@@ -64,7 +70,15 @@ export const Home = () => {
 			</div>
 			<div className='home-right-side'>
 				{isLoading && <Loader />}
-				{shouldShowPoster && <Poster dataIMDB={dataIMDB as string} randomMovie={randomMovie as Movie} />}
+				{shouldShowPoster && (
+					<div className='home-right-container'>
+						<Poster dataIMDB={dataIMDB as string} randomMovie={randomMovie as Movie} />
+						<div className='additional-info'>
+							<Plot plot={(randomMovie as Movie)?.overview} dataIMDB={dataIMDB as string} />
+							<Rating rating={(randomMovie as Movie)?.vote_average} />
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
 	);
