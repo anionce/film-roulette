@@ -15,56 +15,118 @@ exports[`renders correcly 1`] = `
           class="home-section-top"
         >
           <p
-            class="home-subtitle"
-          >
-            Film roulette
-          </p>
-          <p
             class="home-label"
           >
-            Today, I want
-          </p>
-          <p
-            class="home-label"
-          >
-            something...
+            Today, I want...
           </p>
           <select>
             <option
-              id="comedy"
-              value="comedy"
+              id="action"
+              value="action"
             >
-              happy
-            </option>
-            <option
-              id="drama"
-              value="drama"
-            >
-              sad
+              action
             </option>
             <option
               id="adventure"
               value="adventure"
             >
-              adventurous
+              adventure
             </option>
             <option
-              id="horror"
-              value="horror"
+              id="animation"
+              value="animation"
             >
-              scary
+              animation
             </option>
             <option
-              id="thriller"
-              value="thriller"
+              id="comedy"
+              value="comedy"
             >
-              mysterious
+              comedy
+            </option>
+            <option
+              id="crime"
+              value="crime"
+            >
+              crime
+            </option>
+            <option
+              id="documentary"
+              value="documentary"
+            >
+              documentary
+            </option>
+            <option
+              id="drama"
+              value="drama"
+            >
+              drama
+            </option>
+            <option
+              id="family"
+              value="family"
+            >
+              family
+            </option>
+            <option
+              id="fantasy"
+              value="fantasy"
+            >
+              fantasy
             </option>
             <option
               id="history"
               value="history"
             >
-              educational
+              history
+            </option>
+            <option
+              id="horror"
+              value="horror"
+            >
+              horror
+            </option>
+            <option
+              id="music"
+              value="music"
+            >
+              music
+            </option>
+            <option
+              id="mistery"
+              value="mistery"
+            >
+              mistery
+            </option>
+            <option
+              id="romance"
+              value="romance"
+            >
+              romance
+            </option>
+            <option
+              id="scifi"
+              value="scifi"
+            >
+              scifi
+            </option>
+            <option
+              id="thriller"
+              value="thriller"
+            >
+              thriller
+            </option>
+            <option
+              id="war"
+              value="war"
+            >
+              war
+            </option>
+            <option
+              id="western"
+              value="western"
+            >
+              western
             </option>
           </select>
         </div>

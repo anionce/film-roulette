@@ -25,15 +25,6 @@ export enum MovieGenre {
 	Western = 'western',
 }
 
-export const genreSelectorOptions: SelectOptions[] = [
-	{ value: MovieGenre.Comedy, text: 'happy' },
-	{ value: MovieGenre.Drama, text: 'sad' },
-	{ value: MovieGenre.Adventure, text: 'adventurous' },
-	{ value: MovieGenre.Horror, text: 'scary' },
-	{ value: MovieGenre.Thriller, text: 'mysterious' },
-	{ value: MovieGenre.History, text: 'educational' },
-];
-
 export const GENRE_NUM: Record<MovieGenre, number> = {
 	[MovieGenre.Action]: 28,
 	[MovieGenre.Adventure]: 12,
@@ -54,3 +45,8 @@ export const GENRE_NUM: Record<MovieGenre, number> = {
 	[MovieGenre.War]: 10752,
 	[MovieGenre.Western]: 37,
 } as const;
+
+export const genreSelectorOptions: SelectOptions[] = Object.keys(GENRE_NUM).map(genre => ({
+	value: genre,
+	text: genre,
+}));
