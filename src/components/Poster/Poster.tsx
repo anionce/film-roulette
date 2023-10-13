@@ -10,8 +10,10 @@ export type PosterProps = {
 
 export const Poster = ({ randomMovie, dataIMDB }: PosterProps) => {
 	return (
-		<a href={`${MOVIE_IMDB_PATH}${dataIMDB}`} target='_blank' rel='noreferrer'>
-			<img alt={randomMovie?.title} src={`${MOVIE_POSTER_PATH}${randomMovie?.poster_path}`} />
-		</a>
+		<div className='poster-container'>
+			<a href={`${MOVIE_IMDB_PATH}${dataIMDB}`} target='_blank' rel='noreferrer'>
+				<img alt={randomMovie?.title} src={`${MOVIE_POSTER_PATH}${randomMovie?.poster_path}`} />
+			</a>
+		</div>
 	);
 };

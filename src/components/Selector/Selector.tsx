@@ -1,8 +1,7 @@
 import React from 'react';
+import './Selector.scss';
 import MenuItem from '@mui/material/MenuItem';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import './Selector.scss';
-
 import { getOptionsForSelector, SelectValue } from '../../constants/selector';
 
 export type SelectorProps = {
@@ -12,22 +11,14 @@ export type SelectorProps = {
 
 export const Selector = ({ selectorValue, onChange }: SelectorProps) => {
 	return (
-		<Select
-			onChange={onChange}
-			className=''
-			sx={{
-				fontFamily: 'Playfair Display',
-				width: '500px',
-				fontSize: '20px',
-				height: '60px',
-				padding: '8px',
-				borderRadius: '4px',
-				border: '1px solid black',
-				backgroundColor: 'white',
-				'.MuiOutlinedInput-notchedOutline': { borderStyle: 'none' },
-			}}>
+		<Select onChange={onChange} classes={{ root: 'root-element', select: 'select-element' }}>
 			{getOptionsForSelector(selectorValue).map(({ text, value }) => (
-				<MenuItem key={value} id={value} value={value}>
+				<MenuItem
+					sx={{ minHeight: 35, fontFamily: 'Playfair Display', fontSize: 20 }}
+					classes={{ root: 'menu-item' }}
+					key={value}
+					id={value}
+					value={value}>
 					{text}
 				</MenuItem>
 			))}

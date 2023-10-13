@@ -11,9 +11,9 @@ export enum MovieRuntime {
 }
 
 export const runtimeSelectorOptions: SelectOptions[] = [
-	{ value: MovieRuntime.Short, text: '1.30h' },
-	{ value: MovieRuntime.Medium, text: '2h' },
-	{ value: MovieRuntime.Long, text: 'Plenty of time' },
+	{ value: MovieRuntime.Short, text: '1.30 h' },
+	{ value: MovieRuntime.Medium, text: '2 horas' },
+	{ value: MovieRuntime.Long, text: '> 2 horas' },
 ];
 
 export const RUNTIME_LENGTH: Record<MovieRuntime, number> = {

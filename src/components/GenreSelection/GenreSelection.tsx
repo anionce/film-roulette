@@ -11,7 +11,7 @@ export type GenreSelectionProps = {
 export const GenreSelection = ({ onMainGenreChange }: GenreSelectionProps) => {
 	return (
 		<div className='home-section-top'>
-			<p className='home-label'>Today, I want...</p>
+			<p className='home-label'>Hoy me apetece...</p>
 			<Selector selectorValue={SelectValue.Genre} onChange={onMainGenreChange} />
 		</div>
 	);

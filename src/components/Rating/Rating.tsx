@@ -18,8 +18,12 @@ export const Rating = ({ rating }: RatingProps) => {
 		itemStrokeWidth: 0.5,
 	};
 
-	const ratingSize = isTabletOrMobile ? 150 : 250;
+	const ratingSize = isTabletOrMobile ? 150 : 175;
 
 	const cleanRating = Number((rating / 2).toFixed(2));
-	return <Stars readOnly={true} style={{ maxWidth: ratingSize }} value={cleanRating} itemStyles={myStyles} />;
+	return (
+		<div className='rating-container'>
+			<Stars readOnly={true} style={{ maxWidth: ratingSize }} value={cleanRating} itemStyles={myStyles} />
+		</div>
+	);
 };

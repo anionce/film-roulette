@@ -13,9 +13,9 @@ export const Plot = ({ plot, dataIMDB }: PlotProps) => {
 
 	const truncatedPlot = () => {
 		if (isTabletOrMobile) {
-			return `${plot.substring(0, 150)}... `;
+			return `${plot.substring(0, 200)}... `;
 		}
-		return `${plot.substring(0, 325)}... `;
+		return `${plot.substring(0, 350)}... `;
 	};
 
 	return (
@@ -23,7 +23,7 @@ export const Plot = ({ plot, dataIMDB }: PlotProps) => {
 			<p className='plot-text'>
 				{truncatedPlot()}
 				<a href={`${MOVIE_IMDB_PATH}${dataIMDB}`} target='_blank' rel='noreferrer'>
-					More...
+					+
 				</a>
 			</p>
 		</div>

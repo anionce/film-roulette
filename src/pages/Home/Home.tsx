@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Movie } from '../../models/MovieResponse';
-import { useLazyGetDetailsQuery, useLazyGetRandomMovieQuery } from '../../services/api';
+import { AvailabilityInfo, CountryResults, Movie } from '../../models/MovieResponse';
+import {
+	useLazyGetDetailsQuery,
+	useLazyGetRandomMovieQuery,
+	useLazyGetStreamingDetailsQuery,
+} from '../../services/api';
 import { Loader } from '../../components/Loader/Loader';
 import { Poster } from '../../components/Poster/Poster';
 import { MovieGenre, mapValueToGenre } from '../../constants/genre';
@@ -12,6 +16,7 @@ import { Plot } from '../../components/Plot/Plot';
 import { Rating } from '../../components/Rating/Rating';
 import { SelectChangeEvent } from '@mui/material';
 import { SelectValue } from '../../constants/selector';
+import { Streaming } from '../../components/Streaming/Streaming';
 
 export const Home = () => {
 	const [randomMovie, setRandomMovie] = useState<Movie | undefined>(undefined);
@@ -22,8 +27,10 @@ export const Home = () => {
 
 	const [trigger, { data: dataRandom, isLoading }] = useLazyGetRandomMovieQuery();
 	const [triggerIMDBDetail, { data: dataIMDB }] = useLazyGetDetailsQuery();
+	const [triggerStreamingDetail, { data: streamingData }] = useLazyGetStreamingDetailsQuery();
 
 	const shouldShowPoster: boolean = !!randomMovie && !!dataIMDB;
+	const shouldShowStreamingData: boolean = !!streamingData?.flatrate;
 
 	useEffect(() => {
 		if (dataRandom) {
@@ -37,6 +44,7 @@ export const Home = () => {
 	useEffect(() => {
 		if (randomMovie) {
 			triggerIMDBDetail({ id: randomMovie.id });
+			triggerStreamingDetail({ id: randomMovie.id });
 		}
 		// eslint-disable-next-line
 	}, [randomMovie]);
@@ -78,6 +86,12 @@ export const Home = () => {
 						<div className='additional-info'>
 							<Plot plot={(randomMovie as Movie)?.overview} dataIMDB={dataIMDB as string} />
 							<Rating rating={(randomMovie as Movie)?.vote_average} />
+							{shouldShowStreamingData && (
+								<Streaming
+									justWatchLink={(streamingData as CountryResults).link}
+									streamingInfo={(streamingData as CountryResults).flatrate as AvailabilityInfo[]}
+								/>
+							)}
 						</div>
 					</div>
 				)}
