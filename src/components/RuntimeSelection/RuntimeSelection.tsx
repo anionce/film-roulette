@@ -11,7 +11,7 @@ export type RuntimeSelectionProps = {
 export const RuntimeSelection = ({ onDurationChange }: RuntimeSelectionProps) => {
 	return (
 		<div className='home-section-middle'>
-			<p className='home-label home-label-middle'>and i have...</p>
+			<p className='home-label home-label-middle'>y tengo...</p>
 			<Selector selectorValue={SelectValue.Runtime} onChange={onDurationChange} />
 		</div>
 	);
