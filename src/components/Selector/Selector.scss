@@ -3,39 +3,36 @@
 .root-element {
 	font-size: 20;
 	font-family: $main-font;
-	width: 500px;
+	width: $sm;
 	height: 60px;
-	padding: 8px;
+	padding: 0;
 	border-radius: 4px;
-	border: 1px solid black;
+	border: 1px solid $color-black;
 	background-color: white;
 
 	.MuiOutlinedInput-notchedOutline {
 		border-style: none;
 	}
 
-	.select-element {
+	.MuiSelect-outlined.MuiSelect-select {
+		min-height: auto;
 		font-size: $font-size-md;
 	}
 }
 
-@media only screen and (max-width: 1100px) {
+@media only screen and (max-width: $lg) {
 	.root-element {
 		max-width: 300px;
 		max-height: 40px;
-
-		.select-element {
-			min-height: none;
-		}
 	}
 }
 
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: $sm) {
 	.root-element {
 		max-width: 200px;
 		max-height: 30px;
 
-		.select-element {
+		.MuiSelect-outlined.MuiSelect-select {
 			font-size: $font-size-sm;
 		}
 	}

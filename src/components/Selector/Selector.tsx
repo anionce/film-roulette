@@ -3,21 +3,24 @@ import './Selector.scss';
 import MenuItem from '@mui/material/MenuItem';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { getOptionsForSelector, SelectValue } from '../../constants/selector';
+import { MovieRuntime } from '../../constants/runtime';
+import { MovieGenre } from '../../constants/genre';
 
 export type SelectorProps = {
 	selectorValue: SelectValue;
-	onChange: (event: SelectChangeEvent<SelectValue>) => void;
+	onChange: (event: SelectChangeEvent<MovieGenre | MovieRuntime>) => void;
+	selectedOption: MovieGenre | MovieRuntime;
 };
 
-export const Selector = ({ selectorValue, onChange }: SelectorProps) => {
+export const Selector = ({ selectorValue, onChange, selectedOption }: SelectorProps) => {
 	return (
-		<Select onChange={onChange} classes={{ root: 'root-element', select: 'select-element' }}>
+		<Select value={selectedOption} onChange={onChange} classes={{ root: 'root-element' }}>
 			{getOptionsForSelector(selectorValue).map(({ text, value }) => (
 				<MenuItem
 					sx={{ minHeight: 35, fontFamily: 'Playfair Display', fontSize: 20 }}
 					classes={{ root: 'menu-item' }}
 					key={value}
-					id={value}
+					data-testid={value}
 					value={value}>
 					{text}
 				</MenuItem>

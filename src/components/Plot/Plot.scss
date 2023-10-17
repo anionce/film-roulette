@@ -7,7 +7,7 @@ a {
 .plot-container {
 	background-color: white;
 	margin: 0 64px;
-	border: 1px solid black;
+	border: 1px solid $color-black;
 	box-shadow: 4px 4px rgba(0, 0, 0, 0.25);
 }
 .plot-text {
@@ -16,20 +16,27 @@ a {
 	text-align: center;
 	padding: 0 16px;
 	font-weight: 400;
+
+	a {
+		color: $color-black;
+	}
 }
 
-@media only screen and (max-width: 1100px) {
+@media only screen and (max-width: $lg) {
 	.plot-container {
-		max-width: 300px;
+		max-width: 330px;
+		margin: 0 32px;
 	}
 	.plot-text {
 		font-size: $font-size-sm;
+		padding: 0 8px;
 	}
 }
 
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: $sm) {
 	.plot-container {
 		max-width: 250px;
+		margin: 0 8px;
 	}
 	.plot-text {
 		font-size: $font-size-xs;

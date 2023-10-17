@@ -24,7 +24,7 @@ export const moviesApi = createApi({
 	endpoints: builder => ({
 		getRandomMovie: builder.query<APIMovieResponse, RandomMovieArgs>({
 			query: ({ runtime, genres, page }) =>
-				`${DISCOVER}/${TAG}?api_key=${API_KEY}&language=${LANGUAGE}&with_runtime.lte=${runtime}&with_genres=${genres}&vote_count.gte=${POPULARITY_VALUE}&vote_average.gte${MINIMUM_VOTE}&page=${page}`,
+				`${DISCOVER}/${TAG}?api_key=${API_KEY}&language=${LANGUAGE}&include_adult=false&with_runtime.lte=${runtime}&with_genres=${genres}&vote_count.gte=${POPULARITY_VALUE}&vote_average.gte=${MINIMUM_VOTE}&sort_by=popularity.desc&page=${page}`,
 		}),
 		getDetails: builder.query<string, DetailMovieArgs>({
 			query: ({ id }) => `${TAG}/${id}?api_key=${API_KEY}&language=${LANGUAGE}`,
