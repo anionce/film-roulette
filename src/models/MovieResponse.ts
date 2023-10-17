@@ -8,7 +8,7 @@ export type APIMovieResponse = {
 export type RandomMovieArgs = {
 	page: number;
 	runtime: number;
-	genres: number[];
+	genres: number[] | null;
 };
 
 export type DetailMovieArgs = {
@@ -34,15 +34,33 @@ export type Movie = {
 	vote_count: number;
 };
 
+type ProductionCompany = {
+	id: number;
+	logo_path: string;
+	name: string;
+	origin_country: string;
+};
+
+type ProductionCountry = {
+	iso_3166_1: string;
+	name: string;
+};
+
+type SpokenLanguage = {
+	english_name: string;
+	iso_639_1: string;
+	name: string;
+};
+
 export type MovieDetail = Movie & {
 	belongs_to_collection: null;
 	budget: number;
 	homepage: string;
 	imdb_id: string;
-	production_companies: [];
-	production_countries: [];
+	production_companies: ProductionCompany[];
+	production_countries: ProductionCountry[];
 	revenue: number;
-	spoken_languages: [];
+	spoken_languages: SpokenLanguage[];
 	status: string;
 	tagline: string;
 };

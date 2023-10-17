@@ -7,18 +7,18 @@
 
 .streaming-logo {
 	width: 40px;
-	box-shadow: none;
 	border-radius: 4px;
+	box-shadow: none;
 	border: none;
 }
 
-@media only screen and (max-width: 1100px) {
+@media only screen and (max-width: $lg) {
 	.streaming-logo {
 		width: 35px;
 	}
 }
 
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: $sm) {
 	.streaming-logo {
 		width: 30px;
 	}

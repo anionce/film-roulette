@@ -15,31 +15,44 @@ import './Home.scss';
 import { Plot } from '../../components/Plot/Plot';
 import { Rating } from '../../components/Rating/Rating';
 import { SelectChangeEvent } from '@mui/material';
-import { SelectValue } from '../../constants/selector';
 import { Streaming } from '../../components/Streaming/Streaming';
 
 export const Home = () => {
+	const [genre, setGenre] = useState<MovieGenre>(MovieGenre.Action);
+	const [duration, setDuration] = useState<MovieRuntime>(MovieRuntime.Short);
+
+	const [actualPage, setActualPage] = useState<number>(1);
+	const [totalPages, setTotalPages] = useState<number | undefined>(undefined);
+	const [movieResults, setMovieResults] = useState<Movie[] | undefined>(undefined);
 	const [randomMovie, setRandomMovie] = useState<Movie | undefined>(undefined);
 
-	const [duration, setDuration] = useState<MovieRuntime | undefined>(undefined);
-	const [genre, setGenre] = useState<MovieGenre | undefined>(undefined);
-	const [actualPage, setActualPage] = useState<number>(1);
-
-	const [trigger, { data: dataRandom, isLoading }] = useLazyGetRandomMovieQuery();
+	const [triggerMovies, { data: dataMovies, isLoading: isLoadingMovies }] = useLazyGetRandomMovieQuery();
 	const [triggerIMDBDetail, { data: dataIMDB }] = useLazyGetDetailsQuery();
 	const [triggerStreamingDetail, { data: streamingData }] = useLazyGetStreamingDetailsQuery();
 
-	const shouldShowPoster: boolean = !!randomMovie && !!dataIMDB;
+	const shouldShowPoster: boolean = !!randomMovie;
+	const shouldShowPlot: boolean = !!randomMovie?.overview;
+	const shouldShowRating: boolean = !!randomMovie?.vote_average;
 	const shouldShowStreamingData: boolean = !!streamingData?.flatrate;
 
+	const getRandomMovie = (results: Movie[]) => results[Math.floor(Math.random() * results.length)];
+
 	useEffect(() => {
-		if (dataRandom) {
-			const { total_pages, results } = dataRandom;
-			setActualPage(prevPage => (total_pages === actualPage ? 1 : prevPage + 1));
-			setRandomMovie(results[Math.floor(Math.random() * results.length)]);
+		if (dataMovies) {
+			const { results, total_pages } = dataMovies;
+			setTotalPages(total_pages);
+			setMovieResults(results);
+		}
+
+		// eslint-disable-next-line
+	}, [dataMovies]);
+
+	useEffect(() => {
+		if (movieResults && !randomMovie) {
+			setRandomMovie(getRandomMovie(movieResults));
 		}
 		// eslint-disable-next-line
-	}, [dataRandom]);
+	}, [movieResults]);
 
 	useEffect(() => {
 		if (randomMovie) {
@@ -50,51 +63,59 @@ export const Home = () => {
 	}, [randomMovie]);
 
 	const onButtonClick = () => {
+		if (totalPages) {
+			setActualPage(Math.floor(Math.random() * totalPages + 1));
+		}
 		if (duration && genre) {
-			trigger({
+			triggerMovies({
 				page: actualPage,
 				runtime: mapValueToMovieRuntime(duration),
 				genres: mapValueToGenre(genre),
 			});
 		}
+		if (movieResults) {
+			setRandomMovie(getRandomMovie(movieResults));
+		}
 	};
 
-	const onDurationChange = (event: SelectChangeEvent<SelectValue>): void => {
+	const onDurationChange = (event: SelectChangeEvent<MovieRuntime>): void => {
 		setActualPage(1);
 		setDuration(event.target.value as MovieRuntime);
 	};
 
-	const onGenreChange = (event: SelectChangeEvent<SelectValue>): void => {
+	const onGenreChange = (event: SelectChangeEvent<MovieGenre>): void => {
 		setActualPage(1);
 		setGenre(event.target.value as MovieGenre);
 	};
 
 	return (
-		<div className='home-container'>
-			<div className='home-left-side'>
-				<div className='home-left-container'>
-					<GenreSelection onMainGenreChange={onGenreChange} />
-					<RuntimeSelection onDurationChange={onDurationChange} />
-					<button onClick={onButtonClick}>PLAY</button>
+		<div data-testid='homeContainer' className='home-container'>
+			<div data-testid='homeQuestions' className='home-questions-side'>
+				<div className='home-questions-container'>
+					<GenreSelection onMainGenreChange={onGenreChange} genre={genre} />
+					<RuntimeSelection onDurationChange={onDurationChange} duration={duration} />
+					<button className='play-button' onClick={onButtonClick}>
+						PLAY
+					</button>
 				</div>
 			</div>
-			<div className='home-right-side'>
-				{isLoading && <Loader />}
-				{shouldShowPoster && (
-					<div className='home-right-container'>
-						<Poster dataIMDB={dataIMDB as string} randomMovie={randomMovie as Movie} />
-						<div className='additional-info'>
+			<div data-testid='homeMovie' className='home-movie-side'>
+				<div className='home-movie-container'>
+					{isLoadingMovies && <Loader />}
+					{shouldShowPoster && <Poster dataIMDB={dataIMDB as string} randomMovie={randomMovie as Movie} />}
+					<div className='additional-info'>
+						{shouldShowPlot && (
 							<Plot plot={(randomMovie as Movie)?.overview} dataIMDB={dataIMDB as string} />
-							<Rating rating={(randomMovie as Movie)?.vote_average} />
-							{shouldShowStreamingData && (
-								<Streaming
-									justWatchLink={(streamingData as CountryResults).link}
-									streamingInfo={(streamingData as CountryResults).flatrate as AvailabilityInfo[]}
-								/>
-							)}
-						</div>
+						)}
+						{shouldShowRating && <Rating rating={(randomMovie as Movie)?.vote_average} />}
+						{shouldShowStreamingData && (
+							<Streaming
+								justWatchLink={(streamingData as CountryResults).link}
+								streamingInfo={(streamingData as CountryResults).flatrate as AvailabilityInfo[]}
+							/>
+						)}
 					</div>
-				)}
+				</div>
 			</div>
 		</div>
 	);

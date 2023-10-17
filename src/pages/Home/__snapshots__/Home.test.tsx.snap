@@ -4,12 +4,14 @@ exports[`renders correcly 1`] = `
 <div>
   <div
     class="home-container"
+    data-testid="homeContainer"
   >
     <div
-      class="home-left-side"
+      class="home-questions-side"
+      data-testid="homeQuestions"
     >
       <div
-        class="home-left-container"
+        class="home-questions-container"
       >
         <div
           class="home-section-top"
@@ -26,22 +28,18 @@ exports[`renders correcly 1`] = `
               aria-controls=":r0:"
               aria-expanded="false"
               aria-haspopup="listbox"
-              class="MuiSelect-select select-element MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
+              class="MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
               role="combobox"
               tabindex="0"
             >
-              <span
-                class="notranslate"
-              >
-                ​
-              </span>
+              acción
             </div>
             <input
               aria-hidden="true"
               aria-invalid="false"
               class="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
               tabindex="-1"
-              value=""
+              value="acción"
             />
             <svg
               aria-hidden="true"
@@ -85,22 +83,18 @@ exports[`renders correcly 1`] = `
               aria-controls=":r1:"
               aria-expanded="false"
               aria-haspopup="listbox"
-              class="MuiSelect-select select-element MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
+              class="MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
               role="combobox"
               tabindex="0"
             >
-              <span
-                class="notranslate"
-              >
-                ​
-              </span>
+              1.30 h
             </div>
             <input
               aria-hidden="true"
               aria-invalid="false"
               class="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
               tabindex="-1"
-              value=""
+              value="short"
             />
             <svg
               aria-hidden="true"
@@ -129,14 +123,25 @@ exports[`renders correcly 1`] = `
             </fieldset>
           </div>
         </div>
-        <button>
+        <button
+          class="play-button"
+        >
           PLAY
         </button>
       </div>
     </div>
     <div
-      class="home-right-side"
-    />
+      class="home-movie-side"
+      data-testid="homeMovie"
+    >
+      <div
+        class="home-movie-container"
+      >
+        <div
+          class="additional-info"
+        />
+      </div>
+    </div>
   </div>
 </div>
 `;

@@ -1,7 +1,10 @@
 import { SelectOptions } from './selector';
 
-export const mapValueToGenre = (value: MovieGenre): number[] => {
-	return [GENRE_NUM[value]];
+export const mapValueToGenre = (value: MovieGenre): number[] | null => {
+	if (GENRE_NUM[value]) {
+		return [GENRE_NUM[value] as number];
+	}
+	return null;
 };
 
 export enum MovieGenre {
@@ -23,9 +26,10 @@ export enum MovieGenre {
 	Thriller = 'thriller',
 	War = 'bélica',
 	Western = 'western',
+	Random = 'random',
 }
 
-export const GENRE_NUM: Record<MovieGenre, number> = {
+export const GENRE_NUM: Record<MovieGenre, number | null> = {
 	[MovieGenre.Action]: 28,
 	[MovieGenre.Adventure]: 12,
 	[MovieGenre.Animation]: 16,
@@ -44,6 +48,7 @@ export const GENRE_NUM: Record<MovieGenre, number> = {
 	[MovieGenre.Thriller]: 53,
 	[MovieGenre.War]: 10752,
 	[MovieGenre.Western]: 37,
+	[MovieGenre.Random]: null,
 } as const;
 
 export const genreSelectorOptions: SelectOptions[] = Object.keys(GENRE_NUM).map(genre => ({

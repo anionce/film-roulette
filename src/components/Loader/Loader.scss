@@ -1,7 +1,9 @@
 @import '../../assets/styles/variables';
 
 .loader-emoji {
-	font-size: $font-size-xl;
+	display: flex;
+	justify-content: center;
+	font-size: $font-size-xxl;
 	animation: rotation 1.5s infinite linear;
 }
 
