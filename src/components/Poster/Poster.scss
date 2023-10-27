@@ -1,13 +1,19 @@
 @import '../../assets/styles/variables';
 
+.poster-container {
+	height: 280px;
+}
+
 .poster-img {
 	border: 1px solid $color-black;
 	box-shadow: 4px 4px rgba(0, 0, 0, 0.25);
-	max-width: 300px;
-	max-height: 350px;
+	max-height: 280px;
 }
 
 @media only screen and (max-width: $lg) {
+	.poster-container {
+		height: 230px;
+	}
 	.poster-img {
 		margin: 8px;
 		max-width: 250px;
@@ -16,8 +22,10 @@
 }
 
 @media only screen and (max-width: $sm) {
+	.poster-container {
+		height: 140px;
+	}
 	.poster-img {
-		max-height: 175px;
-		max-width: 140px;
+		max-height: 130px;
 	}
 }

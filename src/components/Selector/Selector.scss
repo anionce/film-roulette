@@ -23,14 +23,14 @@
 @media only screen and (max-width: $lg) {
 	.root-element {
 		max-width: 300px;
-		max-height: 40px;
+		max-height: 32px;
 	}
 }
 
 @media only screen and (max-width: $sm) {
 	.root-element {
 		max-width: 200px;
-		max-height: 30px;
+		max-height: 28px;
 
 		.MuiSelect-outlined.MuiSelect-select {
 			font-size: $font-size-sm;

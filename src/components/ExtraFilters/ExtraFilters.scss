@@ -1,0 +1,48 @@
+@import '../../assets/styles/variables';
+
+.extra-filters-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: flex-end;
+	font-family: $main-font;
+	font-style: italic;
+	gap: 8px;
+}
+
+@media only screen and (max-width: $lg) {
+	.extra-filters-container {
+		gap: 4px;
+	}
+}
+
+.extra-filters-text-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.extra-filters-text {
+	font-size: $font-size-xs;
+}
+
+.extra-filters-icon {
+	cursor: pointer;
+}
+
+.filter-streaming-logo {
+	width: 28px;
+	border-radius: 4px;
+	box-shadow: none;
+	border: none;
+	opacity: 0.3;
+}
+
+@media only screen and (max-width: $lg) {
+	.extra-filters-text-container {
+		height: 20px;
+	}
+	.filter-streaming-logo {
+		width: 18px;
+	}
+}

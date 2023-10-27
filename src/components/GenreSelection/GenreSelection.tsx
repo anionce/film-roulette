@@ -1,4 +1,5 @@
 import React from 'react';
+import './GenreSelection.scss';
 import { SelectValue } from '../../constants/selector';
 import { Selector } from '../Selector/Selector';
 import '../../pages/Home/Home.scss';
@@ -12,8 +13,8 @@ export type GenreSelectionProps = {
 
 export const GenreSelection = ({ onMainGenreChange, genre }: GenreSelectionProps) => {
 	return (
-		<div className='home-section-top'>
-			<p className='home-label'>Hoy me apetece...</p>
+		<div>
+			<p className='genre-label'>Hoy me apetece...</p>
 			<Selector selectedOption={genre} selectorValue={SelectValue.Genre} onChange={onMainGenreChange} />
 		</div>
 	);

@@ -18,7 +18,7 @@ export const Rating = ({ rating }: RatingProps) => {
 		itemStrokeWidth: 0.5,
 	};
 
-	const ratingSize = isTabletOrMobile ? 150 : 175;
+	const ratingSize = isTabletOrMobile ? 130 : 175;
 
 	const cleanRating = Number((rating / 2).toFixed(2));
 

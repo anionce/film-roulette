@@ -5,16 +5,6 @@ export type APIMovieResponse = {
 	total_results: number;
 };
 
-export type RandomMovieArgs = {
-	page: number;
-	runtime: number;
-	genres: number[] | null;
-};
-
-export type DetailMovieArgs = {
-	id: number;
-};
-
 export type MovieArray = Movie[];
 
 export type Movie = {
