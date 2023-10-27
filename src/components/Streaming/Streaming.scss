@@ -3,10 +3,11 @@
 .streaming-container {
 	display: flex;
 	gap: 8px;
+	height: 40px;
 }
 
 .streaming-logo {
-	width: 40px;
+	height: 40px;
 	border-radius: 4px;
 	box-shadow: none;
 	border: none;
@@ -14,12 +15,18 @@
 
 @media only screen and (max-width: $lg) {
 	.streaming-logo {
-		width: 35px;
+		height: 35px;
+	}
+	.streaming-container {
+		height: 35px;
 	}
 }
 
 @media only screen and (max-width: $sm) {
 	.streaming-logo {
-		width: 30px;
+		height: 26px;
+	}
+	.streaming-container {
+		height: 26px;
 	}
 }

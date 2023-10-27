@@ -1,4 +1,5 @@
 import React from 'react';
+import './RuntimeSelection.scss';
 import { SelectValue } from '../../constants/selector';
 import { Selector } from '../Selector/Selector';
 import '../../pages/Home/Home.scss';
@@ -12,8 +13,8 @@ export type RuntimeSelectionProps = {
 
 export const RuntimeSelection = ({ onDurationChange, duration }: RuntimeSelectionProps) => {
 	return (
-		<div className='home-section-middle'>
-			<p className='home-label home-label-middle'>y tengo...</p>
+		<div>
+			<p className='duration-label'>y tengo...</p>
 			<Selector selectedOption={duration} selectorValue={SelectValue.Runtime} onChange={onDurationChange} />
 		</div>
 	);

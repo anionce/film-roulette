@@ -1,0 +1,21 @@
+@import '../../assets/styles/variables';
+
+.duration-label {
+	font-size: $font-size-xxl;
+	font-weight: 700;
+	margin: 8px 0;
+	text-align: end;
+}
+
+@media only screen and (max-width: $lg) {
+	.duration-label {
+		font-size: $font-size-xl;
+		text-align: center;
+	}
+}
+
+@media only screen and (max-width: $sm) {
+	.duration-label {
+		font-size: $font-size-lg;
+	}
+}

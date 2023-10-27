@@ -1,39 +1,51 @@
 import React, { useEffect, useState } from 'react';
-import { AvailabilityInfo, CountryResults, Movie } from '../../models/MovieResponse';
+import { CountryResults, Movie } from '../../models/MovieResponse';
 import {
 	useLazyGetDetailsQuery,
 	useLazyGetRandomMovieQuery,
 	useLazyGetStreamingDetailsQuery,
 } from '../../services/api';
 import { Loader } from '../../components/Loader/Loader';
-import { Poster } from '../../components/Poster/Poster';
 import { MovieGenre, mapValueToGenre } from '../../constants/genre';
 import { MovieRuntime, mapValueToMovieRuntime } from '../../constants/runtime';
 import { GenreSelection } from '../../components/GenreSelection/GenreSelection';
 import { RuntimeSelection } from '../../components/RuntimeSelection/RuntimeSelection';
 import './Home.scss';
-import { Plot } from '../../components/Plot/Plot';
-import { Rating } from '../../components/Rating/Rating';
 import { SelectChangeEvent } from '@mui/material';
-import { Streaming } from '../../components/Streaming/Streaming';
+import { ExtraFilters } from '../../components/ExtraFilters/ExtraFilters';
+import { PlayButton } from '../../components/PlayButton/PlayButton';
+import { StreamingServices, mapValueToStreamingService } from '../../constants/streamingServices';
+import { MovieInfo } from '../../components/MovieInfo/MovieInfo';
+import { NoResults } from '../../components/NoResults/NoResults';
+
+export type FilterArguments = {
+	genre: MovieGenre;
+	duration: MovieRuntime;
+	streaming: StreamingServices[] | null;
+};
 
 export const Home = () => {
-	const [genre, setGenre] = useState<MovieGenre>(MovieGenre.Action);
-	const [duration, setDuration] = useState<MovieRuntime>(MovieRuntime.Short);
-
 	const [actualPage, setActualPage] = useState<number>(1);
 	const [totalPages, setTotalPages] = useState<number | undefined>(undefined);
 	const [movieResults, setMovieResults] = useState<Movie[] | undefined>(undefined);
 	const [randomMovie, setRandomMovie] = useState<Movie | undefined>(undefined);
 
+	const [showMovie, toggleShowMovie] = useState<boolean>(false);
+	const [changeMovie, toggleChangeMovie] = useState<boolean>(false);
+
+	const [filters, setFilters] = useState<FilterArguments>({
+		genre: MovieGenre.Action,
+		duration: MovieRuntime.Short,
+		streaming: null,
+	});
+
 	const [triggerMovies, { data: dataMovies, isLoading: isLoadingMovies }] = useLazyGetRandomMovieQuery();
 	const [triggerIMDBDetail, { data: dataIMDB }] = useLazyGetDetailsQuery();
 	const [triggerStreamingDetail, { data: streamingData }] = useLazyGetStreamingDetailsQuery();
 
-	const shouldShowPoster: boolean = !!randomMovie;
-	const shouldShowPlot: boolean = !!randomMovie?.overview;
-	const shouldShowRating: boolean = !!randomMovie?.vote_average;
-	const shouldShowStreamingData: boolean = !!streamingData?.flatrate;
+	const shouldShowMovieInfo: boolean = showMovie && !!randomMovie;
+	const shouldShowFewResults: boolean = showMovie && changeMovie && totalPages === 1;
+	const shouldShowNoResults: boolean = showMovie && changeMovie && !randomMovie && totalPages === 0;
 
 	const getRandomMovie = (results: Movie[]) => results[Math.floor(Math.random() * results.length)];
 
@@ -46,6 +58,13 @@ export const Home = () => {
 
 		// eslint-disable-next-line
 	}, [dataMovies]);
+
+	useEffect(() => {
+		if (!shouldShowNoResults) {
+			toggleShowMovie(false);
+		}
+		// eslint-disable-next-line
+	}, [shouldShowNoResults]);
 
 	useEffect(() => {
 		if (movieResults && !randomMovie) {
@@ -62,59 +81,75 @@ export const Home = () => {
 		// eslint-disable-next-line
 	}, [randomMovie]);
 
-	const onButtonClick = () => {
-		if (totalPages) {
-			setActualPage(Math.floor(Math.random() * totalPages + 1));
-		}
-		if (duration && genre) {
+	useEffect(() => {
+		if (filters.genre && filters.duration) {
 			triggerMovies({
-				page: actualPage,
-				runtime: mapValueToMovieRuntime(duration),
-				genres: mapValueToGenre(genre),
+				runtime: mapValueToMovieRuntime(filters.duration),
+				genres: mapValueToGenre(filters.genre),
+				streamingServices: mapValueToStreamingService(filters.streaming),
 			});
 		}
-		if (movieResults) {
-			setRandomMovie(getRandomMovie(movieResults));
-		}
-	};
+
+		// eslint-disable-next-line
+	}, [filters]);
 
 	const onDurationChange = (event: SelectChangeEvent<MovieRuntime>): void => {
+		toggleChangeMovie(false);
 		setActualPage(1);
-		setDuration(event.target.value as MovieRuntime);
+		setFilters((prev: FilterArguments) => ({ ...prev, duration: event.target.value as MovieRuntime }));
 	};
 
 	const onGenreChange = (event: SelectChangeEvent<MovieGenre>): void => {
+		toggleChangeMovie(false);
 		setActualPage(1);
-		setGenre(event.target.value as MovieGenre);
+		setFilters((prev: FilterArguments) => ({ ...prev, genre: event.target.value as MovieGenre }));
+	};
+
+	const selectedServicesOnChange = (event: React.MouseEvent<HTMLElement>, newServices: StreamingServices[]): void => {
+		toggleChangeMovie(false);
+		setActualPage(1);
+		setFilters((prev: FilterArguments) => ({ ...prev, streaming: newServices }));
 	};
 
 	return (
 		<div data-testid='homeContainer' className='home-container'>
 			<div data-testid='homeQuestions' className='home-questions-side'>
 				<div className='home-questions-container'>
-					<GenreSelection onMainGenreChange={onGenreChange} genre={genre} />
-					<RuntimeSelection onDurationChange={onDurationChange} duration={duration} />
-					<button className='play-button' onClick={onButtonClick}>
-						PLAY
-					</button>
+					<GenreSelection onMainGenreChange={onGenreChange} genre={filters.genre} />
+					<RuntimeSelection onDurationChange={onDurationChange} duration={filters.duration} />
+					<ExtraFilters
+						triggerMovies={triggerMovies}
+						setActualPage={setActualPage}
+						selectedServicesOnChange={selectedServicesOnChange}
+						filters={filters}
+					/>
+
+					<PlayButton
+						toggleShowMovie={toggleShowMovie}
+						toggleChangeMovie={toggleChangeMovie}
+						filters={filters}
+						actualPage={actualPage}
+						setActualPage={setActualPage}
+						totalPages={totalPages}
+						triggerMovies={triggerMovies}
+						movieResults={movieResults}
+						setRandomMovie={setRandomMovie}
+						getRandomMovie={getRandomMovie}
+						shouldShowFewResults={shouldShowFewResults}
+					/>
 				</div>
 			</div>
 			<div data-testid='homeMovie' className='home-movie-side'>
 				<div className='home-movie-container'>
 					{isLoadingMovies && <Loader />}
-					{shouldShowPoster && <Poster dataIMDB={dataIMDB as string} randomMovie={randomMovie as Movie} />}
-					<div className='additional-info'>
-						{shouldShowPlot && (
-							<Plot plot={(randomMovie as Movie)?.overview} dataIMDB={dataIMDB as string} />
-						)}
-						{shouldShowRating && <Rating rating={(randomMovie as Movie)?.vote_average} />}
-						{shouldShowStreamingData && (
-							<Streaming
-								justWatchLink={(streamingData as CountryResults).link}
-								streamingInfo={(streamingData as CountryResults).flatrate as AvailabilityInfo[]}
-							/>
-						)}
-					</div>
+					{shouldShowMovieInfo && (
+						<MovieInfo
+							randomMovie={randomMovie as Movie}
+							streamingData={streamingData as CountryResults}
+							dataIMDB={dataIMDB as string}
+						/>
+					)}
+					{shouldShowNoResults && <NoResults />}
 				</div>
 			</div>
 		</div>
