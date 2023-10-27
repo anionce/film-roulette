@@ -52,9 +52,9 @@ export const ExtraFilters = ({ selectedServicesOnChange, filters, triggerMovies 
 
 	return (
 		<div className='extra-filters-container'>
-			<div className='extra-filters-text-container'>
+			<div className='extra-filters-text-container' onClick={arrowIconOnClick}>
 				<span className='extra-filters-text'>Disponible en... </span>
-				<div className='extra-filters-icon' onClick={arrowIconOnClick}>
+				<div className='extra-filters-icon'>
 					{showContent ? <ArrowDropUpIcon fontSize='small' /> : <ArrowDropDownIcon fontSize='small' />}
 				</div>
 			</div>
