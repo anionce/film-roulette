@@ -16,8 +16,11 @@ export const runtimeSelectorOptions: SelectOptions[] = [
 	{ value: MovieRuntime.Long, text: '> 2 horas' },
 ];
 
-export const RUNTIME_LENGTH: Record<MovieRuntime, number> = {
+export const RUNTIME_LENGTH: Record<MovieRuntime | string, number> = {
 	[MovieRuntime.Short]: 95,
 	[MovieRuntime.Medium]: 125,
 	[MovieRuntime.Long]: 200,
+	'1.30 h': 95,
+	'2 horas': 125,
+	'> 2 horas': 200,
 } as const;

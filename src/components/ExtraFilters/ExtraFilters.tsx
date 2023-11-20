@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import './ExtraFilters.scss';
-import { mapValueToStreamingService, streamingServices } from '../../constants/streamingServices';
+import { streamingServices } from '../../constants/streamingServices';
 import { ToggleButtonGroup, ToggleButton } from '@mui/material';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
@@ -13,10 +13,8 @@ import {
 } from '@reduxjs/toolkit/dist/query';
 import { LazyQueryTrigger } from '@reduxjs/toolkit/dist/query/react/buildHooks';
 import { APIMovieResponse } from '../../models/MovieResponse';
-import { mapValueToGenre } from '../../constants/genre';
-import { mapValueToMovieRuntime } from '../../constants/runtime';
-import { FilterArguments } from '../../pages/Home/Home';
 import { RandomMovieArgs } from '../../models/APIArgs';
+import { FilterArguments } from '../../pages/Home/Home';
 
 export type ExtraFiltersProp = {
 	setActualPage: React.Dispatch<React.SetStateAction<number>>;
@@ -29,14 +27,14 @@ export type ExtraFiltersProp = {
 			'moviesApi'
 		>
 	>;
-	selectedServicesOnChange: (event: React.MouseEvent<HTMLElement>, newServices: string[]) => void;
+	selectedServicesOnChange: (event: ChangeEvent<HTMLInputElement>, newServices: string[]) => void;
 	filters: FilterArguments;
 };
 
 export const ExtraFilters = ({ selectedServicesOnChange, filters, triggerMovies }: ExtraFiltersProp) => {
 	const [showContent, toggleShowContent] = useState<boolean>(false);
 
-	useEffect(() => {
+	/* useEffect(() => {
 		if (filters.genre && filters.duration) {
 			triggerMovies({
 				runtime: mapValueToMovieRuntime(filters.duration),
@@ -46,7 +44,7 @@ export const ExtraFilters = ({ selectedServicesOnChange, filters, triggerMovies 
 		}
 
 		// eslint-disable-next-line
-	}, [filters]);
+	}, [filters]); */
 
 	const arrowIconOnClick = () => toggleShowContent(prev => !prev);
 
@@ -62,7 +60,7 @@ export const ExtraFilters = ({ selectedServicesOnChange, filters, triggerMovies 
 			<ToggleButtonGroup
 				style={{ visibility: showContent ? 'visible' : 'hidden' }}
 				value={filters.streaming}
-				onChange={selectedServicesOnChange}
+				onChange={selectedServicesOnChange as any}
 				size='small'>
 				{streamingServices.map(streamingService => (
 					<ToggleButton

@@ -4,6 +4,13 @@ import JohnTravolta from '../../assets/img/giphy.gif';
 
 export const NoResults = () => {
 	return (
-		<img className='no-results-img' alt='no hay resultados' style={{ borderRadius: '4px' }} src={JohnTravolta} />
+		<div className='no-results-container '>
+			<img
+				className='no-results-img'
+				alt='no hay resultados'
+				style={{ borderRadius: '4px' }}
+				src={JohnTravolta}
+			/>
+		</div>
 	);
 };
