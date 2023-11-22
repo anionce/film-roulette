@@ -1,0 +1,14 @@
+@import '../../../assets/styles/variables';
+
+.few-results-container {
+	display: flex;
+	background-color: $color-light-blue;
+	justify-content: center;
+	align-items: center;
+	height: 20px;
+
+	.few-results-text {
+		font-size: $font-size-xxs;
+		font-style: italic;
+	}
+}

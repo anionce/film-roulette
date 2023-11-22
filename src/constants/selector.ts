@@ -1,3 +1,4 @@
+import { FilterType } from './filters';
 import { genreSelectorOptions } from './genre';
 import { runtimeSelectorOptions } from './runtime';
 
@@ -6,13 +7,8 @@ export type SelectOptions = {
 	text: string;
 };
 
-export enum SelectValue {
-	Runtime = 'runtime',
-	Genre = 'genre',
-}
-
-export const getOptionsForSelector = (value: SelectValue) => {
-	if (value === SelectValue.Genre) {
+export const getOptionsForSelector = (value: FilterType) => {
+	if (value === FilterType.Genre) {
 		return genreSelectorOptions;
 	} else {
 		return runtimeSelectorOptions;

@@ -1,0 +1,60 @@
+@import '../../../assets/styles/variables';
+
+.filter-buttons-container {
+	display: flex;
+	flex-direction: column;
+	margin: 16px;
+	gap: 6px;
+
+	.filter-button {
+		width: -webkit-fill-available;
+		cursor: pointer;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		border-style: none;
+		height: 56px;
+		padding: 16px;
+		flex-shrink: 0;
+		border-radius: 8px;
+		color: #fff;
+		font-family: 'Oxygen', sans-serif;
+		font-size: 18px;
+		font-style: normal;
+		font-weight: 400;
+		line-height: normal;
+		filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+
+		&:active {
+			background-color: $color-beige;
+			color: $color-dark-blue;
+		}
+
+		.filter-button-content {
+			display: flex;
+			gap: 4px;
+			align-items: center;
+		}
+
+		.MuiOutlinedInput-notchedOutline {
+			border-style: none;
+		}
+
+		.MuiSelect-outlined.MuiSelect-select {
+			min-height: auto;
+			font-size: $font-size-md;
+		}
+	}
+
+	.genre-button {
+		background-color: $color-light-pink;
+	}
+	.duration-button {
+		background-color: $color-medium-pink;
+	}
+	.streaming-button {
+		background-color: $color-dark-pink;
+		overflow: hidden;
+		white-space: nowrap;
+	}
+}

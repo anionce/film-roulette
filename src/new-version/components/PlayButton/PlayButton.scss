@@ -1,0 +1,14 @@
+@import '../../../assets/styles/variables';
+
+.mobile-play-button-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	.mobile-play-button {
+		& .MuiSvgIcon-root {
+			height: 75px;
+			width: 75px;
+		}
+	}
+}
