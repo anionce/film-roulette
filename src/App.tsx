@@ -2,24 +2,24 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { MainLayout } from './layout/MainLayout';
 import { NotFound } from './pages/NotFound/NotFound';
 import React, { useEffect, useState } from 'react';
-import { FilterArguments, Home } from './pages/Home/Home';
-import { MovieMobile } from './mobile-version/pages/MovieMobile/MovieMobile';
+import { MoviePage } from './new-version/pages/MoviePage/MoviePage';
 import { useLazyGetDetailsQuery, useLazyGetRandomMovieQuery, useLazyGetStreamingDetailsQuery } from './services/api';
-import { CountryResults, Movie } from './models/MovieResponse';
+import { Movie } from './models/MovieResponse';
 import { mapValueToGenre } from './constants/genre';
 import { mapValueToMovieRuntime } from './constants/runtime';
 import { mapValueToStreamingService } from './constants/streamingServices';
+import { FilterArguments, Home } from './new-version/pages/Home/Home';
 
 export const App = () => {
-	const [triggerMovies, { data: dataMovies, isLoading: isLoadingMovies }] = useLazyGetRandomMovieQuery();
-	const [triggerIMDBDetail, { data: dataIMDB }] = useLazyGetDetailsQuery();
-	const [triggerStreamingDetail, { data: streamingData }] = useLazyGetStreamingDetailsQuery();
-
 	const [filters, setFilters] = useState<FilterArguments>({
 		genre: null,
 		duration: null,
 		streaming: null,
 	});
+
+	const [triggerMovies, { data: dataMovies, isLoading: isLoadingMovies }] = useLazyGetRandomMovieQuery();
+	const [triggerIMDBDetail, { data: dataIMDB }] = useLazyGetDetailsQuery();
+	const [triggerStreamingDetail, { data: streamingData }] = useLazyGetStreamingDetailsQuery();
 
 	const [actualPage, setActualPage] = useState<number>(1);
 	const [totalPages, setTotalPages] = useState<number | undefined>(undefined);
@@ -30,7 +30,6 @@ export const App = () => {
 	const currentMovie = randomMovieArray[currentMovieIndex];
 	const getRandomMovie = (results: Movie[]) => results[Math.floor(Math.random() * results.length)];
 
-	const shouldShowResult: boolean = !!randomMovieArray.length || !!currentMovie;
 	const shouldShowFewResults: boolean = !!randomMovieArray.length && totalPages === 1;
 	const shouldShowNoResults: boolean = !randomMovieArray.length && !currentMovie && totalPages === 0;
 	const shouldShowLoading: boolean = isLoadingMovies || !dataMovies;
@@ -41,7 +40,6 @@ export const App = () => {
 			setTotalPages(total_pages);
 			setMovieResults(results);
 		}
-
 		// eslint-disable-next-line
 	}, [dataMovies]);
 
@@ -51,7 +49,6 @@ export const App = () => {
 			setCurrentMovieIndex(prev => prev + 1);
 
 			if (totalPages) {
-				console.log('nuevos results,cambio de pagina');
 				setActualPage(Math.floor(Math.random() * totalPages + 1));
 			}
 		}
@@ -67,22 +64,9 @@ export const App = () => {
 		// eslint-disable-next-line
 	}, [randomMovieArray]);
 
-	/* useEffect(() => {
-		if (filters.genre && filters.duration) {
-			triggerMovies({
-				runtime: mapValueToMovieRuntime(filters.duration),
-				genres: mapValueToGenre(filters.genre),
-				streamingServices: mapValueToStreamingService(filters.streaming),
-			});
-		}
-
-		// eslint-disable-next-line
-	}, [filters]); */
-
 	const onButtonClick = () => {
 		if (currentMovieIndex === randomMovieArray.length - 1) {
 			if (filters.duration && filters.genre) {
-				console.log('triggeo mas pelis');
 				triggerMovies({
 					page: actualPage,
 					runtime: mapValueToMovieRuntime(filters.duration),
@@ -101,14 +85,6 @@ export const App = () => {
 		}
 	};
 
-	console.log(
-		{ movieResults },
-		{ randomMovieArray },
-		{ title: currentMovie?.title },
-		{ index: currentMovieIndex },
-		{ actualPage: actualPage }
-	);
-
 	const resetValues = () => {
 		setFilters({
 			genre: null,
@@ -122,42 +98,20 @@ export const App = () => {
 		setCurrentMovieIndex(-1);
 	};
 
-	console.log(shouldShowNoResults);
-
 	return (
 		<Router>
 			<Routes>
 				<Route element={<MainLayout />}>
 					<Route
 						index
-						element={
-							<Home
-								actualPage={actualPage}
-								setActualPage={setActualPage}
-								totalPages={totalPages}
-								triggerMovies={triggerMovies}
-								movieResults={movieResults}
-								setRandomMovie={setRandomMovieArray}
-								shouldShowFewResults={shouldShowFewResults}
-								isLoadingMovies={isLoadingMovies}
-								currentMovie={currentMovie}
-								shouldShowNoResults={shouldShowNoResults}
-								streamingData={streamingData}
-								dataIMDB={dataIMDB}
-								onButtonClick={onButtonClick}
-								setFilters={setFilters}
-								filters={filters}
-								randomMovieArray={randomMovieArray}
-								shouldShowResult={shouldShowResult}
-							/>
-						}
+						element={<Home onButtonClick={onButtonClick} setFilters={setFilters} filters={filters} />}
 					/>
 					<Route
 						path='/movie'
 						element={
-							<MovieMobile
-								currentMovie={currentMovie as Movie}
-								streamingData={streamingData as CountryResults}
+							<MoviePage
+								currentMovie={currentMovie}
+								streamingData={streamingData}
 								dataIMDB={dataIMDB as string}
 								onButtonClick={onButtonClick}
 								onPreviousButtonClick={onPreviousButtonClick}
@@ -165,6 +119,7 @@ export const App = () => {
 								currentMovieIndex={currentMovieIndex}
 								shouldShowNoResults={shouldShowNoResults}
 								isLoadingMovies={shouldShowLoading}
+								shouldShowFewResults={shouldShowFewResults}
 							/>
 						}
 					/>

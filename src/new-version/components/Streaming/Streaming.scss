@@ -1,0 +1,34 @@
+@import '../../../assets/styles/variables';
+
+.streaming-container {
+	display: flex;
+	gap: 8px;
+	height: 40px;
+}
+
+.streaming-logo {
+	height: 40px;
+	border-radius: 4px;
+	box-shadow: none;
+	border: none;
+}
+
+@media only screen and (max-width: $lg) {
+	.streaming-logo {
+		height: 35px;
+	}
+	.streaming-container {
+		gap: 4px;
+		height: 35px;
+	}
+}
+
+@media only screen and (max-width: $md) {
+	.streaming-logo {
+		height: 26px;
+	}
+	.streaming-container {
+		gap: 4px;
+		height: 26px;
+	}
+}
