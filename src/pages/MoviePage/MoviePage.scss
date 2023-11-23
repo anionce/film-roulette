@@ -1,0 +1,39 @@
+@import '../../assets/styles/variables';
+
+.movie-page-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	background-color: $color-light-blue;
+	height: 100vh;
+	gap: 18px;
+}
+
+.movie-info-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	gap: 18px;
+	background-color: $color-light-blue;
+}
+
+.exit-button-container {
+	height: 25px;
+	width: 25px;
+	padding: 16px;
+	align-self: flex-end;
+	background-color: $color-light-blue;
+}
+
+.exit-button-movie-page {
+	cursor: pointer;
+	text-align: end;
+	color: $color-dark-blue;
+}
+
+@media only screen and (min-width: $md) and (max-width: $lg) {
+	.movie-info-container {
+		gap: 16px;
+	}
+}

@@ -5,9 +5,9 @@ export const mapValueToMovieRuntime = (value: MovieRuntime): number => {
 };
 
 export enum MovieRuntime {
-	Short = 'short',
-	Medium = 'medium',
-	Long = 'long',
+	Short = '1.30 h',
+	Medium = '2 horas',
+	Long = '> 2 horas',
 }
 
 export const runtimeSelectorOptions: SelectOptions[] = [
@@ -16,11 +16,8 @@ export const runtimeSelectorOptions: SelectOptions[] = [
 	{ value: MovieRuntime.Long, text: '> 2 horas' },
 ];
 
-export const RUNTIME_LENGTH: Record<MovieRuntime | string, number> = {
+export const RUNTIME_LENGTH: Record<MovieRuntime, number> = {
 	[MovieRuntime.Short]: 95,
 	[MovieRuntime.Medium]: 125,
 	[MovieRuntime.Long]: 200,
-	'1.30 h': 95,
-	'2 horas': 125,
-	'> 2 horas': 200,
 } as const;

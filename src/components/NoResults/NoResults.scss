@@ -1,0 +1,13 @@
+@import '../../assets/styles/variables';
+
+@media only screen and (max-width: $md) {
+	.no-results-container {
+		height: 100vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.no-results-img {
+		width: 280px;
+	}
+}
