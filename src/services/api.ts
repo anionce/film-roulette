@@ -15,13 +15,13 @@ export const moviesApi = createApi({
 	}),
 	tagTypes: ['Movies'],
 	endpoints: builder => ({
-		getRandomMovie: builder.query<APIMovieResponse, RandomMovieArgs>({
+		getMovies: builder.query<APIMovieResponse, RandomMovieArgs>({
 			query: ({ runtime, genres, page, streamingServices }) =>
 				`${DISCOVER}/${TAG}?api_key=${API_KEY}&language=${LANGUAGE}&include_adult=false&with_runtime.lte=${runtime}&with_genres=${genres}&vote_count.gte=${POPULARITY_VALUE}&vote_average.gte=${MINIMUM_VOTE}&sort_by=popularity.desc&watch_region=ES&with_watch_providers=${streamingServices}&page=${page}`,
 		}),
-		getDetails: builder.query<string, DetailMovieArgs>({
+		getDetails: builder.query<MovieDetail, DetailMovieArgs>({
 			query: ({ id }) => `${TAG}/${id}?api_key=${API_KEY}&language=${LANGUAGE}`,
-			transformResponse: response => (response as MovieDetail).imdb_id,
+			transformResponse: response => response as MovieDetail,
 		}),
 		getStreamingDetails: builder.query<CountryResults, DetailMovieArgs>({
 			query: ({ id }) => `${TAG}/${id}/watch/providers`,
@@ -30,4 +30,4 @@ export const moviesApi = createApi({
 	}),
 });
 
-export const { useLazyGetRandomMovieQuery, useLazyGetDetailsQuery, useLazyGetStreamingDetailsQuery } = moviesApi;
+export const { useLazyGetMoviesQuery, useLazyGetDetailsQuery, useLazyGetStreamingDetailsQuery } = moviesApi;

@@ -1,12 +1,12 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { MainLayout } from './layout/MainLayout';
 import { NotFound } from './pages/NotFound/NotFound';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MoviePage } from './pages/MoviePage/MoviePage';
-import { useLazyGetDetailsQuery, useLazyGetRandomMovieQuery, useLazyGetStreamingDetailsQuery } from './services/api';
-import { Movie } from './models/MovieResponse';
-import { mapValueToGenre } from './constants/genre';
-import { mapValueToMovieRuntime } from './constants/runtime';
+import { useLazyGetDetailsQuery, useLazyGetMoviesQuery, useLazyGetStreamingDetailsQuery } from './services/api';
+import { AvailabilityInfo, CompleteMovie, CountryResults, Movie, MovieDetail } from './models/MovieResponse';
+import { MovieGenre, mapValueToGenre } from './constants/genre';
+import { MovieRuntime, mapValueToMovieRuntime } from './constants/runtime';
 import { mapValueToStreamingService } from './constants/streamingServices';
 import { Home } from './pages/Home/Home';
 import { FilterArguments } from './constants/filters';
@@ -17,67 +17,161 @@ export const App = () => {
 		duration: null,
 		streaming: null,
 	});
-	const [triggerMovies, { data: dataMovies, isLoading: isLoadingMovies }] = useLazyGetRandomMovieQuery();
-	const [triggerIMDBDetail, { data: dataIMDB }] = useLazyGetDetailsQuery();
-	const [triggerStreamingDetail, { data: streamingData }] = useLazyGetStreamingDetailsQuery();
-	const [actualPage, setActualPage] = useState<number>(1);
+	const [triggerMovies, { data: dataMovies, isLoading: isLoadingMovies }] = useLazyGetMoviesQuery();
+	const [triggerIMDBDetail] = useLazyGetDetailsQuery();
+	const [triggerStreamingDetail] = useLazyGetStreamingDetailsQuery();
 	const [totalPages, setTotalPages] = useState<number | undefined>(undefined);
-	const [movieResults, setMovieResults] = useState<Movie[] | undefined>(undefined);
-	const [randomMovieArray, setRandomMovieArray] = useState<Movie[]>([]);
+	const [randomMovieArray, setRandomMovieArray] = useState<CompleteMovie[]>([]);
 	const [currentMovieIndex, setCurrentMovieIndex] = useState<number>(-1);
-	const [triggers, setTriggers] = useState<number>(0);
-	const prevTriggers = useRef(triggers);
+	const [shouldShowNoResults, setShouldShowNoResults] = useState<boolean>(false);
 
-	const currentMovie = randomMovieArray[currentMovieIndex];
-	const getRandomMovie = (results: Movie[]) => results[Math.floor(Math.random() * results.length)];
+	const currentMovie: CompleteMovie = randomMovieArray[currentMovieIndex];
 
 	const shouldShowFewResults: boolean = !!randomMovieArray.length && totalPages === 1;
-	const shouldShowNoResults: boolean = !randomMovieArray.length && !currentMovie && totalPages === 0;
-	const shouldShowLoading: boolean = isLoadingMovies || !dataMovies || !randomMovieArray.length;
+	const shouldShowLoading: boolean =
+		(isLoadingMovies || !dataMovies || !randomMovieArray.length) && !shouldShowNoResults;
+
+	const shuffleArray = (array: CompleteMovie[]) => {
+		return [...array].sort(() => Math.random() - 0.5);
+	};
 
 	useEffect(() => {
-		if (dataMovies) {
-			const { results, total_pages } = dataMovies;
+		if (dataMovies && !totalPages) {
+			const { total_pages } = dataMovies;
 			setTotalPages(total_pages);
-			setMovieResults(results);
+
+			const fetchDataForMovies = async () => {
+				const allMovieDetails: CompleteMovie[] = [];
+
+				const pagesToFetch = Math.min(2, total_pages);
+				for (let page = 1; page <= pagesToFetch; page++) {
+					const { data } = await triggerMovies({
+						page,
+						runtime: mapValueToMovieRuntime(filters.duration as MovieRuntime),
+						genres: mapValueToGenre(filters.genre as MovieGenre),
+						streamingServices: mapValueToStreamingService(filters.streaming),
+					});
+
+					const movieDetailsPromises = data?.results.map(async (movie: Movie) => {
+						const [detailData, streamingData] = await Promise.all([
+							triggerIMDBDetail({ id: movie.id }),
+							triggerStreamingDetail({ id: movie.id }),
+						]);
+
+						const detailDataResult = detailData as { data?: MovieDetail };
+						const streamingDataResult = streamingData as { data?: CountryResults };
+
+						return {
+							...movie,
+							detailData: detailDataResult,
+							streamingData: streamingDataResult,
+						};
+					});
+
+					const movieDetails = await Promise.all(movieDetailsPromises as Promise<CompleteMovie>[]);
+					allMovieDetails.push(...movieDetails);
+				}
+
+				const shuffledDetails = shuffleArray(allMovieDetails);
+
+				const filteredResults = shuffledDetails.filter(movie => {
+					if (!filters.streaming) {
+						return true;
+					}
+
+					const flatratePlatforms =
+						movie.streamingData?.data?.flatrate?.map(
+							(platform: AvailabilityInfo) => platform.provider_name
+						) ?? [];
+
+					return filters.streaming.some(streamingPlatform => flatratePlatforms.includes(streamingPlatform));
+				});
+
+				if (filteredResults.length) {
+					console.log(filteredResults, 'filtered');
+					setRandomMovieArray(filteredResults);
+				} else {
+					setShouldShowNoResults(true);
+					return;
+				}
+
+				if (total_pages > 2) {
+					console.log('entro aqui');
+					const maxPage = Math.min(total_pages, 10);
+					for (let page = 3; page <= maxPage; page++) {
+						const { data } = await triggerMovies({
+							page,
+							runtime: mapValueToMovieRuntime(filters.duration as MovieRuntime),
+							genres: mapValueToGenre(filters.genre as MovieGenre),
+							streamingServices: mapValueToStreamingService(filters.streaming),
+						});
+
+						const movieDetailsPromises = data?.results.map(async (movie: Movie) => {
+							const [detailData, streamingData] = await Promise.all([
+								triggerIMDBDetail({ id: movie.id }),
+								triggerStreamingDetail({ id: movie.id }),
+							]);
+
+							const detailDataResult = detailData as { data?: MovieDetail };
+							const streamingDataResult = streamingData as { data?: CountryResults };
+
+							return {
+								...movie,
+								detailData: detailDataResult,
+								streamingData: streamingDataResult,
+							};
+						});
+
+						const movieDetails = await Promise.all(movieDetailsPromises as Promise<CompleteMovie>[]);
+						allMovieDetails.push(...movieDetails);
+					}
+
+					const allShuffledDetails = shuffleArray(allMovieDetails);
+
+					// Filter results for all pages
+					const filteredResultsAllPages = allShuffledDetails.filter(movie => {
+						if (!filters.streaming) {
+							return true;
+						}
+
+						const flatratePlatforms =
+							movie.streamingData?.data?.flatrate?.map(
+								(platform: AvailabilityInfo) => platform.provider_name
+							) ?? [];
+
+						return filters.streaming.some(streamingPlatform =>
+							flatratePlatforms.includes(streamingPlatform)
+						);
+					});
+
+					setRandomMovieArray(prev => [...prev, ...filteredResultsAllPages]);
+				}
+			};
+
+			fetchDataForMovies();
 		}
 		// eslint-disable-next-line
 	}, [dataMovies]);
 
 	useEffect(() => {
-		if (triggers !== prevTriggers.current && movieResults?.length) {
-			setCurrentMovieIndex(prev => prev + 1);
-			setRandomMovieArray(prev => [...prev, getRandomMovie(movieResults)]);
-
-			prevTriggers.current = triggers;
-
-			if (totalPages && totalPages > 1) {
-				setActualPage(Math.floor(Math.random() * totalPages + 1));
-			}
-		}
-
-		// eslint-disable-next-line
-	}, [movieResults, triggers]);
-
-	useEffect(() => {
-		if (currentMovie) {
-			triggerIMDBDetail({ id: currentMovie.id });
-			triggerStreamingDetail({ id: currentMovie.id });
-		}
-		// eslint-disable-next-line
+		console.log(randomMovieArray.length, 'randomMovieArray');
+		console.log(currentMovie, 'current');
 	}, [randomMovieArray]);
 
 	const onButtonClick = () => {
-		if (currentMovieIndex === randomMovieArray.length - 1) {
-			setTriggers(prev => prev + 1);
+		if (!randomMovieArray.length) {
+			setShouldShowNoResults(false);
+			setCurrentMovieIndex(prev => prev + 1);
 			if (filters.duration && filters.genre) {
 				triggerMovies({
-					page: actualPage,
+					page: 1,
 					runtime: mapValueToMovieRuntime(filters.duration),
 					genres: mapValueToGenre(filters.genre),
 					streamingServices: mapValueToStreamingService(filters.streaming),
 				});
 			}
+		} else if (randomMovieArray.length - 1 === currentMovieIndex) {
+			setCurrentMovieIndex(0);
 		} else {
 			setCurrentMovieIndex(prev => prev + 1);
 		}
@@ -96,11 +190,9 @@ export const App = () => {
 			streaming: null,
 		});
 		setRandomMovieArray([]);
-		setActualPage(1);
 		setTotalPages(undefined);
-		setMovieResults(undefined);
 		setCurrentMovieIndex(-1);
-		setTriggers(0);
+		setShouldShowNoResults(false);
 	};
 
 	return (
@@ -116,8 +208,8 @@ export const App = () => {
 						element={
 							<MoviePage
 								currentMovie={currentMovie}
-								streamingData={streamingData}
-								dataIMDB={dataIMDB as string}
+								streamingData={currentMovie?.streamingData?.data}
+								dataIMDB={currentMovie?.detailData?.data?.imdb_id as any}
 								onButtonClick={onButtonClick}
 								onPreviousButtonClick={onPreviousButtonClick}
 								resetValues={resetValues}
