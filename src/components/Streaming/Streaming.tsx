@@ -9,6 +9,7 @@ export type StreamingProps = {
 
 export const Streaming = ({ streamingData }: StreamingProps) => {
 	const { flatrate: streamingInfo, link: justWatchLink } = streamingData || {};
+
 	return (
 		<div className='streaming-container'>
 			{streamingInfo?.map((info: AvailabilityInfo) => {

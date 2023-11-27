@@ -24,7 +24,7 @@ export enum StreamingServices {
 	HBOMax = 'HBO Max',
 	PrimeVideo = 'Prime Video',
 	Disney = 'Disney+',
-	MovistarPlus = 'MovistarPlus',
+	MovistarPlus = 'Movistar Plus',
 }
 
 export const streamingServices = [

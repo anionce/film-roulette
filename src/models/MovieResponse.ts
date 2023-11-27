@@ -79,3 +79,8 @@ export type StreamingDetail = Movie & {
 	id: number;
 	results: StreamingResults;
 };
+
+export type CompleteMovie = Movie & {
+	detailData: { data: MovieDetail };
+	streamingData: { data: CountryResults };
+};
