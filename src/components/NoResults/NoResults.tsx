@@ -4,7 +4,7 @@ import JohnTravolta from '../../assets/img/giphy.gif';
 
 export const NoResults = () => {
 	return (
-		<div className='no-results-container '>
+		<div className='no-results-container'>
 			<img
 				className='no-results-img'
 				alt='no hay resultados'
