@@ -153,11 +153,6 @@ export const App = () => {
 		// eslint-disable-next-line
 	}, [dataMovies]);
 
-	useEffect(() => {
-		console.log(randomMovieArray.length, 'randomMovieArray');
-		console.log(currentMovie, 'current');
-	}, [randomMovieArray]);
-
 	const onButtonClick = () => {
 		if (!randomMovieArray.length) {
 			setShouldShowNoResults(false);
