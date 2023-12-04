@@ -16,6 +16,11 @@ export type FilterButtonProps = {
 };
 
 export const FilterButton = ({ openModal, filters, filterType }: FilterButtonProps) => {
+	const isFilterSelected: boolean =
+		filterType === FilterType.Streaming
+			? !!(filters[filterType] as StreamingServices[])?.length
+			: !!filters[filterType];
+
 	const cleanGenreAndDuration = (value: MovieGenre | MovieRuntime): string =>
 		value.charAt(0).toUpperCase() + value.slice(1);
 
@@ -51,10 +56,13 @@ export const FilterButton = ({ openModal, filters, filterType }: FilterButtonPro
 			onKeyDown={handleKeyPress}
 			className={`filter-button ${filterType}-button`}>
 			<div className='filter-button-content'>
-				{filters[filterType]
-					? getCleanFunction(filters[filterType] as MovieGenre | MovieRuntime | StreamingServices[])
-					: label}
-				{!filters[filterType] && icon}
+				{isFilterSelected ? (
+					getCleanFunction(filters[filterType] as MovieGenre | MovieRuntime | StreamingServices[])
+				) : (
+					<span>
+						{label} {icon}
+					</span>
+				)}
 			</div>
 			<NavigateNextIcon />
 		</button>

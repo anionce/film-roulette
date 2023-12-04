@@ -25,6 +25,7 @@ export const StreamingModalContent = ({
 
 	return (
 		<div className='streaming-modal-container'>
+			<p>Selecciona tus plataformas:</p>
 			<ToggleButtonGroup className='toggle-group' value={filters} onChange={onSelect as any} size='small'>
 				{streamingServices.map(streamingService => (
 					<ToggleButton

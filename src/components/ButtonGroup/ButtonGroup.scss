@@ -34,6 +34,12 @@
 			display: flex;
 			gap: 4px;
 			align-items: center;
+
+			span {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
 		}
 
 		.MuiOutlinedInput-notchedOutline {
