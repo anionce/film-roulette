@@ -88,7 +88,6 @@ export const App = () => {
 				});
 
 				if (filteredResults.length) {
-					console.log(filteredResults, 'filtered');
 					setRandomMovieArray(filteredResults);
 				} else {
 					setShouldShowNoResults(true);
@@ -96,7 +95,6 @@ export const App = () => {
 				}
 
 				if (total_pages > 2) {
-					console.log('entro aqui');
 					const maxPage = Math.min(total_pages, 10);
 					for (let page = 3; page <= maxPage; page++) {
 						const { data } = await triggerMovies({
@@ -128,7 +126,6 @@ export const App = () => {
 
 					const allShuffledDetails = shuffleArray(allMovieDetails);
 
-					// Filter results for all pages
 					const filteredResultsAllPages = allShuffledDetails.filter(movie => {
 						if (!filters.streaming) {
 							return true;
