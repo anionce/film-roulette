@@ -69,6 +69,20 @@
 	}
 }
 
+.modal-content-container {
+	font-family: 'Oxygen', sans-serif;
+	font-size: $font-size-md;
+	color: $color-dark-blue;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+
+	p {
+		text-align: center;
+	}
+}
+
 .toggle-group {
 	display: flex;
 	align-items: center;
@@ -149,9 +163,16 @@
 }
 
 .streaming-modal-container {
-	height: 120px;
-	gap: 16px;
+	height: 180px;
+	gap: 8px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	font-family: 'Oxygen', sans-serif;
+	font-size: $font-size-md;
+	color: $color-dark-blue;
+
+	p {
+		text-align: center;
+	}
 }
