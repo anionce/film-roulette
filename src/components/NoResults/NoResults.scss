@@ -2,12 +2,18 @@
 
 .no-results-container {
 	display: flex;
+	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	gap: 16px;
+	font-family: 'Oxygen', sans-serif;
 }
 
 .no-results-img {
 	width: 600px;
+	border: 1px solid #fff;
+	border-radius: 8px;
+	box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
 }
 
 @media only screen and (max-width: $md) {

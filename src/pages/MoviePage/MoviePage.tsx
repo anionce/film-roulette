@@ -1,5 +1,5 @@
 import React from 'react';
-import CloseIcon from '@mui/icons-material/Close';
+import UndoIcon from '@mui/icons-material/Undo';
 import { Movie, CountryResults } from '../../models/MovieResponse';
 import './MoviePage.scss';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,7 @@ export type MoviePageProps = {
 	currentMovie: Movie;
 	streamingData: CountryResults | undefined;
 	dataIMDB: string;
-	onButtonClick: () => void;
+	onButtonAction: () => void;
 	onPreviousButtonClick: () => void;
 	resetValues: () => void;
 	currentMovieIndex: number;
@@ -29,7 +29,7 @@ export const MoviePage = ({
 	isLoadingMovies,
 	streamingData,
 	dataIMDB,
-	onButtonClick,
+	onButtonAction,
 	onPreviousButtonClick,
 	resetValues,
 	currentMovieIndex,
@@ -53,19 +53,19 @@ export const MoviePage = ({
 
 	return (
 		<div className='movie-page-container'>
-			{isLoadingMovies && !currentMovie && <Loader />}
 			<div className='exit-button-container'>
 				<div className='exit-button-movie-page' onClick={goToHome} onKeyDown={handleKeyPress}>
-					<CloseIcon />
+					<UndoIcon />
 				</div>
 			</div>
+			{isLoadingMovies && !currentMovie && <Loader />}
 			{shouldShowNoResults && <NoResults />}
-			{currentMovie && (
+			{!shouldShowNoResults && currentMovie && (
 				<div className='movie-info-container'>
 					<MoviePoster
 						isDisabled={isDisabled}
 						dataIMDB={dataIMDB}
-						onButtonClick={onButtonClick}
+						onButtonAction={onButtonAction}
 						onPreviousButtonClick={onPreviousButtonClick}
 						currentMovie={currentMovie}
 					/>
@@ -74,7 +74,7 @@ export const MoviePage = ({
 					<Streaming streamingData={streamingData} />
 				</div>
 			)}
-			{shouldShowFewResults && <FewResults />}
+			{!shouldShowNoResults && shouldShowFewResults && <FewResults />}
 		</div>
 	);
 };

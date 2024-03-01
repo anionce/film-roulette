@@ -9,10 +9,11 @@ import { MovieGenre } from '../../constants/genre';
 import { MovieRuntime } from '../../constants/runtime';
 import { StreamingServices } from '../../constants/streamingServices';
 import { Introduction } from '../../components/Introduction/Introduction';
+import { RandomButton } from '../../components/RandomButton/RandomButton';
 
 export type HomeProps = {
 	filters: FilterArguments;
-	onButtonClick: () => void;
+	onButtonClick: (random?: boolean) => void;
 	setFilters: React.Dispatch<React.SetStateAction<FilterArguments>>;
 };
 
@@ -71,7 +72,10 @@ export const Home = ({ filters, onButtonClick, setFilters }: HomeProps) => {
 		<div className='home-mobile-container'>
 			<Introduction />
 			<ButtonGroup filters={filters} openModal={openModal} />
-			<PlayButton filters={filters} onButtonClick={onButtonClick} />
+			<div className='action-button-container'>
+				<PlayButton filters={filters} onButtonClick={onButtonClick} />
+				<RandomButton onButtonClick={onButtonClick} />
+			</div>
 			{filterTypes.map(type => {
 				return (
 					<FiltersModal

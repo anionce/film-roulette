@@ -11,6 +11,7 @@ export const NoResults = () => {
 				style={{ borderRadius: '4px' }}
 				src={JohnTravolta}
 			/>
+			<span>Nada por aquí... 👀</span>
 		</div>
 	);
 };

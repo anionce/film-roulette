@@ -6,7 +6,7 @@ import { FilterArguments } from '../../constants/filters';
 
 export type PlayButtonProps = {
 	filters: FilterArguments;
-	onButtonClick: () => void;
+	onButtonClick: (random: boolean) => void;
 };
 
 export const PlayButton = ({ filters, onButtonClick }: PlayButtonProps) => {
@@ -14,14 +14,14 @@ export const PlayButton = ({ filters, onButtonClick }: PlayButtonProps) => {
 
 	const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
 		if (event.key === 'Enter') {
-			onButtonClick();
+			onButtonClick(false);
 		}
 	};
 	return (
 		<div className='mobile-play-button-container'>
 			{shouldShowButton && (
 				<Link to='/movie'>
-					<div onClick={onButtonClick} onKeyDown={handleKeyPress} className='mobile-play-button'>
+					<div onClick={() => onButtonClick(false)} onKeyDown={handleKeyPress} className='mobile-play-button'>
 						<PlayCircleIcon htmlColor='#db3259' />
 					</div>
 				</Link>
