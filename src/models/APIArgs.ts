@@ -1,8 +1,8 @@
-export type RandomMovieArgs = {
+export type GetMovieArgs = {
 	page?: number;
-	runtime: number;
-	genres: number[] | null;
-	streamingServices: string | null;
+	runtime?: number | null;
+	genres?: number[] | null;
+	streamingServices?: string | null;
 };
 
 export type DetailMovieArgs = {

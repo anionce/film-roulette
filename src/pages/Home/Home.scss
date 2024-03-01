@@ -30,6 +30,12 @@
 	}
 }
 
+.action-button-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
 @media only screen and (min-width: $md) and (max-width: $lg) {
 	.home-mobile-container {
 		padding: 50px 150px;
