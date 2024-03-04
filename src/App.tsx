@@ -36,7 +36,6 @@ export const App = () => {
 
 	useEffect(() => {
 		if (!totalPages && dataMovies) {
-			console.log('USEFFECT dataMovies', dataMovies);
 			curateMovieData();
 		}
 		// eslint-disable-next-line
@@ -229,15 +228,6 @@ export const App = () => {
 		setShouldShowNoResults(noResults ?? false);
 		setShouldUseRandomQuery(undefined);
 	};
-
-	console.log(
-		'totalpages',
-		totalPages,
-		'shouldUseRandomQuery',
-		shouldUseRandomQuery,
-		'shouldShowNoResults',
-		shouldShowNoResults
-	);
 
 	return (
 		<Router>
