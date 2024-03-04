@@ -67,6 +67,7 @@ export const MoviePage = ({
 						dataIMDB={dataIMDB}
 						onButtonAction={onButtonAction}
 						onPreviousButtonClick={onPreviousButtonClick}
+						onEscButtonClick={goToHome}
 						currentMovie={currentMovie}
 					/>
 					<MoviePlot currentMovie={currentMovie} dataIMDB={dataIMDB} />

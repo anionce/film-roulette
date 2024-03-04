@@ -11,6 +11,7 @@ export type MoviePosterProps = {
 	dataIMDB: string;
 	onButtonAction: () => void;
 	onPreviousButtonClick: () => void;
+	onEscButtonClick: () => void;
 	isDisabled: boolean;
 };
 
@@ -19,6 +20,7 @@ export const MoviePoster = ({
 	dataIMDB,
 	onButtonAction,
 	onPreviousButtonClick,
+	onEscButtonClick,
 	isDisabled,
 }: MoviePosterProps) => {
 	const swipeHandlers = useSwipeable({
@@ -35,6 +37,10 @@ export const MoviePoster = ({
 
 		if (key === 'ArrowLeft' || key === 'Left' || dir === 'Right') {
 			onPreviousButtonClick();
+		}
+
+		if (key === 'Escape' || key === 'Esc') {
+			onEscButtonClick();
 		}
 	};
 
