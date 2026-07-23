@@ -11,9 +11,9 @@ export enum MovieRuntime {
 }
 
 export const runtimeSelectorOptions: SelectOptions[] = [
-	{ value: MovieRuntime.Short, text: '~1.30 h' },
-	{ value: MovieRuntime.Medium, text: '~2 h' },
-	{ value: MovieRuntime.Long, text: '> 2 h' },
+	{ value: MovieRuntime.Short, text: '~1.30 h', emoji: '⚡' },
+	{ value: MovieRuntime.Medium, text: '~2 h', emoji: '⏱️' },
+	{ value: MovieRuntime.Long, text: '> 2 h', emoji: '🎬' },
 ];
 
 export const RUNTIME_LENGTH: Record<MovieRuntime, number> = {
@@ -21,3 +21,9 @@ export const RUNTIME_LENGTH: Record<MovieRuntime, number> = {
 	[MovieRuntime.Medium]: 125,
 	[MovieRuntime.Long]: 200,
 } as const;
+
+export const RUNTIME_EMOJI: Record<MovieRuntime, string> = {
+	[MovieRuntime.Short]: '⚡',
+	[MovieRuntime.Medium]: '⏱️',
+	[MovieRuntime.Long]: '🎬',
+};

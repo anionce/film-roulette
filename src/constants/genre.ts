@@ -1,10 +1,15 @@
 import { SelectOptions } from './selector';
 
-export const mapValueToGenre = (value: MovieGenre): number[] | null => {
-	if (GENRE_NUM[value]) {
-		return [GENRE_NUM[value] as number];
+export const MAX_GENRES = 3;
+
+export const mapValueToGenre = (values: MovieGenre[] | null): number[] | null => {
+	if (!values?.length) {
+		return null;
 	}
-	return null;
+
+	const ids = values.map(value => GENRE_NUM[value]).filter((id): id is number => id !== null);
+
+	return ids.length ? ids : null;
 };
 
 export enum MovieGenre {
@@ -51,7 +56,30 @@ export const GENRE_NUM: Record<MovieGenre, number | null> = {
 	[MovieGenre.Random]: null,
 } as const;
 
+export const GENRE_EMOJI: Record<MovieGenre, string> = {
+	[MovieGenre.Action]: '🔫',
+	[MovieGenre.Adventure]: '🗺️',
+	[MovieGenre.Animation]: '🎨',
+	[MovieGenre.Comedy]: '😂',
+	[MovieGenre.Crime]: '🕵️',
+	[MovieGenre.Documentary]: '🎥',
+	[MovieGenre.Drama]: '🎭',
+	[MovieGenre.Family]: '👨‍👩‍👧',
+	[MovieGenre.Fantasy]: '🐉',
+	[MovieGenre.History]: '🏛️',
+	[MovieGenre.Horror]: '👻',
+	[MovieGenre.Music]: '🎵',
+	[MovieGenre.Mystery]: '🔍',
+	[MovieGenre.Romance]: '💔',
+	[MovieGenre.ScienceFiction]: '🚀',
+	[MovieGenre.Thriller]: '😱',
+	[MovieGenre.War]: '⚔️',
+	[MovieGenre.Western]: '🤠',
+	[MovieGenre.Random]: '🎲',
+};
+
 export const genreSelectorOptions: SelectOptions[] = Object.keys(GENRE_NUM).map(genre => ({
 	value: genre,
 	text: genre,
+	emoji: GENRE_EMOJI[genre as MovieGenre],
 }));

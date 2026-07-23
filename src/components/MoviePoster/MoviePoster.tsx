@@ -4,6 +4,7 @@ import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 import { useSwipeable } from 'react-swipeable';
 import { MOVIE_IMDB_PATH, MOVIE_POSTER_PATH } from '../../constants/movie';
 import { Movie } from '../../models/MovieResponse';
+import { MovieRating } from '../MovieRating/MovieRating';
 import './MoviePoster.scss';
 
 export type MoviePosterProps = {
@@ -53,22 +54,11 @@ export const MoviePoster = ({
 		// eslint-disable-next-line
 	}, [onButtonAction, onPreviousButtonClick]);
 
-	const [currentImage, setCurrentImage] = useState<string | undefined>(undefined);
-	const [loading, setLoading] = useState(true);
-
-	const fetchImage = (src: string) => {
-		const loadingImage = new Image();
-		loadingImage.src = src;
-		loadingImage.onload = () => {
-			setCurrentImage(loadingImage.src);
-			setLoading(false);
-		};
-	};
+	const [isImageLoaded, setIsImageLoaded] = useState(false);
 
 	useEffect(() => {
-		setLoading(true);
-		fetchImage(`${MOVIE_POSTER_PATH}${currentMovie?.poster_path}`);
-	}, [currentMovie]);
+		setIsImageLoaded(false);
+	}, [currentMovie?.poster_path]);
 
 	return (
 		<div {...swipeHandlers} className='poster-button-container'>
@@ -76,21 +66,19 @@ export const MoviePoster = ({
 				<SkipPreviousIcon />
 			</button>
 			<div className='poster-container'>
+				{!isImageLoaded && <div className='poster-skeleton' />}
 				<a href={`${MOVIE_IMDB_PATH}${dataIMDB}`} target='_blank' rel='noreferrer'>
 					<img
 						className='mobile-poster-img'
 						alt={currentMovie?.title}
-						style={{
-							filter: `${loading ? 'blur(10px)' : ''}`,
-							transition: '1s filter linear',
-							width: '100%',
-							background: 'transparent',
-						}}
-						src={currentImage}
+						style={{ width: '100%', background: 'transparent', display: isImageLoaded ? 'block' : 'none' }}
+						src={`${MOVIE_POSTER_PATH}${currentMovie?.poster_path}`}
+						onLoad={() => setIsImageLoaded(true)}
 					/>
 				</a>
+				{isImageLoaded && <MovieRating currentMovie={currentMovie} />}
 			</div>
-			<button onClick={onButtonAction} className={`button-movie-page ${loading && 'button-disabled'}`}>
+			<button onClick={onButtonAction} className='button-movie-page'>
 				<SkipNextIcon />
 			</button>
 		</div>

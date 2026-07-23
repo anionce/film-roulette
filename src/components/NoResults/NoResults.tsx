@@ -1,17 +1,23 @@
 import React from 'react';
 import './NoResults.scss';
-import JohnTravolta from '../../assets/img/giphy.gif';
+import { useLanguage } from '../../i18n/LanguageContext';
 
-export const NoResults = () => {
+export type NoResultsProps = {
+	message?: string;
+	onGoHome: () => void;
+};
+
+export const NoResults = ({ message, onGoHome }: NoResultsProps) => {
+	const { t } = useLanguage();
+
 	return (
 		<div className='no-results-container'>
-			<img
-				className='no-results-img'
-				alt='no hay resultados'
-				style={{ borderRadius: '4px' }}
-				src={JohnTravolta}
-			/>
-			<span>Nada por aquí... 👀</span>
+			<div className='no-results-mascot'>🍿</div>
+			<p className='no-results-title'>{t.noResultsTitle}</p>
+			<p className='no-results-text'>{message ?? t.noResultsDefaultMessage}</p>
+			<button className='no-results-button' onClick={onGoHome}>
+				{t.goHomeButton}
+			</button>
 		</div>
 	);
 };

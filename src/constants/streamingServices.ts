@@ -46,3 +46,13 @@ export const STREAMING_ID: Record<StreamingServices, number> = {
 	[StreamingServices.PrimeVideo]: 119,
 	[StreamingServices.SkyShowtime]: 1773,
 };
+
+export const STREAMING_LOGO: Record<StreamingServices, string> = {
+	[StreamingServices.Disney]: Disney,
+	[StreamingServices.Filmin]: Filmin,
+	[StreamingServices.HBOMax]: HBOMax,
+	[StreamingServices.MovistarPlus]: MovistarPlus,
+	[StreamingServices.Netflix]: Netflix,
+	[StreamingServices.PrimeVideo]: PrimeVideo,
+	[StreamingServices.SkyShowtime]: SkyShowtime,
+};

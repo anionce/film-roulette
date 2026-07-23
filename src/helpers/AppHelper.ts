@@ -1,8 +1,10 @@
 import { FilterArguments } from '../constants/filters';
 import { AvailabilityInfo, CompleteMovie } from '../models/MovieResponse';
 
+const RANDOM_PAGE_LIMIT = 40;
+
 export const getRandomValue = () => {
-	return Math.floor(Math.random() * 100);
+	return Math.floor(Math.random() * RANDOM_PAGE_LIMIT) + 1;
 };
 
 export const shuffleArray = (array: CompleteMovie[]) => {

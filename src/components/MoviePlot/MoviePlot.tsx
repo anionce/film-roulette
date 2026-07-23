@@ -2,6 +2,7 @@ import React from 'react';
 import { MOVIE_IMDB_PATH } from '../../constants/movie';
 import { Movie } from '../../models/MovieResponse';
 import { useMediaQuery } from 'react-responsive';
+import { useLanguage } from '../../i18n/LanguageContext';
 import './MoviePlot.scss';
 
 export type MoviePlotProps = {
@@ -10,6 +11,7 @@ export type MoviePlotProps = {
 };
 
 export const MoviePlot = ({ currentMovie, dataIMDB }: MoviePlotProps) => {
+	const { t } = useLanguage();
 	const isBiggerScreen = useMediaQuery({ query: '(min-width: 600px)' });
 
 	const getTruncatedPlot = () => {
@@ -18,19 +20,16 @@ export const MoviePlot = ({ currentMovie, dataIMDB }: MoviePlotProps) => {
 
 		const result = trimmedString.substring(0, Math.min(trimmedString.length, trimmedString.lastIndexOf(' ')));
 
-		return `${result}... `;
+		return `${result}...`;
 	};
 
 	return (
 		<div className='plot-container'>
-			<div className='plot-box'>
-				<p className='plot-text'>
-					{getTruncatedPlot()}
-					<a href={`${MOVIE_IMDB_PATH}${dataIMDB}`} target='_blank' rel='noreferrer'>
-						+
-					</a>
-				</p>
-			</div>
+			<p className='plot-text'>{getTruncatedPlot()}</p>
+			<a className='plot-read-more' href={`${MOVIE_IMDB_PATH}${dataIMDB}`} target='_blank' rel='noreferrer'>
+				{t.readMoreLabel}
+				<span className='plot-read-more-arrow'>›</span>
+			</a>
 		</div>
 	);
 };

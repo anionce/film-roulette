@@ -7,38 +7,53 @@
 	gap: 6px;
 
 	.filter-button {
+		position: relative;
 		width: -webkit-fill-available;
 		cursor: pointer;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		border-style: none;
+		border: 2.5px solid var(--ink);
+		border-bottom: 5px solid var(--ink);
 		height: 56px;
-		padding: 16px;
+		padding: 16px 20px;
 		flex-shrink: 0;
-		border-radius: 8px;
-		color: #fff;
+		border-radius: 999px;
 		font-family: 'Oxygen', sans-serif;
 		font-size: 18px;
 		font-style: normal;
-		font-weight: 400;
+		font-weight: 700;
 		line-height: normal;
-		filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
 
 		&:active {
-			background-color: $color-beige;
-			color: $color-dark-blue;
+			filter: brightness(0.95);
 		}
 
 		.filter-button-content {
 			display: flex;
-			gap: 4px;
+			gap: 8px;
 			align-items: center;
+
+			.filter-emoji {
+				font-size: 20px;
+			}
 
 			span {
 				display: flex;
 				align-items: center;
 				gap: 8px;
+			}
+
+			.filter-platform-logos {
+				gap: 4px;
+			}
+
+			.filter-platform-logo {
+				width: 22px;
+				height: 22px;
+				border-radius: 6px;
+				object-fit: cover;
+				border: 1.5px solid var(--yellow-ink);
 			}
 		}
 
@@ -53,14 +68,16 @@
 	}
 
 	.genre-button {
-		background-color: $color-light-pink;
+		background-color: var(--violet);
+		color: #fff;
 	}
 	.duration-button {
-		background-color: $color-medium-pink;
+		background-color: var(--coral);
+		color: #fff;
 	}
 	.streaming-button {
-		background-color: $color-dark-pink;
-		overflow: hidden;
+		background-color: var(--yellow);
+		color: var(--yellow-ink);
 		white-space: nowrap;
 	}
 }

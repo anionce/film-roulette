@@ -2,33 +2,63 @@
 
 .streaming-container {
 	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
 	gap: 8px;
-	height: 40px;
+}
+
+.streaming-tile {
+	width: 44px;
+	height: 44px;
+	border-radius: 10px;
+	border: 2px solid var(--ink);
+	background: var(--surface);
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .streaming-logo {
-	height: 40px;
+	height: 26px;
+	max-width: 32px;
+	object-fit: contain;
 	border-radius: 4px;
 	box-shadow: none;
 	border: none;
 }
 
 @media only screen and (max-width: $lg) {
-	.streaming-logo {
-		height: 35px;
+	.streaming-tile {
+		width: 40px;
+		height: 40px;
 	}
-	.streaming-container {
-		gap: 4px;
-		height: 35px;
+	.streaming-logo {
+		height: 22px;
+		max-width: 28px;
 	}
 }
 
 @media only screen and (max-width: $md) {
+	.streaming-tile {
+		width: 34px;
+		height: 34px;
+	}
 	.streaming-logo {
-		height: 26px;
+		height: 18px;
+		max-width: 24px;
+	}
+}
+
+@media only screen and (min-width: $xl) {
+	.streaming-tile {
+		width: 56px;
+		height: 56px;
+	}
+	.streaming-logo {
+		height: 32px;
+		max-width: 42px;
 	}
 	.streaming-container {
-		gap: 4px;
-		height: 26px;
+		gap: 12px;
 	}
 }

@@ -36,9 +36,5 @@ export const moviesApi = createApi({
 	}),
 });
 
-export const {
-	useLazyGetMoviesQuery,
-	useLazyGetRandomMoviesQuery,
-	useLazyGetDetailsQuery,
-	useLazyGetStreamingDetailsQuery,
-} = moviesApi;
+export const { useLazyGetMoviesQuery, useLazyGetRandomMoviesQuery, useLazyGetDetailsQuery, useLazyGetStreamingDetailsQuery } =
+	moviesApi;

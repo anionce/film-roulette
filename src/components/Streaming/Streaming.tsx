@@ -14,7 +14,12 @@ export const Streaming = ({ streamingData }: StreamingProps) => {
 		<div className='streaming-container'>
 			{streamingInfo?.map((info: AvailabilityInfo) => {
 				return (
-					<a key={info.provider_id} href={justWatchLink} target='_blank' rel='noreferrer'>
+					<a
+						key={info.provider_id}
+						className='streaming-tile'
+						href={justWatchLink}
+						target='_blank'
+						rel='noreferrer'>
 						<img
 							className='streaming-logo'
 							key={info.provider_id}

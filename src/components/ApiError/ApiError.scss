@@ -1,0 +1,33 @@
+@import '../../assets/styles/variables';
+
+.api-error-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	text-align: center;
+	padding: 0 24px;
+}
+
+.api-error-emoji {
+	font-size: $font-size-xxxl;
+}
+
+.api-error-text {
+	font-size: $font-size-md;
+	color: var(--ink);
+}
+
+.api-error-retry-button {
+	font-family: $main-font;
+	font-weight: 700;
+	font-size: $font-size-sm;
+	background-color: var(--violet);
+	color: #fff;
+	border: 2.5px solid var(--ink);
+	border-bottom: 5px solid var(--ink);
+	border-radius: 999px;
+	padding: 10px 28px;
+	cursor: pointer;
+}

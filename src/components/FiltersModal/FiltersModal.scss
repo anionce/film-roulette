@@ -4,21 +4,44 @@
 	height: 100%;
 
 	& .MuiPaper-root {
-		background-color: $color-light-pink;
+		background-color: var(--bg);
 		display: flex;
 	}
 }
 
 .filters-exit-button-container {
-	height: 25px;
-	width: 25px;
-	padding: 4px;
-	align-self: flex-end;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	align-self: stretch;
+	padding: 16px;
 }
 
-.exit-button {
-	color: $color-beige;
+.exit-button,
+.confirm-button {
+	color: var(--ink);
 	cursor: pointer;
+	background: var(--surface);
+	border: 2px solid var(--ink);
+	border-bottom: 4px solid var(--ink);
+	border-radius: 50%;
+	width: 36px;
+	height: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.confirm-button {
+	background: var(--violet);
+	color: #fff;
+	border-color: var(--violet-dark);
+}
+
+.confirm-button-disabled {
+	opacity: 0.3;
+	cursor: not-allowed;
+	pointer-events: none;
 }
 
 .selector-container {
@@ -28,58 +51,96 @@
 	margin: 8px 32px 32px 32px;
 }
 
-.selection-button {
-	cursor: pointer;
-	background-color: $color-beige;
-	color: $color-dark-blue;
-	width: fit-content;
-	height: 48px;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	border-style: none;
-	padding: 16px 32px;
-	flex-shrink: 0;
-	border-radius: 8px;
-	font-family: 'Oxygen', sans-serif;
-	font-size: 18px;
-	font-style: normal;
-	font-weight: 400;
-	line-height: normal;
-	filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
-
-	&:active {
-		background-color: $color-medium-pink;
-		color: white;
-	}
-
-	.filter-button-content {
-		display: flex;
-		gap: 4px;
-		align-items: center;
-	}
-
-	.MuiOutlinedInput-notchedOutline {
-		border-style: none;
-	}
-
-	.MuiSelect-outlined.MuiSelect-select {
-		min-height: auto;
-		font-size: $font-size-md;
-	}
-}
-
 .modal-content-container {
 	font-family: 'Oxygen', sans-serif;
-	font-size: $font-size-md;
-	color: $color-dark-blue;
+	color: var(--ink);
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 16px;
+	gap: 20px;
+	width: 100%;
+	max-width: 640px;
+}
 
-	p {
-		text-align: center;
+.modal-content-title {
+	font-family: $main-font;
+	font-weight: 800;
+	font-size: $font-size-lg;
+	text-align: center;
+	margin: 0;
+}
+
+.modal-content-hint {
+	font-size: $font-size-sm;
+	color: var(--ink-soft);
+	text-align: center;
+	margin: -12px 0 0;
+}
+
+.genre-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 12px;
+	width: 100%;
+}
+
+.genre-tile {
+	position: relative;
+	cursor: pointer;
+	background: var(--bg);
+	color: var(--ink);
+	border: 2.5px solid var(--ink);
+	border-bottom: 5px solid var(--ink);
+	border-radius: 16px;
+	padding: 16px 8px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	font-family: 'Oxygen', sans-serif;
+	font-size: $font-size-sm;
+	font-weight: 700;
+
+	.emoji {
+		font-size: 22px;
+	}
+
+	&.tile-disabled {
+		opacity: 0.35;
+		cursor: not-allowed;
+	}
+
+	&.selected {
+		background: var(--violet);
+		border-color: var(--violet-dark);
+		color: #fff;
+		transform: translateY(-2px);
+
+		&::after {
+			content: '★';
+			position: absolute;
+			top: -10px;
+			right: -8px;
+			background: var(--yellow);
+			color: var(--yellow-ink);
+			border: 2px solid var(--ink);
+			border-radius: 50%;
+			width: 24px;
+			height: 24px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 13px;
+		}
+	}
+}
+
+.genre-grid-plain {
+	.genre-tile {
+		flex-direction: row;
+		justify-content: center;
+		padding: 14px 10px;
+		border-radius: 999px;
 	}
 }
 
@@ -88,89 +149,87 @@
 	align-items: center;
 	justify-content: center;
 	flex-wrap: wrap;
+	gap: 12px;
+}
+
+.platform-tile {
+	position: relative;
+	width: 64px;
+	height: 64px;
+	border-radius: 16px;
+	border: 2.5px solid var(--ink);
+	border-bottom: 5px solid var(--ink);
+	background: var(--bg);
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .mobile-streaming-logo {
 	border-style: none;
-	width: 50px;
+	width: 40px;
 	border-radius: 4px;
 	box-shadow: none;
 	border: none;
-	opacity: 0.3;
 }
 
-.streaming-button-continue {
-	cursor: pointer;
-	background-color: $color-dark-pink;
-	color: white;
-	width: fit-content;
-	height: 48px;
-	display: flex;
-	justify-content: space-between;
+.platform-check {
+	display: none;
+	position: absolute;
+	top: -8px;
+	right: -8px;
+	background: var(--yellow);
+	color: var(--yellow-ink);
+	border: 2px solid var(--ink);
+	border-radius: 50%;
+	width: 20px;
+	height: 20px;
 	align-items: center;
-	border-style: none;
-	padding: 16px 32px;
-	flex-shrink: 0;
-	border-radius: 8px;
-	font-family: 'Oxygen', sans-serif;
-	font-size: 18px;
-	font-style: normal;
-	font-weight: 400;
-	line-height: normal;
-	filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+	justify-content: center;
+	font-size: 11px;
+}
 
-	.MuiOutlinedInput-notchedOutline {
-		border-style: none;
-	}
+.Mui-selected .platform-tile {
+	background: var(--violet);
+	border-color: var(--violet-dark);
 
-	.MuiSelect-outlined.MuiSelect-select {
-		min-height: auto;
-		font-size: $font-size-md;
+	.platform-check {
+		display: flex;
 	}
 }
 
-.streaming-button-disabled {
-	opacity: 0.2;
+@media only screen and (min-width: $md) {
+	.genre-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
 }
 
 @media only screen and (min-width: $lg) {
 	.dialog-container {
 		& .MuiPaper-root {
-			border-radius: 8px;
+			border-radius: 24px;
 
 			&.MuiDialog-paper {
 				height: fit-content;
 			}
 		}
-		padding: 0 300px;
+		padding: 0 clamp(80px, 15vw, 300px);
 		height: fit-content;
 	}
-}
 
-@media only screen and (min-width: $md) and (max-width: $lg) {
-	.dialog-container {
-		& .MuiPaper-root {
-			border-radius: 8px;
-
-			&.MuiDialog-paper {
-				height: fit-content;
-			}
-		}
-
-		padding: 0 100px;
-		height: fit-content;
+	.genre-grid {
+		grid-template-columns: repeat(5, 1fr);
 	}
 }
 
 .streaming-modal-container {
-	height: 180px;
-	gap: 8px;
+	gap: 16px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	font-family: 'Oxygen', sans-serif;
 	font-size: $font-size-md;
-	color: $color-dark-blue;
+	color: var(--ink);
 
 	p {
 		text-align: center;
