@@ -1,0 +1,14 @@
+@import '../../assets/styles/variables';
+
+.language-toggle {
+	cursor: pointer;
+	background: var(--surface);
+	color: var(--ink);
+	border: 2px solid var(--ink);
+	border-bottom: 4px solid var(--ink);
+	border-radius: 999px;
+	padding: 6px 14px;
+	font-family: $main-font;
+	font-weight: 800;
+	font-size: $font-size-xs;
+}

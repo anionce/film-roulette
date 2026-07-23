@@ -5,6 +5,7 @@ import { runtimeSelectorOptions } from './runtime';
 export type SelectOptions = {
 	value: string;
 	text: string;
+	emoji: string;
 };
 
 export const getOptionsForSelector = (value: FilterType) => {

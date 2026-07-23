@@ -5,11 +5,12 @@ import { ButtonGroup } from '../../components/ButtonGroup/ButtonGroup';
 import { FilterArguments, FilterType, ModalOpen, filterTypes } from '../../constants/filters';
 import { PlayButton } from '../../components/PlayButton/PlayButton';
 import { FiltersModal } from '../../components/FiltersModal/FiltersModal';
-import { MovieGenre } from '../../constants/genre';
+import { MAX_GENRES, MovieGenre } from '../../constants/genre';
 import { MovieRuntime } from '../../constants/runtime';
 import { StreamingServices } from '../../constants/streamingServices';
 import { Introduction } from '../../components/Introduction/Introduction';
 import { RandomButton } from '../../components/RandomButton/RandomButton';
+import { LanguageToggle } from '../../components/LanguageToggle/LanguageToggle';
 
 export type HomeProps = {
 	filters: FilterArguments;
@@ -33,19 +34,29 @@ export const Home = ({ filters, onButtonClick, setFilters }: HomeProps) => {
 	};
 
 	const onSelectGenre = (event: React.MouseEvent<HTMLButtonElement>) => {
-		onGenreChange(event);
-		setTimeout(() => closeModal(FilterType.Genre), 250);
-	};
+		const value = event.currentTarget.getAttribute('data-value') as MovieGenre;
 
-	const onGenreChange = (event: ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>): void => {
-		const value = event.currentTarget.getAttribute('data-value');
-		setFilters((prev: FilterArguments) => ({ ...prev, genre: value as MovieGenre }));
+		setFilters((prev: FilterArguments) => {
+			const currentGenres = prev.genre ?? [];
+			const isAlreadySelected = currentGenres.includes(value);
+
+			let nextGenres: MovieGenre[];
+			if (isAlreadySelected) {
+				nextGenres = currentGenres.filter(genre => genre !== value);
+			} else if (currentGenres.length < MAX_GENRES) {
+				nextGenres = [...currentGenres, value];
+			} else {
+				nextGenres = currentGenres;
+			}
+
+			return { ...prev, genre: nextGenres.length ? nextGenres : null };
+		});
 	};
 
 	const getSelect = (type: FilterType) => {
 		const options = {
 			[FilterType.Genre]: onSelectGenre,
-			[FilterType.Duration]: onSelectDuration,
+			[FilterType.Duration]: onDurationChange,
 			[FilterType.Streaming]: selectedServicesOnChange,
 		};
 
@@ -57,11 +68,6 @@ export const Home = ({ filters, onButtonClick, setFilters }: HomeProps) => {
 		setFilters((prev: FilterArguments) => ({ ...prev, duration: value as MovieRuntime }));
 	};
 
-	const onSelectDuration = (event: React.MouseEvent<HTMLButtonElement>) => {
-		onDurationChange(event);
-		setTimeout(() => closeModal(FilterType.Duration), 250);
-	};
-
 	const selectedServicesOnChange = (event: ChangeEvent<HTMLInputElement>, newServices: StreamingServices[]): void => {
 		setFilters((prev: FilterArguments) => ({ ...prev, streaming: newServices }));
 	};
@@ -70,13 +76,18 @@ export const Home = ({ filters, onButtonClick, setFilters }: HomeProps) => {
 
 	return (
 		<div className='home-mobile-container'>
+			<div className='home-top-bar'>
+				<LanguageToggle />
+			</div>
 			<Introduction />
 			<ButtonGroup filters={filters} openModal={openModal} />
 			<div className='action-button-container'>
 				<PlayButton filters={filters} onButtonClick={onButtonClick} />
-				<RandomButton onButtonClick={onButtonClick} />
+				<RandomButton filters={filters} onButtonClick={onButtonClick} />
 			</div>
 			{filterTypes.map(type => {
+				const selectedValue = type === FilterType.Genre ? filters.genre : type === FilterType.Duration ? filters.duration : null;
+
 				return (
 					<FiltersModal
 						key={`filter-modal-${type}`}
@@ -85,6 +96,7 @@ export const Home = ({ filters, onButtonClick, setFilters }: HomeProps) => {
 						closeModal={closeModal}
 						onSelect={getSelect(type)}
 						filters={filters.streaming}
+						selectedValue={selectedValue}
 						isButtonDisabled={isDisabled}
 					/>
 				);

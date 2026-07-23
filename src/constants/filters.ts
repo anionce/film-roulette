@@ -17,7 +17,7 @@ export type ModalOpen = {
 };
 
 export type FilterArguments = {
-	genre: MovieGenre | null;
+	genre: MovieGenre[] | null;
 	duration: MovieRuntime | null;
 	streaming: StreamingServices[] | null;
 };

@@ -2,7 +2,7 @@
 
 .few-results-container {
 	display: flex;
-	background-color: $color-light-blue;
+	background-color: var(--yellow);
 	justify-content: center;
 	align-items: center;
 	height: 20px;
@@ -10,5 +10,6 @@
 	.few-results-text {
 		font-size: $font-size-xxs;
 		font-style: italic;
+		color: var(--yellow-ink);
 	}
 }

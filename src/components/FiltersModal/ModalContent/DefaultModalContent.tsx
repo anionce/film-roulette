@@ -1,27 +1,45 @@
-import { Stack } from '@mui/material';
 import React from 'react';
 import { getOptionsForSelector } from '../../../constants/selector';
 import { FilterType } from '../../../constants/filters';
+import { MAX_GENRES } from '../../../constants/genre';
+import { useLanguage } from '../../../i18n/LanguageContext';
 import '../FiltersModal.scss';
 
 export type DefaultModalContentProps = {
 	onSelect: (event: React.MouseEvent<HTMLButtonElement>) => void;
 	filterType: FilterType;
+	selectedValue?: string | string[] | null;
 };
 
-export const DefaultModalContent = ({ onSelect, filterType }: DefaultModalContentProps) => {
-	const GENRE_TITLE = 'Elige el género que prefieras:';
-	const DURATION_TITLE = 'Selecciona cuánto tiempo tienes:';
+export const DefaultModalContent = ({ onSelect, filterType, selectedValue }: DefaultModalContentProps) => {
+	const { t } = useLanguage();
+	const isGenre = filterType === FilterType.Genre;
+
+	const selectedValues = Array.isArray(selectedValue) ? selectedValue : selectedValue ? [selectedValue] : [];
+	const isMaxReached = isGenre && selectedValues.length >= MAX_GENRES;
+
 	return (
 		<div className='modal-content-container'>
-			<p>{filterType === FilterType.Genre ? GENRE_TITLE : DURATION_TITLE}</p>
-			<Stack spacing={{ xs: 1.5, sm: 3 }} direction='row' justifyContent='center' useFlexGap flexWrap='wrap'>
-				{getOptionsForSelector(filterType).map(({ text, value }) => (
-					<button onClick={onSelect} data-value={value} key={value} className='selection-button'>
-						<div className='filter-button-content'>{text}</div>
-					</button>
-				))}
-			</Stack>
+			<p className='modal-content-title'>{isGenre ? t.genreModalTitle(MAX_GENRES) : t.durationModalTitle}</p>
+			{isMaxReached && <p className='modal-content-hint'>{t.genreMaxHint(MAX_GENRES)}</p>}
+			<div className={`genre-grid ${isGenre ? 'genre-grid-plain' : ''}`}>
+				{getOptionsForSelector(filterType).map(({ text, value, emoji }) => {
+					const isSelected = selectedValues.includes(value);
+					const isDisabled = isMaxReached && !isSelected;
+
+					return (
+						<button
+							onClick={onSelect}
+							data-value={value}
+							key={value}
+							disabled={isDisabled}
+							className={`genre-tile ${isSelected ? 'selected' : ''} ${isDisabled ? 'tile-disabled' : ''}`}>
+							{!isGenre && <span className='emoji'>{emoji}</span>}
+							{text}
+						</button>
+					);
+				})}
+			</div>
 		</div>
 	);
 };

@@ -1,12 +1,13 @@
 import React from 'react';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export const Introduction = () => {
+	const { t } = useLanguage();
+
 	return (
-		<>
-			<h2 className='home-mobile-title'>¡Hola!</h2>
-			<div className='home-mobile-subtitle'>
-				Elige película según el género que te apetezca y el tiempo que tengas &#129303;
-			</div>
-		</>
+		<div className='mascot-row'>
+			<div className='mascot'>🍿</div>
+			<div className='speech-bubble'>{t.introGreeting}</div>
+		</div>
 	);
 };

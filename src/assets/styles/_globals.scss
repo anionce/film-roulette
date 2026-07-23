@@ -1,9 +1,49 @@
 @import './variables';
 
+:root {
+	--bg: #f5f0ff;
+	--surface: #ffffff;
+	--ink: #1e1147;
+	--ink-soft: #6b5b95;
+	--border: rgba(30, 17, 71, 0.14);
+
+	--violet: #7c3aed;
+	--violet-dark: #5b21b6;
+	--coral: #ff5c8a;
+	--coral-dark: #d63d68;
+	--yellow: #ffc93c;
+	--yellow-dark: #e0a81f;
+	--yellow-ink: #402a00;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: #170b33;
+		--surface: #241454;
+		--ink: #f5f0ff;
+		--ink-soft: #b8a9e0;
+		--border: rgba(245, 240, 255, 0.14);
+	}
+}
+
 html {
 	overflow-x: hidden;
 	font-family: -apple-system, Playfair Display, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
 		'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+}
+
+body {
+	margin: 0;
+	background-color: var(--bg);
+}
+
+code {
+	font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+*:focus-visible {
+	outline: 2px solid var(--yellow);
+	outline-offset: 2px;
 }

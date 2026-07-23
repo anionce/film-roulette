@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { MainLayout } from './layout/MainLayout';
 import { NotFound } from './pages/NotFound/NotFound';
 import React, { useEffect, useState } from 'react';
@@ -10,12 +10,15 @@ import {
 	useLazyGetStreamingDetailsQuery,
 } from './services/api';
 import { APIMovieResponse, CompleteMovie, CountryResults, Movie, MovieDetail } from './models/MovieResponse';
-import { MovieGenre, mapValueToGenre } from './constants/genre';
+import { mapValueToGenre } from './constants/genre';
 import { MovieRuntime, mapValueToMovieRuntime } from './constants/runtime';
 import { mapValueToStreamingService } from './constants/streamingServices';
 import { Home } from './pages/Home/Home';
 import { FilterArguments } from './constants/filters';
 import { filterMovies, getRandomValue, shuffleArray } from './helpers/AppHelper';
+import { useLanguage } from './i18n/LanguageContext';
+
+const MOVIES_BATCH_SIZE = 10;
 
 export const App = () => {
 	const [filters, setFilters] = useState<FilterArguments>({
@@ -23,15 +26,19 @@ export const App = () => {
 		duration: null,
 		streaming: null,
 	});
-	const [triggerMovies, { data: dataMovies, isLoading: isLoadingMovies }] = useLazyGetMoviesQuery();
-	const [triggerRandomMovies, { isLoading: isLoadingRandomMovies }] = useLazyGetRandomMoviesQuery();
+	const [triggerMovies, { data: dataMovies, isLoading: isLoadingMovies, isError: isErrorMovies }] =
+		useLazyGetMoviesQuery();
+	const [triggerRandomMovies, { isLoading: isLoadingRandomMovies, isError: isErrorRandomMovies }] =
+		useLazyGetRandomMoviesQuery();
 
+	const { t } = useLanguage();
 	const [triggerIMDBDetail] = useLazyGetDetailsQuery();
 	const [triggerStreamingDetail] = useLazyGetStreamingDetailsQuery();
 	const [totalPages, setTotalPages] = useState<number | undefined>(undefined);
 	const [movieResultsArray, setMovieResultsArray] = useState<CompleteMovie[]>([]);
 	const [currentMovieIndex, setCurrentMovieIndex] = useState<number>(-1);
 	const [shouldShowNoResults, setShouldShowNoResults] = useState<boolean>(false);
+	const [noResultsMessage, setNoResultsMessage] = useState<string | undefined>(undefined);
 	const [shouldUseRandomQuery, setShouldUseRandomQuery] = useState<boolean | undefined>(undefined);
 
 	useEffect(() => {
@@ -51,8 +58,9 @@ export const App = () => {
 
 	const isNotLoading: boolean = !isLoadingMovies && !isLoadingRandomMovies;
 	const shouldShowFewResults: boolean = !!movieResultsArray.length && totalPages === 1;
+	const shouldShowApiError: boolean = (isErrorMovies || isErrorRandomMovies) && !movieResultsArray.length;
 	const shouldShowLoading: boolean =
-		(isNotLoading || !dataMovies || !movieResultsArray.length) && !shouldShowNoResults;
+		(isNotLoading || !dataMovies || !movieResultsArray.length) && !shouldShowNoResults && !shouldShowApiError;
 
 	const getDetailsForMovies = async (
 		currentPage: number,
@@ -67,7 +75,7 @@ export const App = () => {
 					page,
 				});
 
-				const movieDetailsPromises = dataRandomMovies?.results.map(async (movie: Movie) => {
+				const movieDetailsPromises = dataRandomMovies?.results.slice(0, MOVIES_BATCH_SIZE).map(async (movie: Movie) => {
 					const [detailData, streamingData] = await Promise.all([
 						triggerIMDBDetail({ id: movie.id }),
 						triggerStreamingDetail({ id: movie.id }),
@@ -87,7 +95,7 @@ export const App = () => {
 				movieDetails.push(...randomMovieDetailsPromise);
 			}
 		} else if (initialData) {
-			const movieDetailsPromises = initialData?.results.map(async (movie: Movie) => {
+			const movieDetailsPromises = initialData?.results.slice(0, MOVIES_BATCH_SIZE).map(async (movie: Movie) => {
 				const [detailData, streamingData] = await Promise.all([
 					triggerIMDBDetail({ id: movie.id }),
 					triggerStreamingDetail({ id: movie.id }),
@@ -110,11 +118,11 @@ export const App = () => {
 				const { data } = await triggerMovies({
 					page,
 					runtime: mapValueToMovieRuntime(filters.duration as MovieRuntime),
-					genres: mapValueToGenre(filters.genre as MovieGenre),
+					genres: mapValueToGenre(filters.genre),
 					streamingServices: mapValueToStreamingService(filters.streaming),
 				});
 
-				const movieDetailsPromises = data?.results.map(async (movie: Movie) => {
+				const movieDetailsPromises = data?.results.slice(0, MOVIES_BATCH_SIZE).map(async (movie: Movie) => {
 					const [detailData, streamingData] = await Promise.all([
 						triggerIMDBDetail({ id: movie.id }),
 						triggerStreamingDetail({ id: movie.id }),
@@ -130,8 +138,8 @@ export const App = () => {
 					};
 				});
 
-				const movieDetails = await Promise.all(movieDetailsPromises as Promise<CompleteMovie>[]);
-				movieDetails.push(...movieDetails);
+				const pageMovieDetails = await Promise.all(movieDetailsPromises as Promise<CompleteMovie>[]);
+				movieDetails.push(...pageMovieDetails);
 			}
 		}
 
@@ -141,7 +149,7 @@ export const App = () => {
 	const curateMovieData = async () => {
 		if (shouldUseRandomQuery) {
 			const randomValue = getRandomValue();
-			const allRandomMovieDetails = await getDetailsForMovies(randomValue, randomValue + 2);
+			const allRandomMovieDetails = await getDetailsForMovies(randomValue, randomValue);
 
 			const shuffledDetails = shuffleArray(allRandomMovieDetails);
 
@@ -166,7 +174,7 @@ export const App = () => {
 
 			if (total_pages > 2) {
 				const maxPage = Math.min(total_pages, 4);
-				const additionalMovieDetails = await getDetailsForMovies(1, maxPage);
+				const additionalMovieDetails = await getDetailsForMovies(2, maxPage);
 
 				const allShuffledDetails = shuffleArray([...initialMovieDetails, ...additionalMovieDetails]);
 				totalFilteredMovies = filterMovies(allShuffledDetails, filters);
@@ -175,6 +183,9 @@ export const App = () => {
 			if (totalFilteredMovies.length) {
 				setMovieResultsArray(totalFilteredMovies);
 			} else {
+				if ((filters.genre?.length ?? 0) > 1) {
+					setNoResultsMessage(t.noResultsGenreComboMessage);
+				}
 				resetValues(true);
 				return;
 			}
@@ -198,7 +209,7 @@ export const App = () => {
 				triggerMovies({
 					page: 1,
 					runtime: mapValueToMovieRuntime(filters.duration as MovieRuntime),
-					genres: mapValueToGenre(filters.genre as MovieGenre),
+					genres: mapValueToGenre(filters.genre),
 					streamingServices: mapValueToStreamingService(filters.streaming),
 				});
 				setCurrentMovieIndex(prev => prev + 1);
@@ -226,7 +237,10 @@ export const App = () => {
 		setTotalPages(undefined);
 		setCurrentMovieIndex(-1);
 		setShouldShowNoResults(noResults ?? false);
-		setShouldUseRandomQuery(undefined);
+		if (!noResults) {
+			setNoResultsMessage(undefined);
+			setShouldUseRandomQuery(undefined);
+		}
 	};
 
 	return (
@@ -240,18 +254,26 @@ export const App = () => {
 					<Route
 						path='/movie'
 						element={
-							<MoviePage
-								currentMovie={currentMovie}
-								streamingData={currentMovie?.streamingData?.data}
-								dataIMDB={currentMovie?.detailData?.data?.imdb_id as any}
-								onButtonAction={onButtonAction}
-								onPreviousButtonClick={onPreviousButtonClick}
-								resetValues={resetValues}
-								currentMovieIndex={currentMovieIndex}
-								shouldShowNoResults={shouldShowNoResults}
-								isLoadingMovies={shouldShowLoading}
-								shouldShowFewResults={shouldShowFewResults}
-							/>
+							shouldUseRandomQuery === undefined ? (
+								<Navigate to='/' replace />
+							) : (
+								<MoviePage
+									currentMovie={currentMovie}
+									streamingData={currentMovie?.streamingData?.data}
+									dataIMDB={currentMovie?.detailData?.data?.imdb_id as any}
+									tagline={currentMovie?.detailData?.data?.tagline}
+									onButtonAction={onButtonAction}
+									onPreviousButtonClick={onPreviousButtonClick}
+									resetValues={resetValues}
+									currentMovieIndex={currentMovieIndex}
+									shouldShowNoResults={shouldShowNoResults}
+									noResultsMessage={noResultsMessage}
+									isLoadingMovies={shouldShowLoading}
+									shouldShowFewResults={shouldShowFewResults}
+									shouldShowApiError={shouldShowApiError}
+									onRetry={onButtonAction}
+								/>
+							)
 						}
 					/>
 					<Route path='*' element={<NotFound />} />
