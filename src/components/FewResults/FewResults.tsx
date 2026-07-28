@@ -7,7 +7,10 @@ export const FewResults = () => {
 
 	return (
 		<div className='few-results-container'>
-			<span className='few-results-text'>{t.fewResultsText}</span>
+			<div className='few-results-badge'>
+				<span className='few-results-emoji'>🔍</span>
+				<span className='few-results-text'>{t.fewResultsText}</span>
+			</div>
 		</div>
 	);
 };

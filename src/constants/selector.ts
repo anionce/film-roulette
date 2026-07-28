@@ -1,6 +1,7 @@
 import { FilterType } from './filters';
-import { genreSelectorOptions } from './genre';
+import { getGenreSelectorOptions } from './genre';
 import { runtimeSelectorOptions } from './runtime';
+import { Language } from '../i18n/translations';
 
 export type SelectOptions = {
 	value: string;
@@ -8,9 +9,9 @@ export type SelectOptions = {
 	emoji: string;
 };
 
-export const getOptionsForSelector = (value: FilterType) => {
+export const getOptionsForSelector = (value: FilterType, language: Language) => {
 	if (value === FilterType.Genre) {
-		return genreSelectorOptions;
+		return getGenreSelectorOptions(language);
 	} else {
 		return runtimeSelectorOptions;
 	}

@@ -2,14 +2,31 @@
 
 .few-results-container {
 	display: flex;
-	background-color: var(--yellow);
 	justify-content: center;
 	align-items: center;
-	height: 20px;
+	padding: 12px 16px 20px;
+}
+
+.few-results-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	background: var(--yellow);
+	color: var(--yellow-ink);
+	border: 2.5px solid var(--ink);
+	border-bottom: 4px solid var(--ink);
+	border-radius: 999px;
+	padding: 10px 20px;
+
+	.few-results-emoji {
+		font-size: 16px;
+		line-height: 1;
+	}
 
 	.few-results-text {
-		font-size: $font-size-xxs;
-		font-style: italic;
-		color: var(--yellow-ink);
+		font-family: $main-font;
+		font-weight: 800;
+		font-size: $font-size-sm;
+		line-height: 1;
 	}
 }
