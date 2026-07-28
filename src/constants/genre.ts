@@ -1,4 +1,5 @@
 import { SelectOptions } from './selector';
+import { Language } from '../i18n/translations';
 
 export const MAX_GENRES = 3;
 
@@ -78,8 +79,34 @@ export const GENRE_EMOJI: Record<MovieGenre, string> = {
 	[MovieGenre.Random]: '🎲',
 };
 
-export const genreSelectorOptions: SelectOptions[] = Object.keys(GENRE_NUM).map(genre => ({
-	value: genre,
-	text: genre,
-	emoji: GENRE_EMOJI[genre as MovieGenre],
-}));
+export const GENRE_LABEL_EN: Record<MovieGenre, string> = {
+	[MovieGenre.Action]: 'action',
+	[MovieGenre.Adventure]: 'adventure',
+	[MovieGenre.Animation]: 'animation',
+	[MovieGenre.Comedy]: 'comedy',
+	[MovieGenre.Crime]: 'crime',
+	[MovieGenre.Documentary]: 'documentary',
+	[MovieGenre.Drama]: 'drama',
+	[MovieGenre.Family]: 'family',
+	[MovieGenre.Fantasy]: 'fantasy',
+	[MovieGenre.History]: 'history',
+	[MovieGenre.Horror]: 'horror',
+	[MovieGenre.Music]: 'music',
+	[MovieGenre.Mystery]: 'mystery',
+	[MovieGenre.Romance]: 'romance',
+	[MovieGenre.ScienceFiction]: 'science fiction',
+	[MovieGenre.Thriller]: 'thriller',
+	[MovieGenre.War]: 'war',
+	[MovieGenre.Western]: 'western',
+	[MovieGenre.Random]: 'random',
+};
+
+export const getGenreLabel = (genre: MovieGenre, language: Language): string =>
+	language === 'en' ? GENRE_LABEL_EN[genre] : genre;
+
+export const getGenreSelectorOptions = (language: Language): SelectOptions[] =>
+	Object.keys(GENRE_NUM).map(genre => ({
+		value: genre,
+		text: getGenreLabel(genre as MovieGenre, language),
+		emoji: GENRE_EMOJI[genre as MovieGenre],
+	}));

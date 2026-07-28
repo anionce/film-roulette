@@ -15,15 +15,16 @@
 		align-items: center;
 		border: 2.5px solid var(--ink);
 		border-bottom: 5px solid var(--ink);
-		height: 56px;
-		padding: 16px 20px;
+		min-height: 56px;
+		padding: 14px 20px;
 		flex-shrink: 0;
-		border-radius: 999px;
+		border-radius: 28px;
 		font-family: 'Oxygen', sans-serif;
 		font-size: 18px;
 		font-style: normal;
 		font-weight: 700;
 		line-height: normal;
+		text-align: left;
 
 		&:active {
 			filter: brightness(0.95);

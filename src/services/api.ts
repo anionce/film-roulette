@@ -15,18 +15,18 @@ export const moviesApi = createApi({
 	}),
 	endpoints: builder => ({
 		getMovies: builder.query<APIMovieResponse, GetMovieArgs>({
-			query: ({ runtime, genres, page, streamingServices }) => {
+			query: ({ runtime, genres, page, streamingServices, language }) => {
 				const streamingServicesQuery = streamingServices ? `&watch_region=ES` : '';
 
-				return `${DISCOVER}/${TAG}?api_key=${API_KEY}&language=${LANGUAGE}&include_adult=false&with_runtime.lte=${runtime}&with_genres=${genres}&vote_count.gte=${POPULARITY_VALUE}&vote_average.gte=${MINIMUM_VOTE}&sort_by=popularity.desc${streamingServicesQuery}&with_watch_providers=${streamingServices}&page=${page}`;
+				return `${DISCOVER}/${TAG}?api_key=${API_KEY}&language=${language ?? LANGUAGE}&include_adult=false&with_runtime.lte=${runtime}&with_genres=${genres}&vote_count.gte=${POPULARITY_VALUE}&vote_average.gte=${MINIMUM_VOTE}&sort_by=popularity.desc${streamingServicesQuery}&with_watch_providers=${streamingServices}&page=${page}`;
 			},
 		}),
 		getRandomMovies: builder.query<APIMovieResponse, GetMovieArgs>({
-			query: ({ page }) =>
-				`${DISCOVER}/${TAG}?api_key=${API_KEY}&language=${LANGUAGE}&include_adult=false&vote_count.gte=${POPULARITY_VALUE}&vote_average.gte=${MINIMUM_VOTE}&sort_by=popularity.desc&page=${page}`,
+			query: ({ page, language }) =>
+				`${DISCOVER}/${TAG}?api_key=${API_KEY}&language=${language ?? LANGUAGE}&include_adult=false&vote_count.gte=${POPULARITY_VALUE}&vote_average.gte=${MINIMUM_VOTE}&sort_by=popularity.desc&page=${page}`,
 		}),
 		getDetails: builder.query<MovieDetail, DetailMovieArgs>({
-			query: ({ id }) => `${TAG}/${id}?api_key=${API_KEY}&language=${LANGUAGE}`,
+			query: ({ id, language }) => `${TAG}/${id}?api_key=${API_KEY}&language=${language ?? LANGUAGE}`,
 			transformResponse: response => response as MovieDetail,
 		}),
 		getStreamingDetails: builder.query<CountryResults, DetailMovieArgs>({

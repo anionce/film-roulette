@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { MainLayout } from './layout/MainLayout';
 import { NotFound } from './pages/NotFound/NotFound';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MoviePage } from './pages/MoviePage/MoviePage';
 import {
 	useLazyGetDetailsQuery,
@@ -9,16 +9,24 @@ import {
 	useLazyGetRandomMoviesQuery,
 	useLazyGetStreamingDetailsQuery,
 } from './services/api';
-import { APIMovieResponse, CompleteMovie, CountryResults, Movie, MovieDetail } from './models/MovieResponse';
+import { CompleteMovie, CountryResults, Movie, MovieDetail } from './models/MovieResponse';
 import { mapValueToGenre } from './constants/genre';
 import { MovieRuntime, mapValueToMovieRuntime } from './constants/runtime';
 import { mapValueToStreamingService } from './constants/streamingServices';
 import { Home } from './pages/Home/Home';
 import { FilterArguments } from './constants/filters';
-import { filterMovies, getRandomValue, shuffleArray } from './helpers/AppHelper';
+import {
+	MIN_RANDOM_PAGE,
+	filterAvailableMovies,
+	filterMovies,
+	getRandomStartPage,
+	getRandomValue,
+	shuffleArray,
+} from './helpers/AppHelper';
 import { useLanguage } from './i18n/LanguageContext';
 
 const MOVIES_BATCH_SIZE = 10;
+const PAGE_WINDOW_SIZE = 4;
 
 export const App = () => {
 	const [filters, setFilters] = useState<FilterArguments>({
@@ -31,7 +39,8 @@ export const App = () => {
 	const [triggerRandomMovies, { isLoading: isLoadingRandomMovies, isError: isErrorRandomMovies }] =
 		useLazyGetRandomMoviesQuery();
 
-	const { t } = useLanguage();
+	const { t, language } = useLanguage();
+	const tmdbLanguage = language === 'en' ? 'en-US' : 'es-ES';
 	const [triggerIMDBDetail] = useLazyGetDetailsQuery();
 	const [triggerStreamingDetail] = useLazyGetStreamingDetailsQuery();
 	const [totalPages, setTotalPages] = useState<number | undefined>(undefined);
@@ -40,6 +49,7 @@ export const App = () => {
 	const [shouldShowNoResults, setShouldShowNoResults] = useState<boolean>(false);
 	const [noResultsMessage, setNoResultsMessage] = useState<string | undefined>(undefined);
 	const [shouldUseRandomQuery, setShouldUseRandomQuery] = useState<boolean | undefined>(undefined);
+	const nextPageCursorRef = useRef(1);
 
 	useEffect(() => {
 		if (!totalPages && dataMovies) {
@@ -62,22 +72,19 @@ export const App = () => {
 	const shouldShowLoading: boolean =
 		(isNotLoading || !dataMovies || !movieResultsArray.length) && !shouldShowNoResults && !shouldShowApiError;
 
-	const getDetailsForMovies = async (
-		currentPage: number,
-		pagesToFetch: number,
-		initialData?: APIMovieResponse | undefined
-	) => {
+	const getDetailsForMovies = async (currentPage: number, pagesToFetch: number) => {
 		const movieDetails: CompleteMovie[] = [];
 
 		if (shouldUseRandomQuery) {
 			for (let page = currentPage; page <= pagesToFetch; page++) {
 				const { data: dataRandomMovies } = await triggerRandomMovies({
 					page,
+					language: tmdbLanguage,
 				});
 
 				const movieDetailsPromises = dataRandomMovies?.results.slice(0, MOVIES_BATCH_SIZE).map(async (movie: Movie) => {
 					const [detailData, streamingData] = await Promise.all([
-						triggerIMDBDetail({ id: movie.id }),
+						triggerIMDBDetail({ id: movie.id, language: tmdbLanguage }),
 						triggerStreamingDetail({ id: movie.id }),
 					]);
 
@@ -94,25 +101,6 @@ export const App = () => {
 				const randomMovieDetailsPromise = await Promise.all(movieDetailsPromises as Promise<CompleteMovie>[]);
 				movieDetails.push(...randomMovieDetailsPromise);
 			}
-		} else if (initialData) {
-			const movieDetailsPromises = initialData?.results.slice(0, MOVIES_BATCH_SIZE).map(async (movie: Movie) => {
-				const [detailData, streamingData] = await Promise.all([
-					triggerIMDBDetail({ id: movie.id }),
-					triggerStreamingDetail({ id: movie.id }),
-				]);
-
-				const detailDataResult = detailData as { data?: MovieDetail };
-				const streamingDataResult = streamingData as { data?: CountryResults };
-
-				return {
-					...movie,
-					detailData: detailDataResult,
-					streamingData: streamingDataResult,
-				};
-			});
-
-			const movieDetailsPromise = await Promise.all(movieDetailsPromises as Promise<CompleteMovie>[]);
-			movieDetails.push(...movieDetailsPromise);
 		} else {
 			for (let page = currentPage; page <= pagesToFetch; page++) {
 				const { data } = await triggerMovies({
@@ -120,11 +108,12 @@ export const App = () => {
 					runtime: mapValueToMovieRuntime(filters.duration as MovieRuntime),
 					genres: mapValueToGenre(filters.genre),
 					streamingServices: mapValueToStreamingService(filters.streaming),
+					language: tmdbLanguage,
 				});
 
 				const movieDetailsPromises = data?.results.slice(0, MOVIES_BATCH_SIZE).map(async (movie: Movie) => {
 					const [detailData, streamingData] = await Promise.all([
-						triggerIMDBDetail({ id: movie.id }),
+						triggerIMDBDetail({ id: movie.id, language: tmdbLanguage }),
 						triggerStreamingDetail({ id: movie.id }),
 					]);
 
@@ -151,7 +140,7 @@ export const App = () => {
 			const randomValue = getRandomValue();
 			const allRandomMovieDetails = await getDetailsForMovies(randomValue, randomValue);
 
-			const shuffledDetails = shuffleArray(allRandomMovieDetails);
+			const shuffledDetails = shuffleArray(filterAvailableMovies(allRandomMovieDetails));
 
 			if (shuffledDetails.length) {
 				setMovieResultsArray(shuffledDetails);
@@ -164,21 +153,16 @@ export const App = () => {
 		if (dataMovies && !shouldUseRandomQuery) {
 			const { total_pages } = dataMovies;
 			setTotalPages(total_pages);
-			let totalFilteredMovies = [];
 
-			const pagesToFetch = Math.min(2, total_pages);
-			const initialMovieDetails = await getDetailsForMovies(1, pagesToFetch, dataMovies);
+			const startPage = getRandomStartPage(total_pages);
+			const endPage = Math.min(startPage + PAGE_WINDOW_SIZE - 1, total_pages);
 
-			const shuffledDetails = shuffleArray(initialMovieDetails);
-			totalFilteredMovies = filterMovies(shuffledDetails, filters);
+			const movieDetails = await getDetailsForMovies(startPage, endPage);
+			nextPageCursorRef.current =
+				endPage >= total_pages ? Math.min(MIN_RANDOM_PAGE, total_pages) : endPage + 1;
 
-			if (total_pages > 2) {
-				const maxPage = Math.min(total_pages, 4);
-				const additionalMovieDetails = await getDetailsForMovies(2, maxPage);
-
-				const allShuffledDetails = shuffleArray([...initialMovieDetails, ...additionalMovieDetails]);
-				totalFilteredMovies = filterMovies(allShuffledDetails, filters);
-			}
+			const shuffledDetails = shuffleArray(movieDetails);
+			const totalFilteredMovies = filterMovies(shuffledDetails, filters);
 
 			if (totalFilteredMovies.length) {
 				setMovieResultsArray(totalFilteredMovies);
@@ -189,6 +173,28 @@ export const App = () => {
 				resetValues(true);
 				return;
 			}
+		}
+	};
+
+	const fetchMoreFilteredMovies = async () => {
+		if (!totalPages) {
+			setCurrentMovieIndex(0);
+			return;
+		}
+
+		const startPage = nextPageCursorRef.current;
+		const endPage = Math.min(startPage + PAGE_WINDOW_SIZE - 1, totalPages);
+		const additionalMovieDetails = await getDetailsForMovies(startPage, endPage);
+		nextPageCursorRef.current = endPage >= totalPages ? Math.min(MIN_RANDOM_PAGE, totalPages) : endPage + 1;
+
+		const newFilteredMovies = filterMovies(additionalMovieDetails, filters);
+
+		if (newFilteredMovies.length) {
+			const startIndex = movieResultsArray.length;
+			setMovieResultsArray(prev => [...prev, ...shuffleArray(newFilteredMovies)]);
+			setCurrentMovieIndex(startIndex);
+		} else {
+			setCurrentMovieIndex(0);
 		}
 	};
 
@@ -211,11 +217,18 @@ export const App = () => {
 					runtime: mapValueToMovieRuntime(filters.duration as MovieRuntime),
 					genres: mapValueToGenre(filters.genre),
 					streamingServices: mapValueToStreamingService(filters.streaming),
+					language: tmdbLanguage,
 				});
 				setCurrentMovieIndex(prev => prev + 1);
 			}
 		} else if (movieResultsArray.length - 1 === currentMovieIndex) {
-			setCurrentMovieIndex(0);
+			if (shouldUseRandomQuery) {
+				setMovieResultsArray([]);
+				setCurrentMovieIndex(0);
+				curateMovieData();
+			} else {
+				fetchMoreFilteredMovies();
+			}
 		} else if (movieResultsArray.length) {
 			setCurrentMovieIndex(prev => prev + 1);
 		}
@@ -236,6 +249,7 @@ export const App = () => {
 		setMovieResultsArray([]);
 		setTotalPages(undefined);
 		setCurrentMovieIndex(-1);
+		nextPageCursorRef.current = 1;
 		setShouldShowNoResults(noResults ?? false);
 		if (!noResults) {
 			setNoResultsMessage(undefined);

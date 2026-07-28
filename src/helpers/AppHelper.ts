@@ -1,18 +1,41 @@
 import { FilterArguments } from '../constants/filters';
 import { AvailabilityInfo, CompleteMovie } from '../models/MovieResponse';
 
-const RANDOM_PAGE_LIMIT = 40;
+export const RANDOM_PAGE_LIMIT = 40;
+export const MIN_RANDOM_PAGE = 5;
 
 export const getRandomValue = () => {
-	return Math.floor(Math.random() * RANDOM_PAGE_LIMIT) + 1;
+	return Math.floor(Math.random() * (RANDOM_PAGE_LIMIT - MIN_RANDOM_PAGE + 1)) + MIN_RANDOM_PAGE;
+};
+
+export const getRandomStartPage = (totalPages: number): number => {
+	const upperBound = Math.min(totalPages, RANDOM_PAGE_LIMIT);
+
+	if (upperBound <= MIN_RANDOM_PAGE) {
+		return 1;
+	}
+
+	return Math.floor(Math.random() * (upperBound - MIN_RANDOM_PAGE + 1)) + MIN_RANDOM_PAGE;
 };
 
 export const shuffleArray = (array: CompleteMovie[]) => {
 	return [...array].sort(() => Math.random() - 0.5);
 };
 
+export const hasVODAvailability = (movie: CompleteMovie): boolean => {
+	const availability = movie.streamingData?.data;
+
+	return !!(availability?.flatrate?.length || availability?.rent?.length || availability?.buy?.length);
+};
+
+export const filterAvailableMovies = (movies: CompleteMovie[]): CompleteMovie[] => movies.filter(hasVODAvailability);
+
 export const filterMovies = (movies: CompleteMovie[], filters: FilterArguments) => {
 	const filteredResults = movies.filter(movie => {
+		if (!hasVODAvailability(movie)) {
+			return false;
+		}
+
 		if (!filters.streaming) {
 			return true;
 		}

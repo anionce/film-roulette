@@ -3,7 +3,7 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import React from 'react';
 import { StreamingServices, STREAMING_LOGO } from '../../../constants/streamingServices';
 import { MovieRuntime, RUNTIME_EMOJI } from '../../../constants/runtime';
-import { MovieGenre, GENRE_EMOJI } from '../../../constants/genre';
+import { MovieGenre, getGenreLabel } from '../../../constants/genre';
 import { useLanguage } from '../../../i18n/LanguageContext';
 import '../ButtonGroup.scss';
 
@@ -21,11 +21,8 @@ const DEFAULT_EMOJI: Record<FilterType, string> = {
 
 const capitalize = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1);
 
-const truncate = (value: string, maxLength: number): string =>
-	value.length > maxLength ? `${value.substring(0, maxLength)}...` : value;
-
 export const FilterButton = ({ openModal, filters, filterType }: FilterButtonProps) => {
-	const { t } = useLanguage();
+	const { t, language } = useLanguage();
 
 	const LABEL: Record<FilterType, string> = {
 		[FilterType.Genre]: t.labelGenre,
@@ -36,11 +33,7 @@ export const FilterButton = ({ openModal, filters, filterType }: FilterButtonPro
 	const isFilterSelected: boolean =
 		filterType === FilterType.Duration ? !!filters.duration : !!(filters[filterType] as unknown[])?.length;
 
-	const getSelectedEmoji = (): string => {
-		if (filterType === FilterType.Genre) {
-			const emojis = (filters.genre as MovieGenre[])?.map(value => GENRE_EMOJI[value]).join('');
-			return emojis || DEFAULT_EMOJI[filterType];
-		}
+	const getSelectedEmoji = (): string | undefined => {
 		if (filterType === FilterType.Duration) {
 			return RUNTIME_EMOJI[filters.duration as MovieRuntime] ?? DEFAULT_EMOJI[filterType];
 		}
@@ -51,7 +44,7 @@ export const FilterButton = ({ openModal, filters, filterType }: FilterButtonPro
 		if (filterType === FilterType.Duration) {
 			return capitalize(filters.duration as MovieRuntime);
 		}
-		return truncate((filters.genre as MovieGenre[]).map(capitalize).join(', '), 28);
+		return (filters.genre as MovieGenre[]).map(genre => capitalize(getGenreLabel(genre, language))).join(', ');
 	};
 
 	const handleKeyPress = (event: React.KeyboardEvent<HTMLButtonElement>) => {

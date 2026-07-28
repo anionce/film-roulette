@@ -1,21 +1,30 @@
-import { filterMovies, getRandomValue, shuffleArray } from './AppHelper';
+import { filterAvailableMovies, filterMovies, getRandomStartPage, getRandomValue, shuffleArray } from './AppHelper';
 import { CompleteMovie } from '../models/MovieResponse';
 import { StreamingServices } from '../constants/streamingServices';
 import { FilterArguments } from '../constants/filters';
 
-const buildMovie = (id: number, flatratePlatforms: string[] = []): CompleteMovie =>
+const toAvailability = (providers: string[]) =>
+	providers.map(provider_name => ({
+		provider_name,
+		display_priority: 0,
+		logo_path: '',
+		provider_id: 0,
+	}));
+
+const buildMovie = (
+	id: number,
+	flatratePlatforms: string[] = [],
+	options: { rent?: string[]; buy?: string[] } = {}
+): CompleteMovie =>
 	({
 		id,
 		title: `Movie ${id}`,
 		streamingData: {
 			data: {
 				link: '',
-				flatrate: flatratePlatforms.map(provider_name => ({
-					provider_name,
-					display_priority: 0,
-					logo_path: '',
-					provider_id: 0,
-				})),
+				flatrate: toAvailability(flatratePlatforms),
+				rent: options.rent ? toAvailability(options.rent) : undefined,
+				buy: options.buy ? toAvailability(options.buy) : undefined,
 			},
 		},
 	} as unknown as CompleteMovie);
@@ -23,13 +32,29 @@ const buildMovie = (id: number, flatratePlatforms: string[] = []): CompleteMovie
 const baseFilters: FilterArguments = { genre: null, duration: null, streaming: null };
 
 describe('getRandomValue', () => {
-	it('returns a valid TMDB page number within the popular-results range', () => {
+	it('skips the most popular pages while staying within the results range', () => {
 		for (let i = 0; i < 50; i++) {
 			const value = getRandomValue();
 			expect(Number.isInteger(value)).toBe(true);
-			expect(value).toBeGreaterThanOrEqual(1);
+			expect(value).toBeGreaterThanOrEqual(5);
 			expect(value).toBeLessThanOrEqual(40);
 		}
+	});
+});
+
+describe('getRandomStartPage', () => {
+	it('skips the most popular pages when there are enough total pages', () => {
+		for (let i = 0; i < 50; i++) {
+			const value = getRandomStartPage(100);
+			expect(Number.isInteger(value)).toBe(true);
+			expect(value).toBeGreaterThanOrEqual(5);
+			expect(value).toBeLessThanOrEqual(40);
+		}
+	});
+
+	it('falls back to page 1 when there are too few pages to skip', () => {
+		expect(getRandomStartPage(3)).toBe(1);
+		expect(getRandomStartPage(1)).toBe(1);
 	});
 });
 
@@ -54,12 +79,23 @@ describe('shuffleArray', () => {
 });
 
 describe('filterMovies', () => {
-	it('returns all movies when there is no streaming filter', () => {
-		const movies = [buildMovie(1, ['Netflix']), buildMovie(2, [])];
+	it('excludes movies with no VOD availability even without a streaming filter', () => {
+		const movieWithFlatrate = buildMovie(1, ['Netflix']);
+		const movieWithoutAvailability = buildMovie(2, []);
 
-		const result = filterMovies(movies, baseFilters);
+		const result = filterMovies([movieWithFlatrate, movieWithoutAvailability], baseFilters);
 
-		expect(result).toEqual(movies);
+		expect(result).toEqual([movieWithFlatrate]);
+	});
+
+	it('keeps movies only available to rent or buy when there is no streaming filter', () => {
+		const movieToRent = buildMovie(1, [], { rent: ['Apple TV'] });
+		const movieToBuy = buildMovie(2, [], { buy: ['Google Play'] });
+		const movieWithoutAvailability = buildMovie(3, []);
+
+		const result = filterMovies([movieToRent, movieToBuy, movieWithoutAvailability], baseFilters);
+
+		expect(result).toEqual([movieToRent, movieToBuy]);
 	});
 
 	it('only keeps movies available on one of the selected streaming platforms', () => {
@@ -86,5 +122,16 @@ describe('filterMovies', () => {
 		});
 
 		expect(result).toEqual([movieOnNetflix, movieOnDisney]);
+	});
+});
+
+describe('filterAvailableMovies', () => {
+	it('drops movies with no flatrate, rent or buy availability', () => {
+		const availableMovie = buildMovie(1, ['Netflix']);
+		const unavailableMovie = buildMovie(2, []);
+
+		const result = filterAvailableMovies([availableMovie, unavailableMovie]);
+
+		expect(result).toEqual([availableMovie]);
 	});
 });

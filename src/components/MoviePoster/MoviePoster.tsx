@@ -71,7 +71,7 @@ export const MoviePoster = ({
 					<img
 						className='mobile-poster-img'
 						alt={currentMovie?.title}
-						style={{ width: '100%', background: 'transparent', display: isImageLoaded ? 'block' : 'none' }}
+						style={{ display: isImageLoaded ? 'block' : 'none' }}
 						src={`${MOVIE_POSTER_PATH}${currentMovie?.poster_path}`}
 						onLoad={() => setIsImageLoaded(true)}
 					/>
