@@ -14,14 +14,14 @@ const renderPlayButton = (filters: FilterArguments, onButtonClick = jest.fn()) =
 
 describe('PlayButton', () => {
 	it('renders disabled when genre or duration filters are missing', () => {
-		renderPlayButton({ genre: null, duration: null, streaming: null });
+		renderPlayButton({ genre: null, duration: null, streaming: null, era: null });
 
 		const button = screen.getByLabelText('Buscar película');
 		expect(button).toHaveAttribute('aria-disabled', 'true');
 	});
 
 	it('does not call onButtonClick when clicked while disabled', () => {
-		const { onButtonClick } = renderPlayButton({ genre: null, duration: null, streaming: null });
+		const { onButtonClick } = renderPlayButton({ genre: null, duration: null, streaming: null, era: null });
 
 		fireEvent.click(screen.getByLabelText('Buscar película'));
 
@@ -29,7 +29,7 @@ describe('PlayButton', () => {
 	});
 
 	it('renders enabled once both genre and duration filters are selected', () => {
-		renderPlayButton({ genre: [MovieGenre.Comedy], duration: MovieRuntime.Short, streaming: null });
+		renderPlayButton({ genre: [MovieGenre.Comedy], duration: MovieRuntime.Short, streaming: null, era: null });
 
 		const button = screen.getByLabelText('Buscar película');
 		expect(button).toHaveAttribute('aria-disabled', 'false');
@@ -40,6 +40,7 @@ describe('PlayButton', () => {
 			genre: [MovieGenre.Comedy],
 			duration: MovieRuntime.Short,
 			streaming: null,
+			era: null,
 		});
 
 		fireEvent.click(screen.getByLabelText('Buscar película'));

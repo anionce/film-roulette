@@ -14,6 +14,8 @@ export type MoviePosterProps = {
 	onPreviousButtonClick: () => void;
 	onEscButtonClick: () => void;
 	isDisabled: boolean;
+	isNextDisabled?: boolean;
+	hasNext?: boolean;
 };
 
 export const MoviePoster = ({
@@ -23,6 +25,8 @@ export const MoviePoster = ({
 	onPreviousButtonClick,
 	onEscButtonClick,
 	isDisabled,
+	isNextDisabled,
+	hasNext = true,
 }: MoviePosterProps) => {
 	const swipeHandlers = useSwipeable({
 		onSwiped: (eventData: any) => handleKeyPress(eventData),
@@ -32,7 +36,7 @@ export const MoviePoster = ({
 		const { dir } = event;
 		const { key } = event;
 
-		if (key === 'ArrowRight' || key === 'Right' || dir === 'Left') {
+		if ((key === 'ArrowRight' || key === 'Right' || dir === 'Left') && !isNextDisabled && hasNext) {
 			onButtonAction();
 		}
 
@@ -78,9 +82,13 @@ export const MoviePoster = ({
 				</a>
 				{isImageLoaded && <MovieRating currentMovie={currentMovie} />}
 			</div>
-			<button onClick={onButtonAction} className='button-movie-page'>
-				<SkipNextIcon />
-			</button>
+			{hasNext && (
+				<button
+					onClick={() => !isNextDisabled && onButtonAction()}
+					className={`button-movie-page ${isNextDisabled ? 'button-disabled' : ''}`}>
+					<SkipNextIcon />
+				</button>
+			)}
 		</div>
 	);
 };

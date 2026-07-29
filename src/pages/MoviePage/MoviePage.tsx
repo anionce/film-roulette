@@ -24,7 +24,10 @@ export type MoviePageProps = {
 	shouldShowNoResults: boolean;
 	noResultsMessage?: string;
 	isLoadingMovies: boolean;
+	isFetchingMore: boolean;
+	hasNextMovie: boolean;
 	shouldShowFewResults: boolean;
+	fewResultsCount: number;
 	shouldShowApiError: boolean;
 	onRetry: () => void;
 };
@@ -32,6 +35,8 @@ export type MoviePageProps = {
 export const MoviePage = ({
 	currentMovie,
 	isLoadingMovies,
+	isFetchingMore,
+	hasNextMovie,
 	streamingData,
 	dataIMDB,
 	tagline,
@@ -42,6 +47,7 @@ export const MoviePage = ({
 	shouldShowNoResults,
 	noResultsMessage,
 	shouldShowFewResults,
+	fewResultsCount,
 	shouldShowApiError,
 	onRetry,
 }: MoviePageProps) => {
@@ -82,6 +88,8 @@ export const MoviePage = ({
 					<div className='movie-visual'>
 						<MoviePoster
 							isDisabled={isDisabled}
+							isNextDisabled={isFetchingMore}
+							hasNext={hasNextMovie}
 							dataIMDB={dataIMDB}
 							onButtonAction={onButtonAction}
 							onPreviousButtonClick={onPreviousButtonClick}
@@ -104,7 +112,7 @@ export const MoviePage = ({
 					</div>
 				</div>
 			)}
-			{!shouldShowNoResults && shouldShowFewResults && <FewResults />}
+			{!shouldShowNoResults && shouldShowFewResults && <FewResults count={fewResultsCount} />}
 		</div>
 	);
 };

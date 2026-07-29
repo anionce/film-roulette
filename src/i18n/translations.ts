@@ -5,8 +5,10 @@ export type Translations = {
 	labelGenre: string;
 	labelDuration: string;
 	labelStreaming: string;
+	labelEra: string;
 	genreModalTitle: (max: number) => string;
 	durationModalTitle: string;
+	eraModalTitle: string;
 	genreMaxHint: (max: number) => string;
 	streamingModalTitle: string;
 	confirmAriaLabel: string;
@@ -22,7 +24,7 @@ export type Translations = {
 	goHomeButton: string;
 	exitAriaLabel: string;
 	closeAriaLabel: string;
-	fewResultsText: string;
+	fewResultsText: (count: number) => string;
 	loaderText: string;
 	languageToggleAriaLabel: string;
 	readMoreLabel: string;
@@ -35,8 +37,10 @@ export const translations: Record<Language, Translations> = {
 		labelGenre: 'Género',
 		labelDuration: 'Duración',
 		labelStreaming: 'Plataformas',
+		labelEra: 'Época',
 		genreModalTitle: max => `Elige hasta ${max} géneros que te apetezcan hoy`,
 		durationModalTitle: '¿Cuánto tiempo tienes?',
+		eraModalTitle: '¿De qué época?',
 		genreMaxHint: max => `Ya has elegido ${max} — toca uno para cambiarlo`,
 		streamingModalTitle: 'Selecciona tus plataformas:',
 		confirmAriaLabel: 'Aceptar selección',
@@ -52,7 +56,7 @@ export const translations: Record<Language, Translations> = {
 		goHomeButton: 'Volver a elegir',
 		exitAriaLabel: 'Volver al inicio',
 		closeAriaLabel: 'Cerrar',
-		fewResultsText: 'Pocos resultados*',
+		fewResultsText: count => `Solo hemos encontrado ${count} películas con estos filtros`,
 		loaderText: 'Buscando algo buenísimo…',
 		languageToggleAriaLabel: 'Cambiar idioma',
 		readMoreLabel: 'Ver más',
@@ -63,8 +67,10 @@ export const translations: Record<Language, Translations> = {
 		labelGenre: 'Genre',
 		labelDuration: 'Duration',
 		labelStreaming: 'Platforms',
+		labelEra: 'Era',
 		genreModalTitle: max => `Pick up to ${max} genres you're in the mood for`,
 		durationModalTitle: 'How much time do you have?',
+		eraModalTitle: 'Which era?',
 		genreMaxHint: max => `You already picked ${max} — tap one to swap it`,
 		streamingModalTitle: 'Select your platforms:',
 		confirmAriaLabel: 'Confirm selection',
@@ -80,7 +86,7 @@ export const translations: Record<Language, Translations> = {
 		goHomeButton: 'Back to filters',
 		exitAriaLabel: 'Back home',
 		closeAriaLabel: 'Close',
-		fewResultsText: 'Few results*',
+		fewResultsText: count => `We only found ${count} movies with these filters`,
 		loaderText: 'Looking for something great…',
 		languageToggleAriaLabel: 'Switch language',
 		readMoreLabel: 'Read more',

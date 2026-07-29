@@ -8,6 +8,7 @@ import { FiltersModal } from '../../components/FiltersModal/FiltersModal';
 import { MAX_GENRES, MovieGenre } from '../../constants/genre';
 import { MovieRuntime } from '../../constants/runtime';
 import { StreamingServices } from '../../constants/streamingServices';
+import { MovieEra } from '../../constants/era';
 import { Introduction } from '../../components/Introduction/Introduction';
 import { RandomButton } from '../../components/RandomButton/RandomButton';
 import { LanguageToggle } from '../../components/LanguageToggle/LanguageToggle';
@@ -23,6 +24,7 @@ export const Home = ({ filters, onButtonClick, setFilters }: HomeProps) => {
 		[FilterType.Genre]: false,
 		[FilterType.Duration]: false,
 		[FilterType.Streaming]: false,
+		[FilterType.Era]: false,
 	});
 
 	const openModal = (type: FilterType): void => {
@@ -58,6 +60,7 @@ export const Home = ({ filters, onButtonClick, setFilters }: HomeProps) => {
 			[FilterType.Genre]: onSelectGenre,
 			[FilterType.Duration]: onDurationChange,
 			[FilterType.Streaming]: selectedServicesOnChange,
+			[FilterType.Era]: onEraChange,
 		};
 
 		return options[type];
@@ -66,6 +69,11 @@ export const Home = ({ filters, onButtonClick, setFilters }: HomeProps) => {
 	const onDurationChange = (event: ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>): void => {
 		const value = event.currentTarget.getAttribute('data-value');
 		setFilters((prev: FilterArguments) => ({ ...prev, duration: value as MovieRuntime }));
+	};
+
+	const onEraChange = (event: React.MouseEvent<HTMLButtonElement>): void => {
+		const value = event.currentTarget.getAttribute('data-value');
+		setFilters((prev: FilterArguments) => ({ ...prev, era: value as MovieEra }));
 	};
 
 	const selectedServicesOnChange = (event: ChangeEvent<HTMLInputElement>, newServices: StreamingServices[]): void => {
@@ -86,7 +94,14 @@ export const Home = ({ filters, onButtonClick, setFilters }: HomeProps) => {
 				<RandomButton filters={filters} onButtonClick={onButtonClick} />
 			</div>
 			{filterTypes.map(type => {
-				const selectedValue = type === FilterType.Genre ? filters.genre : type === FilterType.Duration ? filters.duration : null;
+				const selectedValue =
+					type === FilterType.Genre
+						? filters.genre
+						: type === FilterType.Duration
+						? filters.duration
+						: type === FilterType.Era
+						? filters.era
+						: null;
 
 				return (
 					<FiltersModal

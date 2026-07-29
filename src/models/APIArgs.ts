@@ -4,6 +4,8 @@ export type GetMovieArgs = {
 	genres?: number[] | null;
 	streamingServices?: string | null;
 	language?: string;
+	releaseDateGte?: string;
+	releaseDateLte?: string;
 };
 
 export type DetailMovieArgs = {

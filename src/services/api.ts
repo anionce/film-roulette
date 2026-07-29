@@ -15,10 +15,13 @@ export const moviesApi = createApi({
 	}),
 	endpoints: builder => ({
 		getMovies: builder.query<APIMovieResponse, GetMovieArgs>({
-			query: ({ runtime, genres, page, streamingServices, language }) => {
+			query: ({ runtime, genres, page, streamingServices, language, releaseDateGte, releaseDateLte }) => {
 				const streamingServicesQuery = streamingServices ? `&watch_region=ES` : '';
+				const releaseDateQuery = `${releaseDateGte ? `&primary_release_date.gte=${releaseDateGte}` : ''}${
+					releaseDateLte ? `&primary_release_date.lte=${releaseDateLte}` : ''
+				}`;
 
-				return `${DISCOVER}/${TAG}?api_key=${API_KEY}&language=${language ?? LANGUAGE}&include_adult=false&with_runtime.lte=${runtime}&with_genres=${genres}&vote_count.gte=${POPULARITY_VALUE}&vote_average.gte=${MINIMUM_VOTE}&sort_by=popularity.desc${streamingServicesQuery}&with_watch_providers=${streamingServices}&page=${page}`;
+				return `${DISCOVER}/${TAG}?api_key=${API_KEY}&language=${language ?? LANGUAGE}&include_adult=false&with_runtime.lte=${runtime}&with_genres=${genres}&vote_count.gte=${POPULARITY_VALUE}&vote_average.gte=${MINIMUM_VOTE}&sort_by=popularity.desc${streamingServicesQuery}&with_watch_providers=${streamingServices}${releaseDateQuery}&page=${page}`;
 			},
 		}),
 		getRandomMovies: builder.query<APIMovieResponse, GetMovieArgs>({

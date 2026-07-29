@@ -29,7 +29,7 @@ const buildMovie = (
 		},
 	} as unknown as CompleteMovie);
 
-const baseFilters: FilterArguments = { genre: null, duration: null, streaming: null };
+const baseFilters: FilterArguments = { genre: null, duration: null, streaming: null, era: null };
 
 describe('getRandomValue', () => {
 	it('skips the most popular pages while staying within the results range', () => {
@@ -43,12 +43,20 @@ describe('getRandomValue', () => {
 });
 
 describe('getRandomStartPage', () => {
-	it('skips the most popular pages when there are enough total pages', () => {
+	it('skips the most popular pages while staying within the real total pages', () => {
 		for (let i = 0; i < 50; i++) {
 			const value = getRandomStartPage(100);
 			expect(Number.isInteger(value)).toBe(true);
 			expect(value).toBeGreaterThanOrEqual(5);
-			expect(value).toBeLessThanOrEqual(40);
+			expect(value).toBeLessThanOrEqual(100);
+		}
+	});
+
+	it('can reach pages beyond the random-button page limit for large catalogs', () => {
+		for (let i = 0; i < 50; i++) {
+			const value = getRandomStartPage(300);
+			expect(value).toBeGreaterThanOrEqual(5);
+			expect(value).toBeLessThanOrEqual(300);
 		}
 	});
 

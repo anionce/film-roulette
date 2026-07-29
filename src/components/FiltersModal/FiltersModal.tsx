@@ -30,7 +30,8 @@ export const FiltersModal = ({
 	selectedValue,
 }: FiltersModalProps) => {
 	const { t } = useLanguage();
-	const shouldShowDefault = filterType === FilterType.Duration || filterType === FilterType.Genre;
+	const shouldShowDefault =
+		filterType === FilterType.Duration || filterType === FilterType.Genre || filterType === FilterType.Era;
 	const isConfirmDisabled = filterType === FilterType.Streaming && !!isButtonDisabled;
 
 	const onConfirmClick = () => {
