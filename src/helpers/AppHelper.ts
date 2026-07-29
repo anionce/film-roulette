@@ -9,13 +9,11 @@ export const getRandomValue = () => {
 };
 
 export const getRandomStartPage = (totalPages: number): number => {
-	const upperBound = Math.min(totalPages, RANDOM_PAGE_LIMIT);
-
-	if (upperBound <= MIN_RANDOM_PAGE) {
+	if (totalPages <= MIN_RANDOM_PAGE) {
 		return 1;
 	}
 
-	return Math.floor(Math.random() * (upperBound - MIN_RANDOM_PAGE + 1)) + MIN_RANDOM_PAGE;
+	return Math.floor(Math.random() * (totalPages - MIN_RANDOM_PAGE + 1)) + MIN_RANDOM_PAGE;
 };
 
 export const shuffleArray = (array: CompleteMovie[]) => {

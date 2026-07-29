@@ -12,7 +12,7 @@ export type RandomButtonProps = {
 
 export const RandomButton = ({ filters, onButtonClick }: RandomButtonProps) => {
 	const { t } = useLanguage();
-	const isDisabled = !!(filters.genre?.length && filters.duration && filters.streaming?.length);
+	const isDisabled = !!(filters.genre?.length && filters.duration && filters.streaming?.length && filters.era);
 
 	const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
 		if (event.key === 'Enter' && !isDisabled) {

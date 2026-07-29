@@ -14,13 +14,16 @@ export type DefaultModalContentProps = {
 export const DefaultModalContent = ({ onSelect, filterType, selectedValue }: DefaultModalContentProps) => {
 	const { t, language } = useLanguage();
 	const isGenre = filterType === FilterType.Genre;
+	const isEra = filterType === FilterType.Era;
 
 	const selectedValues = Array.isArray(selectedValue) ? selectedValue : selectedValue ? [selectedValue] : [];
 	const isMaxReached = isGenre && selectedValues.length >= MAX_GENRES;
 
+	const modalTitle = isGenre ? t.genreModalTitle(MAX_GENRES) : isEra ? t.eraModalTitle : t.durationModalTitle;
+
 	return (
 		<div className='modal-content-container'>
-			<p className='modal-content-title'>{isGenre ? t.genreModalTitle(MAX_GENRES) : t.durationModalTitle}</p>
+			<p className='modal-content-title'>{modalTitle}</p>
 			{isMaxReached && <p className='modal-content-hint'>{t.genreMaxHint(MAX_GENRES)}</p>}
 			<div className={`genre-grid ${isGenre ? 'genre-grid-plain' : ''}`}>
 				{getOptionsForSelector(filterType, language).map(({ text, value, emoji }) => {

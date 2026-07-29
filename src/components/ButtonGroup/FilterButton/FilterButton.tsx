@@ -4,6 +4,7 @@ import React from 'react';
 import { StreamingServices, STREAMING_LOGO } from '../../../constants/streamingServices';
 import { MovieRuntime, RUNTIME_EMOJI } from '../../../constants/runtime';
 import { MovieGenre, getGenreLabel } from '../../../constants/genre';
+import { MovieEra, ERA_EMOJI, getEraLabel } from '../../../constants/era';
 import { useLanguage } from '../../../i18n/LanguageContext';
 import '../ButtonGroup.scss';
 
@@ -17,6 +18,7 @@ const DEFAULT_EMOJI: Record<FilterType, string> = {
 	[FilterType.Genre]: '😊',
 	[FilterType.Duration]: '⏱️',
 	[FilterType.Streaming]: '📺',
+	[FilterType.Era]: '🕰️',
 };
 
 const capitalize = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1);
@@ -28,14 +30,22 @@ export const FilterButton = ({ openModal, filters, filterType }: FilterButtonPro
 		[FilterType.Genre]: t.labelGenre,
 		[FilterType.Duration]: t.labelDuration,
 		[FilterType.Streaming]: t.labelStreaming,
+		[FilterType.Era]: t.labelEra,
 	};
 
 	const isFilterSelected: boolean =
-		filterType === FilterType.Duration ? !!filters.duration : !!(filters[filterType] as unknown[])?.length;
+		filterType === FilterType.Duration
+			? !!filters.duration
+			: filterType === FilterType.Era
+			? !!filters.era
+			: !!(filters[filterType] as unknown[])?.length;
 
 	const getSelectedEmoji = (): string | undefined => {
 		if (filterType === FilterType.Duration) {
 			return RUNTIME_EMOJI[filters.duration as MovieRuntime] ?? DEFAULT_EMOJI[filterType];
+		}
+		if (filterType === FilterType.Era) {
+			return ERA_EMOJI[filters.era as MovieEra] ?? DEFAULT_EMOJI[filterType];
 		}
 		return DEFAULT_EMOJI[filterType];
 	};
@@ -43,6 +53,9 @@ export const FilterButton = ({ openModal, filters, filterType }: FilterButtonPro
 	const getSummaryText = (): string => {
 		if (filterType === FilterType.Duration) {
 			return capitalize(filters.duration as MovieRuntime);
+		}
+		if (filterType === FilterType.Era) {
+			return capitalize(getEraLabel(filters.era as MovieEra, language));
 		}
 		return (filters.genre as MovieGenre[]).map(genre => capitalize(getGenreLabel(genre, language))).join(', ');
 	};

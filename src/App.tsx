@@ -13,6 +13,7 @@ import { CompleteMovie, CountryResults, Movie, MovieDetail } from './models/Movi
 import { mapValueToGenre } from './constants/genre';
 import { MovieRuntime, mapValueToMovieRuntime } from './constants/runtime';
 import { mapValueToStreamingService } from './constants/streamingServices';
+import { MovieEra, mapValueToEraRange } from './constants/era';
 import { Home } from './pages/Home/Home';
 import { FilterArguments } from './constants/filters';
 import {
@@ -27,12 +28,16 @@ import { useLanguage } from './i18n/LanguageContext';
 
 const MOVIES_BATCH_SIZE = 10;
 const PAGE_WINDOW_SIZE = 4;
+const MIN_RESULTS_TARGET = 100;
+const MAX_FETCH_WINDOWS = 6;
+export const FEW_RESULTS_THRESHOLD = 30;
 
 export const App = () => {
 	const [filters, setFilters] = useState<FilterArguments>({
 		genre: null,
 		duration: null,
 		streaming: null,
+		era: null,
 	});
 	const [triggerMovies, { data: dataMovies, isLoading: isLoadingMovies, isError: isErrorMovies }] =
 		useLazyGetMoviesQuery();
@@ -50,6 +55,9 @@ export const App = () => {
 	const [noResultsMessage, setNoResultsMessage] = useState<string | undefined>(undefined);
 	const [shouldUseRandomQuery, setShouldUseRandomQuery] = useState<boolean | undefined>(undefined);
 	const nextPageCursorRef = useRef(1);
+	const isFetchingMoreRef = useRef(false);
+	const [isFetchingMore, setIsFetchingMore] = useState(false);
+	const [isCatalogExhausted, setIsCatalogExhausted] = useState(false);
 
 	useEffect(() => {
 		if (!totalPages && dataMovies) {
@@ -67,7 +75,13 @@ export const App = () => {
 	let currentMovie: CompleteMovie | undefined = movieResultsArray[currentMovieIndex];
 
 	const isNotLoading: boolean = !isLoadingMovies && !isLoadingRandomMovies;
-	const shouldShowFewResults: boolean = !!movieResultsArray.length && totalPages === 1;
+	const shouldShowFewResults: boolean =
+		!!movieResultsArray.length &&
+		!shouldUseRandomQuery &&
+		isCatalogExhausted &&
+		movieResultsArray.length < FEW_RESULTS_THRESHOLD;
+	const hasNextMovie: boolean =
+		shouldUseRandomQuery === true || !isCatalogExhausted || currentMovieIndex < movieResultsArray.length - 1;
 	const shouldShowApiError: boolean = (isErrorMovies || isErrorRandomMovies) && !movieResultsArray.length;
 	const shouldShowLoading: boolean =
 		(isNotLoading || !dataMovies || !movieResultsArray.length) && !shouldShowNoResults && !shouldShowApiError;
@@ -102,6 +116,8 @@ export const App = () => {
 				movieDetails.push(...randomMovieDetailsPromise);
 			}
 		} else {
+			const eraRange = mapValueToEraRange(filters.era as MovieEra);
+
 			for (let page = currentPage; page <= pagesToFetch; page++) {
 				const { data } = await triggerMovies({
 					page,
@@ -109,6 +125,8 @@ export const App = () => {
 					genres: mapValueToGenre(filters.genre),
 					streamingServices: mapValueToStreamingService(filters.streaming),
 					language: tmdbLanguage,
+					releaseDateGte: eraRange?.gte,
+					releaseDateLte: eraRange?.lte,
 				});
 
 				const movieDetailsPromises = data?.results.slice(0, MOVIES_BATCH_SIZE).map(async (movie: Movie) => {
@@ -137,16 +155,27 @@ export const App = () => {
 
 	const curateMovieData = async () => {
 		if (shouldUseRandomQuery) {
-			const randomValue = getRandomValue();
-			const allRandomMovieDetails = await getDetailsForMovies(randomValue, randomValue);
-
-			const shuffledDetails = shuffleArray(filterAvailableMovies(allRandomMovieDetails));
-
-			if (shuffledDetails.length) {
-				setMovieResultsArray(shuffledDetails);
-			} else {
-				resetValues(true);
+			if (isFetchingMoreRef.current) {
 				return;
+			}
+			isFetchingMoreRef.current = true;
+			setIsFetchingMore(true);
+
+			try {
+				const randomValue = getRandomValue();
+				const allRandomMovieDetails = await getDetailsForMovies(randomValue, randomValue);
+
+				const shuffledDetails = shuffleArray(filterAvailableMovies(allRandomMovieDetails));
+
+				if (shuffledDetails.length) {
+					setMovieResultsArray(shuffledDetails);
+				} else {
+					resetValues(true);
+					return;
+				}
+			} finally {
+				isFetchingMoreRef.current = false;
+				setIsFetchingMore(false);
 			}
 		}
 
@@ -155,14 +184,30 @@ export const App = () => {
 			setTotalPages(total_pages);
 
 			const startPage = getRandomStartPage(total_pages);
-			const endPage = Math.min(startPage + PAGE_WINDOW_SIZE - 1, total_pages);
+			let highestPageFetched = Math.min(startPage + PAGE_WINDOW_SIZE - 1, total_pages);
 
-			const movieDetails = await getDetailsForMovies(startPage, endPage);
+			let allMovieDetails = await getDetailsForMovies(startPage, highestPageFetched);
+			let totalFilteredMovies = filterMovies(shuffleArray(allMovieDetails), filters);
+
+			let windowsFetched = 1;
+			while (
+				totalFilteredMovies.length < MIN_RESULTS_TARGET &&
+				highestPageFetched < total_pages &&
+				windowsFetched < MAX_FETCH_WINDOWS
+			) {
+				const nextStart = highestPageFetched + 1;
+				const nextEnd = Math.min(nextStart + PAGE_WINDOW_SIZE - 1, total_pages);
+				const moreMovieDetails = await getDetailsForMovies(nextStart, nextEnd);
+
+				allMovieDetails = [...allMovieDetails, ...moreMovieDetails];
+				totalFilteredMovies = filterMovies(shuffleArray(allMovieDetails), filters);
+				highestPageFetched = nextEnd;
+				windowsFetched += 1;
+			}
+
 			nextPageCursorRef.current =
-				endPage >= total_pages ? Math.min(MIN_RANDOM_PAGE, total_pages) : endPage + 1;
-
-			const shuffledDetails = shuffleArray(movieDetails);
-			const totalFilteredMovies = filterMovies(shuffledDetails, filters);
+				highestPageFetched >= total_pages ? Math.min(MIN_RANDOM_PAGE, total_pages) : highestPageFetched + 1;
+			setIsCatalogExhausted(highestPageFetched >= total_pages);
 
 			if (totalFilteredMovies.length) {
 				setMovieResultsArray(totalFilteredMovies);
@@ -177,24 +222,36 @@ export const App = () => {
 	};
 
 	const fetchMoreFilteredMovies = async () => {
-		if (!totalPages) {
-			setCurrentMovieIndex(0);
+		if (isFetchingMoreRef.current) {
 			return;
 		}
+		isFetchingMoreRef.current = true;
+		setIsFetchingMore(true);
 
-		const startPage = nextPageCursorRef.current;
-		const endPage = Math.min(startPage + PAGE_WINDOW_SIZE - 1, totalPages);
-		const additionalMovieDetails = await getDetailsForMovies(startPage, endPage);
-		nextPageCursorRef.current = endPage >= totalPages ? Math.min(MIN_RANDOM_PAGE, totalPages) : endPage + 1;
+		try {
+			if (!totalPages) {
+				setCurrentMovieIndex(0);
+				return;
+			}
 
-		const newFilteredMovies = filterMovies(additionalMovieDetails, filters);
+			const startPage = nextPageCursorRef.current;
+			const endPage = Math.min(startPage + PAGE_WINDOW_SIZE - 1, totalPages);
+			const additionalMovieDetails = await getDetailsForMovies(startPage, endPage);
+			nextPageCursorRef.current = endPage >= totalPages ? Math.min(MIN_RANDOM_PAGE, totalPages) : endPage + 1;
+			setIsCatalogExhausted(endPage >= totalPages);
 
-		if (newFilteredMovies.length) {
-			const startIndex = movieResultsArray.length;
-			setMovieResultsArray(prev => [...prev, ...shuffleArray(newFilteredMovies)]);
-			setCurrentMovieIndex(startIndex);
-		} else {
-			setCurrentMovieIndex(0);
+			const newFilteredMovies = filterMovies(additionalMovieDetails, filters);
+
+			if (newFilteredMovies.length) {
+				const startIndex = movieResultsArray.length;
+				setMovieResultsArray(prev => [...prev, ...shuffleArray(newFilteredMovies)]);
+				setCurrentMovieIndex(startIndex);
+			} else {
+				setCurrentMovieIndex(0);
+			}
+		} finally {
+			isFetchingMoreRef.current = false;
+			setIsFetchingMore(false);
 		}
 	};
 
@@ -212,12 +269,16 @@ export const App = () => {
 				curateMovieData();
 				setCurrentMovieIndex(prev => prev + 1);
 			} else {
+				const eraRange = mapValueToEraRange(filters.era as MovieEra);
+
 				triggerMovies({
 					page: 1,
 					runtime: mapValueToMovieRuntime(filters.duration as MovieRuntime),
 					genres: mapValueToGenre(filters.genre),
 					streamingServices: mapValueToStreamingService(filters.streaming),
 					language: tmdbLanguage,
+					releaseDateGte: eraRange?.gte,
+					releaseDateLte: eraRange?.lte,
 				});
 				setCurrentMovieIndex(prev => prev + 1);
 			}
@@ -226,7 +287,7 @@ export const App = () => {
 				setMovieResultsArray([]);
 				setCurrentMovieIndex(0);
 				curateMovieData();
-			} else {
+			} else if (!isCatalogExhausted) {
 				fetchMoreFilteredMovies();
 			}
 		} else if (movieResultsArray.length) {
@@ -245,11 +306,15 @@ export const App = () => {
 			genre: null,
 			duration: null,
 			streaming: null,
+			era: null,
 		});
 		setMovieResultsArray([]);
 		setTotalPages(undefined);
 		setCurrentMovieIndex(-1);
 		nextPageCursorRef.current = 1;
+		isFetchingMoreRef.current = false;
+		setIsFetchingMore(false);
+		setIsCatalogExhausted(false);
 		setShouldShowNoResults(noResults ?? false);
 		if (!noResults) {
 			setNoResultsMessage(undefined);
@@ -283,7 +348,10 @@ export const App = () => {
 									shouldShowNoResults={shouldShowNoResults}
 									noResultsMessage={noResultsMessage}
 									isLoadingMovies={shouldShowLoading}
+									isFetchingMore={isFetchingMore}
+									hasNextMovie={hasNextMovie}
 									shouldShowFewResults={shouldShowFewResults}
+									fewResultsCount={movieResultsArray.length}
 									shouldShowApiError={shouldShowApiError}
 									onRetry={onButtonAction}
 								/>
