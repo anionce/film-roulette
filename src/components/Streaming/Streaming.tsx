@@ -8,11 +8,14 @@ export type StreamingProps = {
 };
 
 export const Streaming = ({ streamingData }: StreamingProps) => {
-	const { flatrate: streamingInfo, link: justWatchLink } = streamingData || {};
+	const { flatrate, free, ads, link: justWatchLink } = streamingData || {};
+	const streamingInfo = [...(flatrate ?? []), ...(free ?? []), ...(ads ?? [])].filter(
+		(info, index, all) => all.findIndex(other => other.provider_id === info.provider_id) === index
+	);
 
 	return (
 		<div className='streaming-container'>
-			{streamingInfo?.map((info: AvailabilityInfo) => {
+			{streamingInfo.map((info: AvailabilityInfo) => {
 				return (
 					<a
 						key={info.provider_id}

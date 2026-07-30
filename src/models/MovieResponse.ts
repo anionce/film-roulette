@@ -72,6 +72,8 @@ export type CountryResults = {
 	rent?: AvailabilityInfo[];
 	buy?: AvailabilityInfo[];
 	flatrate?: AvailabilityInfo[];
+	free?: AvailabilityInfo[];
+	ads?: AvailabilityInfo[];
 	link: string;
 };
 

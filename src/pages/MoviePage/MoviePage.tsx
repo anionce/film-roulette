@@ -103,7 +103,7 @@ export const MoviePage = ({
 							{!!tagline && <p className='movie-tagline'>{tagline}</p>}
 						</div>
 						<MoviePlot currentMovie={currentMovie} dataIMDB={dataIMDB} />
-						{!!streamingData?.flatrate?.length && (
+						{!!(streamingData?.flatrate?.length || streamingData?.free?.length || streamingData?.ads?.length) && (
 							<div className='movie-streaming'>
 								<p className='movie-streaming-label'>{t.availableOnLabel}</p>
 								<Streaming streamingData={streamingData} />
