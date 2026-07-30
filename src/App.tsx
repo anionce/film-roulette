@@ -11,16 +11,15 @@ import {
 } from './services/api';
 import { CompleteMovie, CountryResults, Movie, MovieDetail } from './models/MovieResponse';
 import { mapValueToGenre } from './constants/genre';
-import { MovieRuntime, mapValueToMovieRuntime } from './constants/runtime';
+import { mapValueToMovieRuntime } from './constants/runtime';
 import { mapValueToStreamingService } from './constants/streamingServices';
 import { MovieEra, mapValueToEraRange } from './constants/era';
 import { Home } from './pages/Home/Home';
 import { FilterArguments } from './constants/filters';
 import {
-	MIN_RANDOM_PAGE,
 	filterAvailableMovies,
 	filterMovies,
-	getRandomStartPage,
+	getSearchStartPage,
 	getRandomValue,
 	shuffleArray,
 } from './helpers/AppHelper';
@@ -55,6 +54,7 @@ export const App = () => {
 	const [noResultsMessage, setNoResultsMessage] = useState<string | undefined>(undefined);
 	const [shouldUseRandomQuery, setShouldUseRandomQuery] = useState<boolean | undefined>(undefined);
 	const nextPageCursorRef = useRef(1);
+	const remainingPagesRef = useRef(0);
 	const isFetchingMoreRef = useRef(false);
 	const [isFetchingMore, setIsFetchingMore] = useState(false);
 	const [isCatalogExhausted, setIsCatalogExhausted] = useState(false);
@@ -121,7 +121,7 @@ export const App = () => {
 			for (let page = currentPage; page <= pagesToFetch; page++) {
 				const { data } = await triggerMovies({
 					page,
-					runtime: mapValueToMovieRuntime(filters.duration as MovieRuntime),
+					runtime: mapValueToMovieRuntime(filters.duration),
 					genres: mapValueToGenre(filters.genre),
 					streamingServices: mapValueToStreamingService(filters.streaming),
 					language: tmdbLanguage,
@@ -183,31 +183,29 @@ export const App = () => {
 			const { total_pages } = dataMovies;
 			setTotalPages(total_pages);
 
-			const startPage = getRandomStartPage(total_pages);
-			let highestPageFetched = Math.min(startPage + PAGE_WINDOW_SIZE - 1, total_pages);
+			let cursor = getSearchStartPage(total_pages);
+			let remaining = total_pages;
+			let allMovieDetails: CompleteMovie[] = [];
+			let totalFilteredMovies: CompleteMovie[] = [];
+			let windowsFetched = 0;
 
-			let allMovieDetails = await getDetailsForMovies(startPage, highestPageFetched);
-			let totalFilteredMovies = filterMovies(shuffleArray(allMovieDetails), filters);
+			while (totalFilteredMovies.length < MIN_RESULTS_TARGET && windowsFetched < MAX_FETCH_WINDOWS && remaining > 0) {
+				const pagesThisWindow = Math.min(PAGE_WINDOW_SIZE, remaining);
+				const endPage = Math.min(cursor + pagesThisWindow - 1, total_pages);
+				const windowDetails = await getDetailsForMovies(cursor, endPage);
 
-			let windowsFetched = 1;
-			while (
-				totalFilteredMovies.length < MIN_RESULTS_TARGET &&
-				highestPageFetched < total_pages &&
-				windowsFetched < MAX_FETCH_WINDOWS
-			) {
-				const nextStart = highestPageFetched + 1;
-				const nextEnd = Math.min(nextStart + PAGE_WINDOW_SIZE - 1, total_pages);
-				const moreMovieDetails = await getDetailsForMovies(nextStart, nextEnd);
-
-				allMovieDetails = [...allMovieDetails, ...moreMovieDetails];
+				allMovieDetails = [...allMovieDetails, ...windowDetails];
 				totalFilteredMovies = filterMovies(shuffleArray(allMovieDetails), filters);
-				highestPageFetched = nextEnd;
+
+				const fetchedNow = endPage - cursor + 1;
+				remaining -= fetchedNow;
+				cursor = endPage >= total_pages && remaining > 0 ? 1 : endPage + 1;
 				windowsFetched += 1;
 			}
 
-			nextPageCursorRef.current =
-				highestPageFetched >= total_pages ? Math.min(MIN_RANDOM_PAGE, total_pages) : highestPageFetched + 1;
-			setIsCatalogExhausted(highestPageFetched >= total_pages);
+			nextPageCursorRef.current = cursor;
+			remainingPagesRef.current = remaining;
+			setIsCatalogExhausted(remaining <= 0);
 
 			if (totalFilteredMovies.length) {
 				setMovieResultsArray(totalFilteredMovies);
@@ -229,16 +227,21 @@ export const App = () => {
 		setIsFetchingMore(true);
 
 		try {
-			if (!totalPages) {
+			if (!totalPages || remainingPagesRef.current <= 0) {
 				setCurrentMovieIndex(0);
 				return;
 			}
 
-			const startPage = nextPageCursorRef.current;
-			const endPage = Math.min(startPage + PAGE_WINDOW_SIZE - 1, totalPages);
-			const additionalMovieDetails = await getDetailsForMovies(startPage, endPage);
-			nextPageCursorRef.current = endPage >= totalPages ? Math.min(MIN_RANDOM_PAGE, totalPages) : endPage + 1;
-			setIsCatalogExhausted(endPage >= totalPages);
+			const cursor = nextPageCursorRef.current;
+			const pagesThisWindow = Math.min(PAGE_WINDOW_SIZE, remainingPagesRef.current);
+			const endPage = Math.min(cursor + pagesThisWindow - 1, totalPages);
+			const additionalMovieDetails = await getDetailsForMovies(cursor, endPage);
+
+			const fetchedNow = endPage - cursor + 1;
+			const remaining = remainingPagesRef.current - fetchedNow;
+			nextPageCursorRef.current = endPage >= totalPages && remaining > 0 ? 1 : endPage + 1;
+			remainingPagesRef.current = remaining;
+			setIsCatalogExhausted(remaining <= 0);
 
 			const newFilteredMovies = filterMovies(additionalMovieDetails, filters);
 
@@ -273,7 +276,7 @@ export const App = () => {
 
 				triggerMovies({
 					page: 1,
-					runtime: mapValueToMovieRuntime(filters.duration as MovieRuntime),
+					runtime: mapValueToMovieRuntime(filters.duration),
 					genres: mapValueToGenre(filters.genre),
 					streamingServices: mapValueToStreamingService(filters.streaming),
 					language: tmdbLanguage,
@@ -312,6 +315,7 @@ export const App = () => {
 		setTotalPages(undefined);
 		setCurrentMovieIndex(-1);
 		nextPageCursorRef.current = 1;
+		remainingPagesRef.current = 0;
 		isFetchingMoreRef.current = false;
 		setIsFetchingMore(false);
 		setIsCatalogExhausted(false);

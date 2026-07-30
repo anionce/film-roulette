@@ -1,7 +1,7 @@
 import { SelectOptions } from './selector';
 
-export const mapValueToMovieRuntime = (value: MovieRuntime): number => {
-	return RUNTIME_LENGTH[value];
+export const mapValueToMovieRuntime = (value: MovieRuntime | null): number | undefined => {
+	return value ? RUNTIME_LENGTH[value] : undefined;
 };
 
 export enum MovieRuntime {

@@ -12,7 +12,7 @@ export type PlayButtonProps = {
 
 export const PlayButton = ({ filters, onButtonClick }: PlayButtonProps) => {
 	const { t } = useLanguage();
-	const isDisabled = !filters.duration || !filters.genre?.length;
+	const isDisabled = !filters.genre?.length;
 
 	const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
 		if (event.key === 'Enter' && !isDisabled) {

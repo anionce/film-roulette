@@ -1,6 +1,18 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { APIMovieResponse, CountryCodes, CountryResults, MovieDetail, StreamingDetail } from '../models/MovieResponse';
-import { API_KEY, BASE_URL, DISCOVER, LANGUAGE, MINIMUM_VOTE, POPULARITY_VALUE, TAG, TOKEN } from './endpoints';
+import {
+	API_KEY,
+	BASE_URL,
+	DISCOVER,
+	LANGUAGE,
+	MINIMUM_VOTE,
+	PLUTO_TV_MINIMUM_VOTE,
+	PLUTO_TV_POPULARITY_VALUE,
+	PLUTO_TV_PROVIDER_ID,
+	POPULARITY_VALUE,
+	TAG,
+	TOKEN,
+} from './endpoints';
 import { DetailMovieArgs, GetMovieArgs } from '../models/APIArgs';
 
 export const moviesApi = createApi({
@@ -20,8 +32,12 @@ export const moviesApi = createApi({
 				const releaseDateQuery = `${releaseDateGte ? `&primary_release_date.gte=${releaseDateGte}` : ''}${
 					releaseDateLte ? `&primary_release_date.lte=${releaseDateLte}` : ''
 				}`;
+				const runtimeQuery = runtime ? `&with_runtime.lte=${runtime}` : '';
+				const isPlutoTvOnly = streamingServices === PLUTO_TV_PROVIDER_ID;
+				const voteCountThreshold = isPlutoTvOnly ? PLUTO_TV_POPULARITY_VALUE : POPULARITY_VALUE;
+				const voteAverageThreshold = isPlutoTvOnly ? PLUTO_TV_MINIMUM_VOTE : MINIMUM_VOTE;
 
-				return `${DISCOVER}/${TAG}?api_key=${API_KEY}&language=${language ?? LANGUAGE}&include_adult=false&with_runtime.lte=${runtime}&with_genres=${genres}&vote_count.gte=${POPULARITY_VALUE}&vote_average.gte=${MINIMUM_VOTE}&sort_by=popularity.desc${streamingServicesQuery}&with_watch_providers=${streamingServices}${releaseDateQuery}&page=${page}`;
+				return `${DISCOVER}/${TAG}?api_key=${API_KEY}&language=${language ?? LANGUAGE}&include_adult=false${runtimeQuery}&with_genres=${genres}&vote_count.gte=${voteCountThreshold}&vote_average.gte=${voteAverageThreshold}&sort_by=popularity.desc${streamingServicesQuery}&with_watch_providers=${streamingServices}${releaseDateQuery}&page=${page}`;
 			},
 		}),
 		getRandomMovies: builder.query<APIMovieResponse, GetMovieArgs>({
