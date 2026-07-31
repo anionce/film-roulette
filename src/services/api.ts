@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react';
 import { APIMovieResponse, CountryCodes, CountryResults, MovieDetail, StreamingDetail } from '../models/MovieResponse';
 import {
 	API_KEY,
@@ -15,16 +15,34 @@ import {
 } from './endpoints';
 import { DetailMovieArgs, GetMovieArgs } from '../models/APIArgs';
 
+const baseQuery = fetchBaseQuery({
+	baseUrl: BASE_URL,
+	prepareHeaders: headers => {
+		headers.set('Authorization', `Bearer ${TOKEN}`);
+
+		return headers;
+	},
+});
+
+// TMDB rate-limits bursts of requests (this app fires dozens of detail/streaming
+// calls per search), so transient failures are expected. Retry with backoff, but
+// bail immediately on 404s (deleted/invalid movie ids) since retrying won't help.
+const baseQueryWithRetry = retry(
+	async (args, api, extraOptions) => {
+		const result = await baseQuery(args, api, extraOptions);
+
+		if (result.error?.status === 404) {
+			retry.fail(result.error);
+		}
+
+		return result;
+	},
+	{ maxRetries: 3 }
+);
+
 export const moviesApi = createApi({
 	reducerPath: 'moviesApi',
-	baseQuery: fetchBaseQuery({
-		baseUrl: BASE_URL,
-		prepareHeaders: headers => {
-			headers.set('Authorization', `Bearer ${TOKEN}`);
-
-			return headers;
-		},
-	}),
+	baseQuery: baseQueryWithRetry,
 	endpoints: builder => ({
 		getMovies: builder.query<APIMovieResponse, GetMovieArgs>({
 			query: ({ runtime, genres, page, streamingServices, language, releaseDateGte, releaseDateLte }) => {

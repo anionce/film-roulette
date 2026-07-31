@@ -305,12 +305,6 @@ export const App = () => {
 	};
 
 	const resetValues = (noResults?: boolean) => {
-		setFilters({
-			genre: null,
-			duration: null,
-			streaming: null,
-			era: null,
-		});
 		setMovieResultsArray([]);
 		setTotalPages(undefined);
 		setCurrentMovieIndex(-1);
