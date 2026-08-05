@@ -1,4 +1,3 @@
-import React from 'react';
 import './Streaming.scss';
 import { AvailabilityInfo, CountryResults } from '../../models/MovieResponse';
 import { MOVIE_POSTER_PATH } from '../../constants/movie';

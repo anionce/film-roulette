@@ -1,4 +1,3 @@
-import React from 'react';
 import './ApiError.scss';
 import { useLanguage } from '../../i18n/LanguageContext';
 

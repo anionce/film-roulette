@@ -1,4 +1,3 @@
-import React from 'react';
 import { MOVIE_IMDB_PATH } from '../../constants/movie';
 import { Movie } from '../../models/MovieResponse';
 import { useMediaQuery } from 'react-responsive';

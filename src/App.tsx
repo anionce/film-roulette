@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { MainLayout } from './layout/MainLayout';
 import { NotFound } from './pages/NotFound/NotFound';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MoviePage } from './pages/MoviePage/MoviePage';
 import {
 	useLazyGetDetailsQuery,

@@ -14,7 +14,7 @@ export type FiltersModalProps = {
 	closeModal: (filterType: FilterType) => void;
 	onSelect:
 		| ((event: React.MouseEvent<HTMLButtonElement>) => void)
-		| ((event: ChangeEvent<HTMLInputElement>, newServices: string[]) => void);
+		| ((event: ChangeEvent<HTMLInputElement>, newServices: StreamingServices[]) => void);
 	filters?: StreamingServices[] | null;
 	selectedValue?: string | string[] | null;
 	isButtonDisabled?: boolean;
@@ -87,7 +87,7 @@ export const FiltersModal = ({
 					/>
 				) : (
 					<StreamingModalContent
-						onSelect={onSelect as (event: ChangeEvent<HTMLInputElement>, newServices: string[]) => void}
+						onSelect={onSelect as (event: ChangeEvent<HTMLInputElement>, newServices: StreamingServices[]) => void}
 						filters={filters as StreamingServices[] | null}
 					/>
 				)}

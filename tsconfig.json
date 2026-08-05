@@ -1,24 +1,23 @@
 {
 	"compilerOptions": {
-		"baseUrl": ".",
-		"outDir": "build/dist",
-		"module": "commonjs",
-		"target": "es5",
-		"lib": ["es6", "dom"],
-		"sourceMap": true,
-		"allowJs": true,
-		"jsx": "react",
-		"moduleResolution": "node",
-		"experimentalDecorators": true,
-		"forceConsistentCasingInFileNames": true,
-		"noImplicitReturns": true,
-		"noImplicitThis": true,
-		"noImplicitAny": true,
-		"importHelpers": true,
-		"strictNullChecks": true,
-		"noUnusedLocals": true,
+		"target": "ES2020",
+		"useDefineForClassFields": true,
+		"lib": ["ES2020", "DOM", "DOM.Iterable"],
+		"module": "ESNext",
+		"skipLibCheck": true,
+		"moduleResolution": "bundler",
 		"resolveJsonModule": true,
-		"esModuleInterop": true
+		"isolatedModules": true,
+		"noEmit": true,
+		"jsx": "react-jsx",
+		"strict": true,
+		"noImplicitReturns": true,
+		"noUnusedLocals": true,
+		"noFallthroughCasesInSwitch": true,
+		"forceConsistentCasingInFileNames": true,
+		"esModuleInterop": true,
+		"allowJs": true,
+		"types": ["vite/client", "vitest/globals"]
 	},
-	"exclude": ["node_modules", "build", "scripts", "acceptance-tests", "webpack", "jest", "src/setupTests.ts"]
+	"include": ["src", "vite.config.ts"]
 }

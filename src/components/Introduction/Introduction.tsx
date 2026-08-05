@@ -1,4 +1,3 @@
-import React from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
 export const Introduction = () => {

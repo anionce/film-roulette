@@ -1,4 +1,3 @@
-import React from 'react';
 import { Movie } from '../../models/MovieResponse';
 
 export type MovieRatingProps = {
