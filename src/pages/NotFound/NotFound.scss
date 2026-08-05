@@ -1,4 +1,4 @@
-@import '../../assets/styles/variables';
+@use '../../assets/styles/variables' as *;
 
 .not-found-container {
 	justify-content: center;
