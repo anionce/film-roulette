@@ -14,6 +14,7 @@ import {
 	TOKEN,
 } from './endpoints';
 import { DetailMovieArgs, GetMovieArgs } from '../models/APIArgs';
+import { GENRES_EXCLUDED_UNLESS_SELECTED } from '../constants/genre';
 
 const baseQuery = fetchBaseQuery({
 	baseUrl: BASE_URL,
@@ -54,8 +55,10 @@ export const moviesApi = createApi({
 				const isPlutoTvOnly = streamingServices === PLUTO_TV_PROVIDER_ID;
 				const voteCountThreshold = isPlutoTvOnly ? PLUTO_TV_POPULARITY_VALUE : POPULARITY_VALUE;
 				const voteAverageThreshold = isPlutoTvOnly ? PLUTO_TV_MINIMUM_VOTE : MINIMUM_VOTE;
+				const excludedGenres = GENRES_EXCLUDED_UNLESS_SELECTED.filter(id => !genres?.includes(id));
+				const excludeGenresQuery = genres?.length && excludedGenres.length ? `&without_genres=${excludedGenres}` : '';
 
-				return `${DISCOVER}/${TAG}?api_key=${API_KEY}&language=${language ?? LANGUAGE}&include_adult=false${runtimeQuery}&with_genres=${genres}&vote_count.gte=${voteCountThreshold}&vote_average.gte=${voteAverageThreshold}&sort_by=popularity.desc${streamingServicesQuery}&with_watch_providers=${streamingServices}${releaseDateQuery}&page=${page}`;
+				return `${DISCOVER}/${TAG}?api_key=${API_KEY}&language=${language ?? LANGUAGE}&include_adult=false${runtimeQuery}&with_genres=${genres}&vote_count.gte=${voteCountThreshold}&vote_average.gte=${voteAverageThreshold}&sort_by=popularity.desc${streamingServicesQuery}&with_watch_providers=${streamingServices}${releaseDateQuery}${excludeGenresQuery}&page=${page}`;
 			},
 		}),
 		getRandomMovies: builder.query<APIMovieResponse, GetMovieArgs>({

@@ -1,6 +1,7 @@
 import { FilterArguments } from '../constants/filters';
 import { AvailabilityInfo, CompleteMovie, CountryResults } from '../models/MovieResponse';
 import { STREAMING_ID } from '../constants/streamingServices';
+import { MovieEra, mapValueToEraRange } from '../constants/era';
 
 export const RANDOM_PAGE_LIMIT = 40;
 export const MIN_RANDOM_PAGE = 5;
@@ -49,11 +50,56 @@ export const hasVODAvailability = (movie: CompleteMovie): boolean => {
 	);
 };
 
-export const filterAvailableMovies = (movies: CompleteMovie[]): CompleteMovie[] => movies.filter(hasVODAvailability);
+// Users asked for movies from the countries they actually recognize (US/UK, Spain, France,
+// Italy, Germany) and to only see other origins when they're genuinely mainstream hits,
+// rather than obscure indie/Eastern-European titles that happen to pass the vote thresholds.
+const PREFERRED_ORIGIN_LANGUAGES = ['en', 'es', 'fr', 'it', 'de'];
+const SUPER_POPULAR_VOTE_COUNT_THRESHOLD = 2000;
+
+export const isFromPreferredOrigin = (movie: CompleteMovie): boolean =>
+	PREFERRED_ORIGIN_LANGUAGES.includes(movie.original_language) || movie.vote_count >= SUPER_POPULAR_VOTE_COUNT_THRESHOLD;
+
+// Defensive re-check: TMDB's own primary_release_date filter can occasionally still let a
+// movie through (data quirks, retried/partial requests), so re-validate client-side too
+// rather than trusting the API's date filtering alone.
+export const isWithinEraRange = (movie: CompleteMovie, era: MovieEra | null): boolean => {
+	const range = mapValueToEraRange(era);
+
+	if (!range) {
+		return true;
+	}
+
+	const releaseDate = movie.release_date;
+
+	if (!releaseDate) {
+		return false;
+	}
+
+	if (range.gte && releaseDate < range.gte) {
+		return false;
+	}
+
+	if (range.lte && releaseDate > range.lte) {
+		return false;
+	}
+
+	return true;
+};
+
+export const filterAvailableMovies = (movies: CompleteMovie[]): CompleteMovie[] =>
+	movies.filter(movie => hasVODAvailability(movie) && isFromPreferredOrigin(movie));
 
 export const filterMovies = (movies: CompleteMovie[], filters: FilterArguments) => {
 	const filteredResults = movies.filter(movie => {
 		if (!hasVODAvailability(movie)) {
+			return false;
+		}
+
+		if (!isFromPreferredOrigin(movie)) {
+			return false;
+		}
+
+		if (!isWithinEraRange(movie, filters.era as MovieEra)) {
 			return false;
 		}
 

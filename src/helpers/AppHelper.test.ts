@@ -2,6 +2,7 @@ import { filterAvailableMovies, filterMovies, getRandomStartPage, getRandomValue
 import { CompleteMovie } from '../models/MovieResponse';
 import { STREAMING_ID, StreamingServices } from '../constants/streamingServices';
 import { FilterArguments } from '../constants/filters';
+import { MovieEra } from '../constants/era';
 
 // Real TMDB data doesn't always match our display names (e.g. RTVE Play is listed as
 // plain "rtve"), so tests build availability from the enum + real provider_id instead
@@ -23,11 +24,17 @@ const buildMovie = (
 		free?: StreamingServices[];
 		ads?: StreamingServices[];
 		providerNameOverride?: Partial<Record<StreamingServices, string>>;
+		originalLanguage?: string;
+		voteCount?: number;
+		releaseDate?: string;
 	} = {}
 ): CompleteMovie =>
 	({
 		id,
 		title: `Movie ${id}`,
+		original_language: options.originalLanguage ?? 'en',
+		vote_count: options.voteCount ?? 500,
+		release_date: options.releaseDate ?? '2024-01-01',
 		streamingData: {
 			data: {
 				link: '',
@@ -165,6 +172,33 @@ describe('filterMovies', () => {
 		const result = filterMovies([movieOnRTVE], { ...baseFilters, streaming: [StreamingServices.RTVE] });
 
 		expect(result).toEqual([movieOnRTVE]);
+	});
+
+	it('keeps movies from the preferred origin languages regardless of popularity', () => {
+		const spanishMovie = buildMovie(1, [StreamingServices.Netflix], { originalLanguage: 'es', voteCount: 50 });
+		const germanMovie = buildMovie(2, [StreamingServices.Netflix], { originalLanguage: 'de', voteCount: 50 });
+
+		const result = filterMovies([spanishMovie, germanMovie], baseFilters);
+
+		expect(result).toEqual([spanishMovie, germanMovie]);
+	});
+
+	it('drops niche/indie movies from other origins, but keeps them when they are super popular', () => {
+		const obscureKoreanMovie = buildMovie(1, [StreamingServices.Netflix], { originalLanguage: 'ko', voteCount: 300 });
+		const blockbusterKoreanMovie = buildMovie(2, [StreamingServices.Netflix], { originalLanguage: 'ko', voteCount: 5000 });
+
+		const result = filterMovies([obscureKoreanMovie, blockbusterKoreanMovie], baseFilters);
+
+		expect(result).toEqual([blockbusterKoreanMovie]);
+	});
+
+	it('drops movies outside the selected era even if the API let them slip through', () => {
+		const oldMovie = buildMovie(1, [StreamingServices.Netflix], { releaseDate: '2020-10-08' });
+		const recentMovie = buildMovie(2, [StreamingServices.Netflix], { releaseDate: '2026-01-01' });
+
+		const result = filterMovies([oldMovie, recentMovie], { ...baseFilters, era: MovieEra.LastYear });
+
+		expect(result).toEqual([recentMovie]);
 	});
 });
 

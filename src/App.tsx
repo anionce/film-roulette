@@ -25,7 +25,9 @@ import {
 } from './helpers/AppHelper';
 import { useLanguage } from './i18n/LanguageContext';
 
-const MOVIES_BATCH_SIZE = 10;
+// TMDB returns 20 results per discover page; checking only a slice of that wastes half of
+// each page we already paid the request for, and shrinks results for niche filter combos.
+const MOVIES_BATCH_SIZE = 20;
 const PAGE_WINDOW_SIZE = 4;
 const MIN_RESULTS_TARGET = 100;
 const MAX_FETCH_WINDOWS = 6;

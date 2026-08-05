@@ -3,6 +3,13 @@ import { Language } from '../i18n/translations';
 
 export const MAX_GENRES = 3;
 
+// TMDB tags anime and documentaries with a second genre matching their subject (Action,
+// Adventure, Comedy...), so e.g. "Acción" alone returns anime and documentaries mixed in.
+// Excluding these ids whenever they aren't explicitly selected keeps genres from bleeding together.
+export const ANIMATION_GENRE_ID = 16;
+export const DOCUMENTARY_GENRE_ID = 99;
+export const GENRES_EXCLUDED_UNLESS_SELECTED = [ANIMATION_GENRE_ID, DOCUMENTARY_GENRE_ID];
+
 export const mapValueToGenre = (values: MovieGenre[] | null): number[] | null => {
 	if (!values?.length) {
 		return null;
