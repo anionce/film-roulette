@@ -1,11 +1,11 @@
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
-import React, { ChangeEvent } from 'react';
+import { ChangeEvent } from 'react';
 import { StreamingServices, streamingServices } from '../../../constants/streamingServices';
 import { useLanguage } from '../../../i18n/LanguageContext';
 import '../FiltersModal.scss';
 
 export type StreamingModalContentProps = {
-	onSelect: (event: ChangeEvent<HTMLInputElement>, newServices: string[]) => void;
+	onSelect: (event: ChangeEvent<HTMLInputElement>, newServices: StreamingServices[]) => void;
 	filters: StreamingServices[] | null;
 };
 

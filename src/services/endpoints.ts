@@ -4,9 +4,9 @@ export const TAG = 'movie';
 
 export const DISCOVER = 'discover';
 
-export const TOKEN = process.env.REACT_APP_TOKEN;
+export const TOKEN = import.meta.env.VITE_TOKEN;
 
-export const API_KEY = process.env.REACT_APP_API_KEY;
+export const API_KEY = import.meta.env.VITE_API_KEY;
 
 export const POPULARITY_VALUE = 100;
 

@@ -1,4 +1,3 @@
-import React from 'react';
 import { FilterButton } from './FilterButton/FilterButton';
 import { FilterArguments, FilterType, filterTypes } from '../../constants/filters';
 import './ButtonGroup.scss';

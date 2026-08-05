@@ -1,4 +1,3 @@
-import React from 'react';
 import './FewResults.scss';
 import { useLanguage } from '../../i18n/LanguageContext';
 

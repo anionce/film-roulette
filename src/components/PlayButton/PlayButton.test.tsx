@@ -1,4 +1,3 @@
-import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import { PlayButton } from './PlayButton';
 import { FilterArguments } from '../../constants/filters';
@@ -6,7 +5,7 @@ import { MovieGenre } from '../../constants/genre';
 import { MovieRuntime } from '../../constants/runtime';
 import { customRender } from '../../assets/tests/testUtils';
 
-const renderPlayButton = (filters: FilterArguments, onButtonClick = jest.fn()) => {
+const renderPlayButton = (filters: FilterArguments, onButtonClick = vi.fn()) => {
 	customRender(<PlayButton filters={filters} onButtonClick={onButtonClick} />);
 
 	return { onButtonClick };

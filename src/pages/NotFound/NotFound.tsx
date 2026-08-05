@@ -1,4 +1,3 @@
-import React from 'react';
 import './NotFound.scss';
 import notFound from '../../assets/img/notFound.jpg';
 

@@ -15,7 +15,7 @@ import { LanguageToggle } from '../../components/LanguageToggle/LanguageToggle';
 
 export type HomeProps = {
 	filters: FilterArguments;
-	onButtonClick: (random?: boolean) => void;
+	onButtonClick: (random: boolean) => void;
 	setFilters: React.Dispatch<React.SetStateAction<FilterArguments>>;
 };
 
