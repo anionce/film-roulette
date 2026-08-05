@@ -13,7 +13,7 @@ import { CompleteMovie, CountryResults, Movie, MovieDetail } from './models/Movi
 import { mapValueToGenre } from './constants/genre';
 import { mapValueToMovieRuntime } from './constants/runtime';
 import { mapValueToStreamingService } from './constants/streamingServices';
-import { MovieEra, mapValueToEraRange } from './constants/era';
+import { mapValueToEraRange } from './constants/era';
 import { Home } from './pages/Home/Home';
 import { FilterArguments } from './constants/filters';
 import {
@@ -118,7 +118,7 @@ export const App = () => {
 				movieDetails.push(...randomMovieDetailsPromise);
 			}
 		} else {
-			const eraRange = mapValueToEraRange(filters.era as MovieEra);
+			const eraRange = mapValueToEraRange(filters.era);
 
 			for (let page = currentPage; page <= pagesToFetch; page++) {
 				const { data } = await triggerMovies({
@@ -274,7 +274,7 @@ export const App = () => {
 				curateMovieData();
 				setCurrentMovieIndex(prev => prev + 1);
 			} else {
-				const eraRange = mapValueToEraRange(filters.era as MovieEra);
+				const eraRange = mapValueToEraRange(filters.era);
 
 				triggerMovies({
 					page: 1,

@@ -66,7 +66,7 @@ export const MoviePoster = ({
 
 	return (
 		<div {...swipeHandlers} className='poster-button-container'>
-			<button onClick={onPreviousButtonClick} className={`button-movie-page ${isDisabled && 'button-disabled'}`}>
+			<button onClick={onPreviousButtonClick} className={`button-movie-page ${isDisabled ? 'button-disabled' : ''}`}>
 				<SkipPreviousIcon />
 			</button>
 			<div className='poster-container'>

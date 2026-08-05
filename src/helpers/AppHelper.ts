@@ -99,7 +99,7 @@ export const filterMovies = (movies: CompleteMovie[], filters: FilterArguments) 
 			return false;
 		}
 
-		if (!isWithinEraRange(movie, filters.era as MovieEra)) {
+		if (!isWithinEraRange(movie, filters.era)) {
 			return false;
 		}
 
