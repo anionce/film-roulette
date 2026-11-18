@@ -29,6 +29,10 @@ export type Translations = {
 	languageToggleAriaLabel: string;
 	readMoreLabel: string;
 	availableOnLabel: string;
+	appName: string;
+	appTagline: string;
+	clearFiltersButton: string;
+	clearSelectionButton: string;
 };
 
 export const translations: Record<Language, Translations> = {
@@ -61,6 +65,10 @@ export const translations: Record<Language, Translations> = {
 		languageToggleAriaLabel: 'Cambiar idioma',
 		readMoreLabel: 'Ver más',
 		availableOnLabel: 'Disponible en',
+		appName: 'Film Roulette',
+		appTagline: 'Descubre entre miles de películas',
+		clearFiltersButton: 'Borrar filtros',
+		clearSelectionButton: 'Borrar selección',
 	},
 	en: {
 		introGreeting: "Hi! Let's pick something awesome to watch 🤗",
@@ -91,5 +99,9 @@ export const translations: Record<Language, Translations> = {
 		languageToggleAriaLabel: 'Switch language',
 		readMoreLabel: 'Read more',
 		availableOnLabel: 'Available on',
+		appName: 'Film Roulette',
+		appTagline: 'Discover thousands of movies',
+		clearFiltersButton: 'Clear filters',
+		clearSelectionButton: 'Clear selection',
 	},
 };

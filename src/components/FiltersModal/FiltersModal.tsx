@@ -18,6 +18,7 @@ export type FiltersModalProps = {
 	filters?: StreamingServices[] | null;
 	selectedValue?: string | string[] | null;
 	isButtonDisabled?: boolean;
+	onClear: (filterType: FilterType) => void;
 };
 
 export const FiltersModal = ({
@@ -28,11 +29,13 @@ export const FiltersModal = ({
 	isButtonDisabled,
 	filters,
 	selectedValue,
+	onClear,
 }: FiltersModalProps) => {
 	const { t } = useLanguage();
 	const shouldShowDefault =
 		filterType === FilterType.Duration || filterType === FilterType.Genre || filterType === FilterType.Era;
 	const isConfirmDisabled = filterType === FilterType.Streaming && !!isButtonDisabled;
+	const hasSelection = filterType === FilterType.Streaming ? !!filters?.length : Array.isArray(selectedValue) ? !!selectedValue.length : !!selectedValue;
 
 	const onConfirmClick = () => {
 		if (!isConfirmDisabled) {
@@ -78,6 +81,11 @@ export const FiltersModal = ({
 						aria-label={t.confirmAriaLabel}>
 						<CheckIcon />
 					</div>
+					{hasSelection && (
+						<button className='modal-clear-button' onClick={() => onClear(filterType)} type='button'>
+							{t.clearSelectionButton}
+						</button>
+					)}
 				</div>
 				{shouldShowDefault ? (
 					<DefaultModalContent

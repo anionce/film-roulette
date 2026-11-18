@@ -6,7 +6,7 @@ export const LanguageToggle = () => {
 
 	return (
 		<button className='language-toggle' onClick={toggleLanguage} aria-label={t.languageToggleAriaLabel}>
-			{language === 'es' ? '🇪🇸 ES' : '🇬🇧 EN'}
+			🌐 {language === 'es' ? 'ES' : 'EN'}
 		</button>
 	);
 };

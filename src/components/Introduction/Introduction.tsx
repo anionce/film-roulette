@@ -5,7 +5,6 @@ export const Introduction = () => {
 
 	return (
 		<div className='mascot-row'>
-			<div className='mascot'>🍿</div>
 			<div className='speech-bubble'>{t.introGreeting}</div>
 		</div>
 	);

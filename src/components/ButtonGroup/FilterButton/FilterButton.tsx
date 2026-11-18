@@ -50,14 +50,14 @@ export const FilterButton = ({ openModal, filters, filterType }: FilterButtonPro
 		return DEFAULT_EMOJI[filterType];
 	};
 
-	const getSummaryText = (): string => {
+	const getSelectedValues = (): string[] => {
 		if (filterType === FilterType.Duration) {
-			return capitalize(filters.duration as MovieRuntime);
+			return [capitalize(filters.duration as MovieRuntime)];
 		}
 		if (filterType === FilterType.Era) {
-			return capitalize(getEraLabel(filters.era as MovieEra, language));
+			return [capitalize(getEraLabel(filters.era as MovieEra, language))];
 		}
-		return (filters.genre as MovieGenre[]).map(genre => capitalize(getGenreLabel(genre, language))).join(', ');
+		return (filters.genre as MovieGenre[]).map(genre => capitalize(getGenreLabel(genre, language)));
 	};
 
 	const handleKeyPress = (event: React.KeyboardEvent<HTMLButtonElement>) => {
@@ -85,8 +85,12 @@ export const FilterButton = ({ openModal, filters, filterType }: FilterButtonPro
 						</span>
 					</span>
 				) : isFilterSelected ? (
-					<span>
-						{LABEL[filterType]}: {getSummaryText()}
+					<span className='filter-chip-row'>
+						{getSelectedValues().map(value => (
+							<span key={value} className='filter-chip'>
+								{value}
+							</span>
+						))}
 					</span>
 				) : (
 					<span>{LABEL[filterType]}</span>

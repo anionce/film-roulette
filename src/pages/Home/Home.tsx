@@ -12,6 +12,8 @@ import { MovieEra } from '../../constants/era';
 import { Introduction } from '../../components/Introduction/Introduction';
 import { RandomButton } from '../../components/RandomButton/RandomButton';
 import { LanguageToggle } from '../../components/LanguageToggle/LanguageToggle';
+import { Header } from '../../components/Header/Header';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export type HomeProps = {
 	filters: FilterArguments;
@@ -20,6 +22,7 @@ export type HomeProps = {
 };
 
 export const Home = ({ filters, onButtonClick, setFilters }: HomeProps) => {
+	const { t } = useLanguage();
 	const [open, setOpen] = useState<ModalOpen>({
 		[FilterType.Genre]: false,
 		[FilterType.Duration]: false,
@@ -80,6 +83,16 @@ export const Home = ({ filters, onButtonClick, setFilters }: HomeProps) => {
 		setFilters((prev: FilterArguments) => ({ ...prev, streaming: newServices }));
 	};
 
+	const onClearFilter = (type: FilterType): void => {
+		setFilters((prev: FilterArguments) => ({ ...prev, [type]: null }));
+	};
+
+	const hasAnyFilterSelected = !!(filters.genre?.length || filters.duration || filters.streaming?.length || filters.era);
+
+	const onClearAllFilters = (): void => {
+		setFilters({ genre: null, duration: null, streaming: null, era: null });
+	};
+
 	const isDisabled = !filters.streaming?.length;
 
 	return (
@@ -87,8 +100,14 @@ export const Home = ({ filters, onButtonClick, setFilters }: HomeProps) => {
 			<div className='home-top-bar'>
 				<LanguageToggle />
 			</div>
+			<Header />
 			<Introduction />
 			<ButtonGroup filters={filters} openModal={openModal} />
+			{hasAnyFilterSelected && (
+				<button className='clear-filters-button' onClick={onClearAllFilters} type='button'>
+					{t.clearFiltersButton}
+				</button>
+			)}
 			<div className='action-button-container'>
 				<PlayButton filters={filters} onButtonClick={onButtonClick} />
 				<RandomButton filters={filters} onButtonClick={onButtonClick} />
@@ -113,6 +132,7 @@ export const Home = ({ filters, onButtonClick, setFilters }: HomeProps) => {
 						filters={filters.streaming}
 						selectedValue={selectedValue}
 						isButtonDisabled={isDisabled}
+						onClear={onClearFilter}
 					/>
 				);
 			})}
