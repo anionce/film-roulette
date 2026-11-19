@@ -1,20 +1,17 @@
-import React from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Provider } from 'react-redux';
-import { store } from './store/store';
 import { App } from './App';
-import { LanguageProvider } from './i18n/LanguageContext';
+import { LanguageProvider } from './i18n/LanguageProvider';
 import './index.scss';
 
-const container = document.getElementById('root')!;
-const root = createRoot(container);
+const root = document.getElementById('root');
 
-root.render(
-	<React.StrictMode>
-		<Provider store={store}>
+if (root) {
+	createRoot(root).render(
+		<StrictMode>
 			<LanguageProvider>
 				<App />
 			</LanguageProvider>
-		</Provider>
-	</React.StrictMode>
-);
+		</StrictMode>
+	);
+}

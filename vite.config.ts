@@ -1,25 +1,18 @@
-/// <reference types="vitest/config" />
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
 	plugins: [react()],
+	envDir: process.env.VITEST ? false : undefined,
 	server: {
 		port: 3000,
 	},
 	build: {
 		outDir: 'build',
 	},
-	css: {
-		preprocessorOptions: {
-			scss: {
-				api: 'modern-compiler',
-			},
-		},
-	},
 	test: {
-		globals: true,
 		environment: 'jsdom',
-		setupFiles: './src/setupTests.ts',
+		setupFiles: ['./src/test/setup.ts'],
+		execArgv: ['--no-experimental-webstorage'],
 	},
 });

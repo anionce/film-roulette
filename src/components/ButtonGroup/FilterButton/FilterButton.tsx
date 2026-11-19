@@ -1,17 +1,17 @@
-import { FilterArguments, FilterType } from '../../../constants/filters';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import React from 'react';
-import { StreamingServices, STREAMING_LOGO } from '../../../constants/streamingServices';
-import { MovieRuntime, RUNTIME_EMOJI } from '../../../constants/runtime';
-import { MovieGenre, getGenreLabel } from '../../../constants/genre';
-import { MovieEra, ERA_EMOJI, getEraLabel } from '../../../constants/era';
-import { useLanguage } from '../../../i18n/LanguageContext';
+import { ERA_EMOJI, getEraLabel } from '../../../constants/era';
+import { FilterType, type FilterArguments } from '../../../constants/filters';
+import { getGenreLabel } from '../../../constants/genre';
+import { RUNTIME_EMOJI } from '../../../constants/runtime';
+import { STREAMING_LOGO } from '../../../constants/streamingServices';
+import { useLanguage } from '../../../i18n/useLanguage';
+import { hasSelection } from '../../../lib/filters';
 import '../ButtonGroup.scss';
 
-export type FilterButtonProps = {
+type FilterButtonProps = {
 	filters: FilterArguments;
-	openModal: (type: FilterType) => void;
 	filterType: FilterType;
+	openModal: (type: FilterType) => void;
 };
 
 const DEFAULT_EMOJI: Record<FilterType, string> = {
@@ -23,77 +23,51 @@ const DEFAULT_EMOJI: Record<FilterType, string> = {
 
 const capitalize = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1);
 
-export const FilterButton = ({ openModal, filters, filterType }: FilterButtonProps) => {
+export const FilterButton = ({ filters, filterType, openModal }: FilterButtonProps) => {
 	const { t, language } = useLanguage();
+	const isSelected = hasSelection(filters, filterType);
 
-	const LABEL: Record<FilterType, string> = {
+	const label: Record<FilterType, string> = {
 		[FilterType.Genre]: t.labelGenre,
 		[FilterType.Duration]: t.labelDuration,
 		[FilterType.Streaming]: t.labelStreaming,
 		[FilterType.Era]: t.labelEra,
 	};
 
-	const isFilterSelected: boolean =
-		filterType === FilterType.Duration
-			? !!filters.duration
-			: filterType === FilterType.Era
-			? !!filters.era
-			: !!(filters[filterType] as unknown[])?.length;
+	const selectedEmoji =
+		(filterType === FilterType.Duration && filters.duration && RUNTIME_EMOJI[filters.duration]) ||
+		(filterType === FilterType.Era && filters.era && ERA_EMOJI[filters.era]) ||
+		DEFAULT_EMOJI[filterType];
 
-	const getSelectedEmoji = (): string | undefined => {
-		if (filterType === FilterType.Duration) {
-			return RUNTIME_EMOJI[filters.duration as MovieRuntime] ?? DEFAULT_EMOJI[filterType];
-		}
-		if (filterType === FilterType.Era) {
-			return ERA_EMOJI[filters.era as MovieEra] ?? DEFAULT_EMOJI[filterType];
-		}
-		return DEFAULT_EMOJI[filterType];
+	const selectedValues = (): string[] => {
+		if (filterType === FilterType.Duration && filters.duration) return [capitalize(filters.duration)];
+		if (filterType === FilterType.Era && filters.era) return [capitalize(getEraLabel(filters.era, language))];
+		return (filters.genre ?? []).map(genre => capitalize(getGenreLabel(genre, language)));
 	};
-
-	const getSelectedValues = (): string[] => {
-		if (filterType === FilterType.Duration) {
-			return [capitalize(filters.duration as MovieRuntime)];
-		}
-		if (filterType === FilterType.Era) {
-			return [capitalize(getEraLabel(filters.era as MovieEra, language))];
-		}
-		return (filters.genre as MovieGenre[]).map(genre => capitalize(getGenreLabel(genre, language)));
-	};
-
-	const handleKeyPress = (event: React.KeyboardEvent<HTMLButtonElement>) => {
-		if (event.key === 'Enter') {
-			openModal(filterType);
-		}
-	};
-
-	const isStreaming = filterType === FilterType.Streaming;
 
 	return (
-		<button
-			onClick={() => openModal(filterType)}
-			onKeyDown={handleKeyPress}
-			className={`filter-button ${filterType}-button`}>
+		<button type='button' onClick={() => openModal(filterType)} className={`filter-button ${filterType}-button`}>
 			<div className='filter-button-content'>
-				<span className='filter-emoji'>{isFilterSelected ? getSelectedEmoji() : DEFAULT_EMOJI[filterType]}</span>
-				{isFilterSelected && isStreaming ? (
+				<span className='filter-emoji'>{isSelected ? selectedEmoji : DEFAULT_EMOJI[filterType]}</span>
+				{isSelected && filterType === FilterType.Streaming ? (
 					<span className='filter-platform-summary'>
-						{LABEL[filterType]}:
+						{label[filterType]}:
 						<span className='filter-platform-logos'>
-							{(filters.streaming as StreamingServices[]).map(service => (
+							{(filters.streaming ?? []).map(service => (
 								<img key={service} className='filter-platform-logo' src={STREAMING_LOGO[service]} alt={service} />
 							))}
 						</span>
 					</span>
-				) : isFilterSelected ? (
+				) : isSelected ? (
 					<span className='filter-chip-row'>
-						{getSelectedValues().map(value => (
+						{selectedValues().map(value => (
 							<span key={value} className='filter-chip'>
 								{value}
 							</span>
 						))}
 					</span>
 				) : (
-					<span>{LABEL[filterType]}</span>
+					<span>{label[filterType]}</span>
 				)}
 			</div>
 			<NavigateNextIcon />

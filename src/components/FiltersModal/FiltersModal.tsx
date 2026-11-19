@@ -1,102 +1,76 @@
 import { Dialog } from '@mui/material';
-import React, { ChangeEvent } from 'react';
-import { FilterType } from '../../constants/filters';
-import CloseIcon from '@mui/icons-material/Close';
 import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
+import { FilterType, type FilterArguments } from '../../constants/filters';
+import type { MovieEra } from '../../constants/era';
+import type { MovieGenre } from '../../constants/genre';
+import type { MovieRuntime } from '../../constants/runtime';
+import { useLanguage } from '../../i18n/useLanguage';
+import { hasSelection, toggleGenre } from '../../lib/filters';
 import { DefaultModalContent } from './ModalContent/DefaultModalContent';
 import { StreamingModalContent } from './ModalContent/StreamingModalContent';
-import { StreamingServices } from '../../constants/streamingServices';
-import { useLanguage } from '../../i18n/LanguageContext';
+import './FiltersModal.scss';
 
-export type FiltersModalProps = {
+type FiltersModalProps = {
 	open: boolean;
 	filterType: FilterType;
-	closeModal: (filterType: FilterType) => void;
-	onSelect:
-		| ((event: React.MouseEvent<HTMLButtonElement>) => void)
-		| ((event: ChangeEvent<HTMLInputElement>, newServices: StreamingServices[]) => void);
-	filters?: StreamingServices[] | null;
-	selectedValue?: string | string[] | null;
-	isButtonDisabled?: boolean;
-	onClear: (filterType: FilterType) => void;
+	filters: FilterArguments;
+	onChange: (filters: FilterArguments) => void;
+	onClose: () => void;
 };
 
-export const FiltersModal = ({
-	open,
-	filterType,
-	closeModal,
-	onSelect,
-	isButtonDisabled,
-	filters,
-	selectedValue,
-	onClear,
-}: FiltersModalProps) => {
+const selectedValuesOf = (filters: FilterArguments, type: FilterType): string[] => {
+	const value = filters[type];
+	return Array.isArray(value) ? value : value ? [value] : [];
+};
+
+export const FiltersModal = ({ open, filterType, filters, onChange, onClose }: FiltersModalProps) => {
 	const { t } = useLanguage();
-	const shouldShowDefault =
-		filterType === FilterType.Duration || filterType === FilterType.Genre || filterType === FilterType.Era;
-	const isConfirmDisabled = filterType === FilterType.Streaming && !!isButtonDisabled;
-	const hasSelection = filterType === FilterType.Streaming ? !!filters?.length : Array.isArray(selectedValue) ? !!selectedValue.length : !!selectedValue;
+	const isStreaming = filterType === FilterType.Streaming;
+	const isConfirmDisabled = isStreaming && !hasSelection(filters, FilterType.Streaming);
 
-	const onConfirmClick = () => {
-		if (!isConfirmDisabled) {
-			closeModal(filterType);
-		}
-	};
-
-	const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
-		if (event.key === 'Enter') {
-			closeModal(filterType);
-		}
-	};
-
-	const handleConfirmKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
-		if (event.key === 'Enter') {
-			onConfirmClick();
-		}
+	const select = (value: string) => {
+		if (filterType === FilterType.Genre) onChange(toggleGenre(filters, value as MovieGenre));
+		if (filterType === FilterType.Duration) onChange({ ...filters, duration: value as MovieRuntime });
+		if (filterType === FilterType.Era) onChange({ ...filters, era: value as MovieEra });
 	};
 
 	return (
-		<Dialog
-			classes={{ container: 'dialog-container', paper: 'paper' }}
-			fullScreen
-			open={open}
-			onClose={() => closeModal(filterType)}>
+		<Dialog classes={{ container: 'dialog-container', paper: 'paper' }} fullScreen open={open} onClose={onClose}>
 			<div className='selector-container'>
 				<div className='filters-exit-button-container'>
-					<div
-						className='exit-button'
-						onClick={() => closeModal(filterType)}
-						onKeyDown={handleKeyPress}
-						role='button'
-						tabIndex={0}
-						aria-label={t.closeAriaLabel}>
+					<button type='button' className='exit-button' onClick={onClose} aria-label={t.closeAriaLabel}>
 						<CloseIcon />
-					</div>
-					<div
+					</button>
+					<button
+						type='button'
 						className={`confirm-button ${isConfirmDisabled ? 'confirm-button-disabled' : ''}`}
-						onClick={onConfirmClick}
-						onKeyDown={handleConfirmKeyPress}
-						role='button'
-						tabIndex={0}
-						aria-label={t.confirmAriaLabel}>
+						onClick={onClose}
+						disabled={isConfirmDisabled}
+						aria-label={t.confirmAriaLabel}
+					>
 						<CheckIcon />
-					</div>
-					{hasSelection && (
-						<button className='modal-clear-button' onClick={() => onClear(filterType)} type='button'>
+					</button>
+					{hasSelection(filters, filterType) && (
+						<button
+							className='modal-clear-button'
+							onClick={() => onChange({ ...filters, [filterType]: null })}
+							type='button'
+						>
 							{t.clearSelectionButton}
 						</button>
 					)}
 				</div>
-				{shouldShowDefault ? (
-					<DefaultModalContent
-						filterType={filterType}
-						selectedValue={selectedValue}
-						onSelect={onSelect as (event: React.MouseEvent<HTMLButtonElement>) => void}
+				{isStreaming ? (
+					<StreamingModalContent
+						selected={filters.streaming ?? []}
+						onChange={streaming => onChange({ ...filters, streaming })}
 					/>
 				) : (
-					<StreamingModalContent
-						onSelect={onSelect as (event: ChangeEvent<HTMLInputElement>, newServices: StreamingServices[]) => void}
-						filters={filters as StreamingServices[] | null}
+					<DefaultModalContent
+						filterType={filterType}
+						selectedValues={selectedValuesOf(filters, filterType)}
+						onSelect={select}
 					/>
 				)}
 			</div>

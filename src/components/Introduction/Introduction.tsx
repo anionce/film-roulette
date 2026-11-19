@@ -1,4 +1,4 @@
-import { useLanguage } from '../../i18n/LanguageContext';
+import { useLanguage } from '../../i18n/useLanguage';
 
 export const Introduction = () => {
 	const { t } = useLanguage();

@@ -1,118 +1,72 @@
-import React from 'react';
 import UndoIcon from '@mui/icons-material/Undo';
-import { Movie, CountryResults } from '../../models/MovieResponse';
-import './MoviePage.scss';
 import { useNavigate } from 'react-router-dom';
+import { ApiError } from '../../components/ApiError/ApiError';
+import { FewResults } from '../../components/FewResults/FewResults';
 import { Loader } from '../../components/Loader/Loader';
+import { MoviePlot } from '../../components/MoviePlot/MoviePlot';
+import { MoviePoster } from '../../components/MoviePoster/MoviePoster';
 import { NoResults } from '../../components/NoResults/NoResults';
 import { Streaming } from '../../components/Streaming/Streaming';
-import { MoviePoster } from '../../components/MoviePoster/MoviePoster';
-import { MoviePlot } from '../../components/MoviePlot/MoviePlot';
-import { FewResults } from '../../components/FewResults/FewResults';
-import { ApiError } from '../../components/ApiError/ApiError';
-import { useLanguage } from '../../i18n/LanguageContext';
+import type { MovieRoulette } from '../../hooks/useMovieRoulette';
+import { useLanguage } from '../../i18n/useLanguage';
+import { includedWithSubscription } from '../../lib/movies';
+import './MoviePage.scss';
 
-export type MoviePageProps = {
-	currentMovie: Movie;
-	streamingData: CountryResults | undefined;
-	dataIMDB: string;
-	tagline?: string;
-	onButtonAction: () => void;
-	onPreviousButtonClick: () => void;
-	resetValues: () => void;
-	currentMovieIndex: number;
-	shouldShowNoResults: boolean;
-	noResultsMessage?: string;
-	isLoadingMovies: boolean;
-	isFetchingMore: boolean;
-	hasNextMovie: boolean;
-	shouldShowFewResults: boolean;
-	fewResultsCount: number;
-	shouldShowApiError: boolean;
-	onRetry: () => void;
-};
-
-export const MoviePage = ({
-	currentMovie,
-	isLoadingMovies,
-	isFetchingMore,
-	hasNextMovie,
-	streamingData,
-	dataIMDB,
-	tagline,
-	onButtonAction,
-	onPreviousButtonClick,
-	resetValues,
-	currentMovieIndex,
-	shouldShowNoResults,
-	noResultsMessage,
-	shouldShowFewResults,
-	fewResultsCount,
-	shouldShowApiError,
-	onRetry,
-}: MoviePageProps) => {
+export const MoviePage = ({ roulette }: { roulette: MovieRoulette }) => {
 	const navigate = useNavigate();
 	const { t } = useLanguage();
+	const { status, currentMovie } = roulette;
 
-	const isDisabled = currentMovieIndex === 0;
-
-	const goToHome = () => {
+	const goHome = () => {
+		roulette.reset();
 		navigate('/');
-		resetValues();
-	};
-
-	const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
-		if (event.key === 'Enter') {
-			goToHome();
-		}
 	};
 
 	return (
 		<div className='movie-page-container'>
 			<div className='exit-button-container'>
-				<div
-					className='exit-button-movie-page'
-					onClick={goToHome}
-					onKeyDown={handleKeyPress}
-					role='button'
-					tabIndex={0}
-					aria-label={t.exitAriaLabel}>
+				<button type='button' className='exit-button-movie-page' onClick={goHome} aria-label={t.exitAriaLabel}>
 					<UndoIcon />
-				</div>
+				</button>
 			</div>
-			{shouldShowApiError && <ApiError onRetry={onRetry} />}
-			{!shouldShowApiError && isLoadingMovies && !currentMovie && <Loader />}
-			{!shouldShowApiError && shouldShowNoResults && <NoResults message={noResultsMessage} onGoHome={goToHome} />}
-			{!shouldShowApiError && !shouldShowNoResults && currentMovie && (
+			{status === 'error' && <ApiError onRetry={roulette.retry} />}
+			{status === 'loading' && <Loader />}
+			{status === 'empty' && (
+				<NoResults
+					message={roulette.emptyReason === 'genreCombo' ? t.noResultsGenreComboMessage : undefined}
+					onGoHome={goHome}
+				/>
+			)}
+			{status === 'ready' && currentMovie && (
 				<div className='movie-info-container'>
 					<div className='movie-visual'>
 						<MoviePoster
-							isDisabled={isDisabled}
-							isNextDisabled={isFetchingMore}
-							hasNext={hasNextMovie}
-							dataIMDB={dataIMDB}
-							onButtonAction={onButtonAction}
-							onPreviousButtonClick={onPreviousButtonClick}
-							onEscButtonClick={goToHome}
-							currentMovie={currentMovie}
+							movie={currentMovie}
+							imdbId={currentMovie.detail?.imdb_id}
+							canGoBack={roulette.index > 0}
+							canGoNext={roulette.hasNext}
+							isNextBusy={roulette.isFetchingMore}
+							onNext={roulette.next}
+							onPrevious={roulette.previous}
+							onExit={goHome}
 						/>
 					</div>
 					<div className='movie-meta'>
 						<div className='movie-heading'>
 							<p className='movie-title'>{currentMovie.title}</p>
-							{!!tagline && <p className='movie-tagline'>{tagline}</p>}
+							{currentMovie.detail?.tagline && <p className='movie-tagline'>{currentMovie.detail.tagline}</p>}
 						</div>
-						<MoviePlot currentMovie={currentMovie} dataIMDB={dataIMDB} />
-						{!!(streamingData?.flatrate?.length || streamingData?.free?.length || streamingData?.ads?.length) && (
+						<MoviePlot movie={currentMovie} imdbId={currentMovie.detail?.imdb_id} />
+						{includedWithSubscription(currentMovie.streaming).length > 0 && (
 							<div className='movie-streaming'>
 								<p className='movie-streaming-label'>{t.availableOnLabel}</p>
-								<Streaming streamingData={streamingData} />
+								<Streaming availability={currentMovie.streaming} />
 							</div>
 						)}
 					</div>
 				</div>
 			)}
-			{!shouldShowNoResults && shouldShowFewResults && <FewResults count={fewResultsCount} />}
+			{status === 'ready' && roulette.showFewResults && <FewResults count={roulette.movies.length} />}
 		</div>
 	);
 };

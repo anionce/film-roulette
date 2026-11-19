@@ -1,5 +1,5 @@
 import './FewResults.scss';
-import { useLanguage } from '../../i18n/LanguageContext';
+import { useLanguage } from '../../i18n/useLanguage';
 
 export type FewResultsProps = {
 	count: number;

@@ -1,5 +1,5 @@
 import './Loader.scss';
-import { useLanguage } from '../../i18n/LanguageContext';
+import { useLanguage } from '../../i18n/useLanguage';
 
 export const Loader = () => {
 	const { t } = useLanguage();

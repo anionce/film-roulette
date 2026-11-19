@@ -8,7 +8,8 @@ export const NotFound = () => {
 			<span className='not-found-text'>
 				<a
 					className='not-found-link'
-					href='https://www.freepik.com/free-vector/oops-404-error-with-broken-robot-concept-illustration_13315300.htm#query=not%20found&position=0&from_view=keyword&track=ais'>
+					href='https://www.freepik.com/free-vector/oops-404-error-with-broken-robot-concept-illustration_13315300.htm#query=not%20found&position=0&from_view=keyword&track=ais'
+				>
 					Image by storyset
 				</a>
 				on Freepik

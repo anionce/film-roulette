@@ -1,5 +1,5 @@
-import { SelectOptions } from './selector';
-import { Language } from '../i18n/translations';
+import { type SelectOptions } from './selector';
+import { type Language } from '../i18n/translations';
 
 export enum MovieEra {
 	LastYear = 'último año',
@@ -19,8 +19,7 @@ export const ERA_LABEL_EN: Record<MovieEra, string> = {
 	[MovieEra.Classic]: 'classics',
 };
 
-export const getEraLabel = (era: MovieEra, language: Language): string =>
-	language === 'en' ? ERA_LABEL_EN[era] : era;
+export const getEraLabel = (era: MovieEra, language: Language): string => (language === 'en' ? ERA_LABEL_EN[era] : era);
 
 export const ERA_EMOJI: Record<MovieEra, string> = {
 	[MovieEra.LastYear]: '✨',
@@ -33,18 +32,17 @@ export const ERA_EMOJI: Record<MovieEra, string> = {
 
 export type EraRange = { gte?: string; lte?: string };
 
-const formatDate = (date: Date): string => date.toISOString().slice(0, 10);
+const pad = (value: number) => String(value).padStart(2, '0');
 
-const getLastYearRange = (): EraRange => {
-	const today = new Date();
+const toDateKey = (date: Date): string => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+
+export const getLastYearRange = (today = new Date()): EraRange => {
 	const oneYearAgo = new Date(today);
 	oneYearAgo.setFullYear(today.getFullYear() - 1);
-
-	return { gte: formatDate(oneYearAgo), lte: formatDate(today) };
+	return { gte: toDateKey(oneYearAgo), lte: toDateKey(today) };
 };
 
-export const ERA_RANGE: Record<MovieEra, EraRange> = {
-	[MovieEra.LastYear]: getLastYearRange(),
+const FIXED_ERA_RANGE: Record<Exclude<MovieEra, MovieEra.LastYear>, EraRange> = {
 	[MovieEra.Century21]: { gte: '2000-01-01' },
 	[MovieEra.Decade90]: { gte: '1990-01-01', lte: '1999-12-31' },
 	[MovieEra.Decade80]: { gte: '1980-01-01', lte: '1989-12-31' },
@@ -53,11 +51,8 @@ export const ERA_RANGE: Record<MovieEra, EraRange> = {
 };
 
 export const mapValueToEraRange = (value: MovieEra | null): EraRange | null => {
-	if (!value) {
-		return null;
-	}
-
-	return ERA_RANGE[value];
+	if (!value) return null;
+	return value === MovieEra.LastYear ? getLastYearRange() : FIXED_ERA_RANGE[value];
 };
 
 export const getEraSelectorOptions = (language: Language): SelectOptions[] =>

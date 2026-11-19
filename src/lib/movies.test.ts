@@ -1,19 +1,18 @@
-import { filterAvailableMovies, filterMovies, getRandomStartPage, getRandomValue, shuffleArray } from './AppHelper';
-import { CompleteMovie } from '../models/MovieResponse';
-import { STREAMING_ID, StreamingServices } from '../constants/streamingServices';
-import { FilterArguments } from '../constants/filters';
+import { describe, expect, it } from 'vitest';
 import { MovieEra } from '../constants/era';
-
-// Real TMDB data doesn't always match our display names (e.g. RTVE Play is listed as
-// plain "rtve"), so tests build availability from the enum + real provider_id instead
-// of a raw name string, matching how filterMovies actually matches (by provider_id).
-const toAvailability = (services: StreamingServices[], providerNameOverride?: Partial<Record<StreamingServices, string>>) =>
-	services.map(service => ({
-		provider_name: providerNameOverride?.[service] ?? service,
-		display_priority: 0,
-		logo_path: '',
-		provider_id: STREAMING_ID[service],
-	}));
+import type { FilterArguments } from '../constants/filters';
+import { StreamingServices } from '../constants/streamingServices';
+import type { CompleteMovie } from '../models/MovieResponse';
+import { makeCompleteMovie, toAvailability } from '../test/factories';
+import {
+	filterAvailableMovies,
+	filterMovies,
+	getRandomPage,
+	getRandomStartPage,
+	nextPageWindow,
+	randomInt,
+	shuffle,
+} from './movies';
 
 const buildMovie = (
 	id: number,
@@ -23,36 +22,32 @@ const buildMovie = (
 		buy?: StreamingServices[];
 		free?: StreamingServices[];
 		ads?: StreamingServices[];
-		providerNameOverride?: Partial<Record<StreamingServices, string>>;
+		providerName?: string;
 		originalLanguage?: string;
 		voteCount?: number;
 		releaseDate?: string;
 	} = {}
 ): CompleteMovie =>
-	({
-		id,
-		title: `Movie ${id}`,
+	makeCompleteMovie(id, [], {
 		original_language: options.originalLanguage ?? 'en',
 		vote_count: options.voteCount ?? 500,
 		release_date: options.releaseDate ?? '2024-01-01',
-		streamingData: {
-			data: {
-				link: '',
-				flatrate: toAvailability(flatratePlatforms, options.providerNameOverride),
-				rent: options.rent ? toAvailability(options.rent) : undefined,
-				buy: options.buy ? toAvailability(options.buy) : undefined,
-				free: options.free ? toAvailability(options.free, options.providerNameOverride) : undefined,
-				ads: options.ads ? toAvailability(options.ads, options.providerNameOverride) : undefined,
-			},
+		streaming: {
+			link: '',
+			flatrate: toAvailability(flatratePlatforms, options.providerName),
+			rent: options.rent && toAvailability(options.rent),
+			buy: options.buy && toAvailability(options.buy),
+			free: options.free && toAvailability(options.free, options.providerName),
+			ads: options.ads && toAvailability(options.ads, options.providerName),
 		},
-	} as unknown as CompleteMovie);
+	});
 
 const baseFilters: FilterArguments = { genre: null, duration: null, streaming: null, era: null };
 
-describe('getRandomValue', () => {
+describe('getRandomPage', () => {
 	it('skips the most popular pages while staying within the results range', () => {
 		for (let i = 0; i < 50; i++) {
-			const value = getRandomValue();
+			const value = getRandomPage();
 			expect(Number.isInteger(value)).toBe(true);
 			expect(value).toBeGreaterThanOrEqual(5);
 			expect(value).toBeLessThanOrEqual(40);
@@ -84,11 +79,11 @@ describe('getRandomStartPage', () => {
 	});
 });
 
-describe('shuffleArray', () => {
+describe('shuffle', () => {
 	it('returns an array with the same elements', () => {
 		const movies = [buildMovie(1), buildMovie(2), buildMovie(3)];
 
-		const shuffled = shuffleArray(movies);
+		const shuffled = shuffle(movies);
 
 		expect(shuffled).toHaveLength(movies.length);
 		expect(shuffled.map(movie => movie.id).sort()).toEqual(movies.map(movie => movie.id).sort());
@@ -98,7 +93,7 @@ describe('shuffleArray', () => {
 		const movies = [buildMovie(1), buildMovie(2), buildMovie(3)];
 		const original = [...movies];
 
-		shuffleArray(movies);
+		shuffle(movies);
 
 		expect(movies).toEqual(original);
 	});
@@ -166,7 +161,7 @@ describe('filterMovies', () => {
 	it('matches by provider_id even when TMDB reports a different display name (e.g. "rtve")', () => {
 		const movieOnRTVE = buildMovie(1, [], {
 			free: [StreamingServices.RTVE],
-			providerNameOverride: { [StreamingServices.RTVE]: 'rtve' },
+			providerName: 'rtve',
 		});
 
 		const result = filterMovies([movieOnRTVE], { ...baseFilters, streaming: [StreamingServices.RTVE] });
@@ -210,5 +205,41 @@ describe('filterAvailableMovies', () => {
 		const result = filterAvailableMovies([availableMovie, unavailableMovie]);
 
 		expect(result).toEqual([availableMovie]);
+	});
+});
+
+describe('randomInt', () => {
+	it('covers both ends of the range', () => {
+		expect(randomInt(5, 40, () => 0)).toBe(5);
+		expect(randomInt(5, 40, () => 0.9999)).toBe(40);
+	});
+});
+
+describe('shuffle', () => {
+	it('is a Fisher-Yates shuffle driven by the random source', () => {
+		expect(shuffle([1, 2, 3, 4], () => 0)).toEqual([2, 3, 4, 1]);
+		expect(shuffle([1, 2, 3, 4], () => 0.9999)).toEqual([1, 2, 3, 4]);
+	});
+});
+
+describe('nextPageWindow', () => {
+	it('fetches the next window of pages and moves the cursor', () => {
+		expect(nextPageWindow({ next: 3, remaining: 10 }, 10, 4)).toEqual({
+			start: 3,
+			end: 6,
+			cursor: { next: 7, remaining: 6 },
+		});
+	});
+
+	it('wraps around to page 1 after the last page while pages remain', () => {
+		expect(nextPageWindow({ next: 9, remaining: 10 }, 10, 4)).toEqual({
+			start: 9,
+			end: 10,
+			cursor: { next: 1, remaining: 8 },
+		});
+	});
+
+	it('never fetches more pages than remain', () => {
+		expect(nextPageWindow({ next: 1, remaining: 2 }, 10, 4)).toEqual({ start: 1, end: 2, cursor: { next: 3, remaining: 0 } });
 	});
 });

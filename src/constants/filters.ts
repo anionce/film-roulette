@@ -1,7 +1,7 @@
-import { MovieGenre } from './genre';
-import { MovieRuntime } from './runtime';
-import { StreamingServices } from './streamingServices';
-import { MovieEra } from './era';
+import { type MovieGenre } from './genre';
+import { type MovieRuntime } from './runtime';
+import { type StreamingServices } from './streamingServices';
+import { type MovieEra } from './era';
 
 export enum FilterType {
 	Duration = 'duration',

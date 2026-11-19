@@ -1,5 +1,5 @@
 import './LanguageToggle.scss';
-import { useLanguage } from '../../i18n/LanguageContext';
+import { useLanguage } from '../../i18n/useLanguage';
 
 export const LanguageToggle = () => {
 	const { language, toggleLanguage, t } = useLanguage();

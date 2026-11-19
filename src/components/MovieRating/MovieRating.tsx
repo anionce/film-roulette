@@ -1,16 +1,8 @@
-import { Movie } from '../../models/MovieResponse';
+import type { Movie } from '../../models/MovieResponse';
 
-export type MovieRatingProps = {
-	currentMovie: Movie;
-};
-
-export const MovieRating = ({ currentMovie }: MovieRatingProps) => {
-	const cleanRating = (currentMovie?.vote_average ?? 0).toFixed(1);
-
-	return (
-		<div className='score-badge'>
-			<span className='score-star'>★</span>
-			<span className='score-value'>{cleanRating}</span>
-		</div>
-	);
-};
+export const MovieRating = ({ movie }: { movie: Movie }) => (
+	<div className='score-badge'>
+		<span className='score-star'>★</span>
+		<span className='score-value'>{movie.vote_average.toFixed(1)}</span>
+	</div>
+);

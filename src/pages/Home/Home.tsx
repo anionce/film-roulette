@@ -1,99 +1,32 @@
-import React, { ChangeEvent, useState } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ButtonGroup } from '../../components/ButtonGroup/ButtonGroup';
+import { FiltersModal } from '../../components/FiltersModal/FiltersModal';
+import { Header } from '../../components/Header/Header';
+import { Introduction } from '../../components/Introduction/Introduction';
+import { LanguageToggle } from '../../components/LanguageToggle/LanguageToggle';
+import { StartButton } from '../../components/StartButton/StartButton';
+import { type FilterType, filterTypes, type FilterArguments } from '../../constants/filters';
+import type { RouletteMode } from '../../hooks/useMovieRoulette';
+import { useLanguage } from '../../i18n/useLanguage';
+import { canPickRandom, canSearch, EMPTY_FILTERS, hasAnyFilter } from '../../lib/filters';
 import './Home.scss';
 
-import { ButtonGroup } from '../../components/ButtonGroup/ButtonGroup';
-import { FilterArguments, FilterType, ModalOpen, filterTypes } from '../../constants/filters';
-import { PlayButton } from '../../components/PlayButton/PlayButton';
-import { FiltersModal } from '../../components/FiltersModal/FiltersModal';
-import { MAX_GENRES, MovieGenre } from '../../constants/genre';
-import { MovieRuntime } from '../../constants/runtime';
-import { StreamingServices } from '../../constants/streamingServices';
-import { MovieEra } from '../../constants/era';
-import { Introduction } from '../../components/Introduction/Introduction';
-import { RandomButton } from '../../components/RandomButton/RandomButton';
-import { LanguageToggle } from '../../components/LanguageToggle/LanguageToggle';
-import { Header } from '../../components/Header/Header';
-import { useLanguage } from '../../i18n/LanguageContext';
-
-export type HomeProps = {
+type HomeProps = {
 	filters: FilterArguments;
-	onButtonClick: (random: boolean) => void;
-	setFilters: React.Dispatch<React.SetStateAction<FilterArguments>>;
+	onFiltersChange: (filters: FilterArguments) => void;
+	onStart: (mode: RouletteMode) => void;
 };
 
-export const Home = ({ filters, onButtonClick, setFilters }: HomeProps) => {
+export const Home = ({ filters, onFiltersChange, onStart }: HomeProps) => {
 	const { t } = useLanguage();
-	const [open, setOpen] = useState<ModalOpen>({
-		[FilterType.Genre]: false,
-		[FilterType.Duration]: false,
-		[FilterType.Streaming]: false,
-		[FilterType.Era]: false,
-	});
+	const navigate = useNavigate();
+	const [openFilter, setOpenFilter] = useState<FilterType | null>(null);
 
-	const openModal = (type: FilterType): void => {
-		setOpen(prev => ({ ...prev, [type]: true }));
+	const start = (mode: RouletteMode) => {
+		onStart(mode);
+		navigate('/movie');
 	};
-
-	const closeModal = (type: FilterType) => {
-		setOpen(prev => ({ ...prev, [type]: false }));
-	};
-
-	const onSelectGenre = (event: React.MouseEvent<HTMLButtonElement>) => {
-		const value = event.currentTarget.getAttribute('data-value') as MovieGenre;
-
-		setFilters((prev: FilterArguments) => {
-			const currentGenres = prev.genre ?? [];
-			const isAlreadySelected = currentGenres.includes(value);
-
-			let nextGenres: MovieGenre[];
-			if (isAlreadySelected) {
-				nextGenres = currentGenres.filter(genre => genre !== value);
-			} else if (currentGenres.length < MAX_GENRES) {
-				nextGenres = [...currentGenres, value];
-			} else {
-				nextGenres = currentGenres;
-			}
-
-			return { ...prev, genre: nextGenres.length ? nextGenres : null };
-		});
-	};
-
-	const getSelect = (type: FilterType) => {
-		const options = {
-			[FilterType.Genre]: onSelectGenre,
-			[FilterType.Duration]: onDurationChange,
-			[FilterType.Streaming]: selectedServicesOnChange,
-			[FilterType.Era]: onEraChange,
-		};
-
-		return options[type];
-	};
-
-	const onDurationChange = (event: ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>): void => {
-		const value = event.currentTarget.getAttribute('data-value');
-		setFilters((prev: FilterArguments) => ({ ...prev, duration: value as MovieRuntime }));
-	};
-
-	const onEraChange = (event: React.MouseEvent<HTMLButtonElement>): void => {
-		const value = event.currentTarget.getAttribute('data-value');
-		setFilters((prev: FilterArguments) => ({ ...prev, era: value as MovieEra }));
-	};
-
-	const selectedServicesOnChange = (event: ChangeEvent<HTMLInputElement>, newServices: StreamingServices[]): void => {
-		setFilters((prev: FilterArguments) => ({ ...prev, streaming: newServices }));
-	};
-
-	const onClearFilter = (type: FilterType): void => {
-		setFilters((prev: FilterArguments) => ({ ...prev, [type]: null }));
-	};
-
-	const hasAnyFilterSelected = !!(filters.genre?.length || filters.duration || filters.streaming?.length || filters.era);
-
-	const onClearAllFilters = (): void => {
-		setFilters({ genre: null, duration: null, streaming: null, era: null });
-	};
-
-	const isDisabled = !filters.streaming?.length;
 
 	return (
 		<div className='home-mobile-container'>
@@ -102,40 +35,26 @@ export const Home = ({ filters, onButtonClick, setFilters }: HomeProps) => {
 			</div>
 			<Header />
 			<Introduction />
-			<ButtonGroup filters={filters} openModal={openModal} />
-			{hasAnyFilterSelected && (
-				<button className='clear-filters-button' onClick={onClearAllFilters} type='button'>
+			<ButtonGroup filters={filters} openModal={setOpenFilter} />
+			{hasAnyFilter(filters) && (
+				<button className='clear-filters-button' onClick={() => onFiltersChange(EMPTY_FILTERS)} type='button'>
 					{t.clearFiltersButton}
 				</button>
 			)}
 			<div className='action-button-container'>
-				<PlayButton filters={filters} onButtonClick={onButtonClick} />
-				<RandomButton filters={filters} onButtonClick={onButtonClick} />
+				<StartButton mode='filtered' disabled={!canSearch(filters)} onStart={start} />
+				<StartButton mode='random' disabled={!canPickRandom(filters)} onStart={start} />
 			</div>
-			{filterTypes.map(type => {
-				const selectedValue =
-					type === FilterType.Genre
-						? filters.genre
-						: type === FilterType.Duration
-						? filters.duration
-						: type === FilterType.Era
-						? filters.era
-						: null;
-
-				return (
-					<FiltersModal
-						key={`filter-modal-${type}`}
-						open={open[type]}
-						filterType={type}
-						closeModal={closeModal}
-						onSelect={getSelect(type)}
-						filters={filters.streaming}
-						selectedValue={selectedValue}
-						isButtonDisabled={isDisabled}
-						onClear={onClearFilter}
-					/>
-				);
-			})}
+			{filterTypes.map(type => (
+				<FiltersModal
+					key={type}
+					open={openFilter === type}
+					filterType={type}
+					filters={filters}
+					onChange={onFiltersChange}
+					onClose={() => setOpenFilter(null)}
+				/>
+			))}
 		</div>
 	);
 };

@@ -1,17 +1,17 @@
 @use '../../assets/styles/variables' as *;
 
-.mobile-play-button-container {
+.start-button-container {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 
-	.mobile-play-button {
+	.start-button {
 		display: flex;
 		align-items: center;
 		gap: 10px;
 		padding: 15px 26px;
 		border-radius: 999px;
-		background: var(--violet);
+		background: var(--coral);
 		border: 3px solid var(--ink);
 		border-bottom: 7px solid var(--ink);
 		cursor: pointer;
@@ -25,7 +25,11 @@
 			width: 24px;
 		}
 
-		&.button-disabled {
+		&.start-button-random {
+			background: var(--violet);
+		}
+
+		&:disabled {
 			background: var(--ink-soft);
 			cursor: not-allowed;
 			opacity: 0.6;

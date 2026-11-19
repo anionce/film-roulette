@@ -1,4 +1,4 @@
-import { SelectOptions } from './selector';
+import { type SelectOptions } from './selector';
 
 export const mapValueToMovieRuntime = (value: MovieRuntime | null): number | undefined => {
 	return value ? RUNTIME_LENGTH[value] : undefined;

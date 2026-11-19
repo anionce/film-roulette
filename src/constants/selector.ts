@@ -2,7 +2,7 @@ import { FilterType } from './filters';
 import { getGenreSelectorOptions } from './genre';
 import { runtimeSelectorOptions } from './runtime';
 import { getEraSelectorOptions } from './era';
-import { Language } from '../i18n/translations';
+import { type Language } from '../i18n/translations';
 
 export type SelectOptions = {
 	value: string;

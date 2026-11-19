@@ -1,29 +1,27 @@
-import React from 'react';
-import { getOptionsForSelector } from '../../../constants/selector';
 import { FilterType } from '../../../constants/filters';
 import { MAX_GENRES } from '../../../constants/genre';
-import { useLanguage } from '../../../i18n/LanguageContext';
-import '../FiltersModal.scss';
+import { getOptionsForSelector } from '../../../constants/selector';
+import { useLanguage } from '../../../i18n/useLanguage';
 
-export type DefaultModalContentProps = {
-	onSelect: (event: React.MouseEvent<HTMLButtonElement>) => void;
+type DefaultModalContentProps = {
 	filterType: FilterType;
-	selectedValue?: string | string[] | null;
+	selectedValues: string[];
+	onSelect: (value: string) => void;
 };
 
-export const DefaultModalContent = ({ onSelect, filterType, selectedValue }: DefaultModalContentProps) => {
+export const DefaultModalContent = ({ filterType, selectedValues, onSelect }: DefaultModalContentProps) => {
 	const { t, language } = useLanguage();
 	const isGenre = filterType === FilterType.Genre;
-	const isEra = filterType === FilterType.Era;
-
-	const selectedValues = Array.isArray(selectedValue) ? selectedValue : selectedValue ? [selectedValue] : [];
 	const isMaxReached = isGenre && selectedValues.length >= MAX_GENRES;
-
-	const modalTitle = isGenre ? t.genreModalTitle(MAX_GENRES) : isEra ? t.eraModalTitle : t.durationModalTitle;
+	const title = isGenre
+		? t.genreModalTitle(MAX_GENRES)
+		: filterType === FilterType.Era
+			? t.eraModalTitle
+			: t.durationModalTitle;
 
 	return (
 		<div className='modal-content-container'>
-			<p className='modal-content-title'>{modalTitle}</p>
+			<p className='modal-content-title'>{title}</p>
 			{isMaxReached && <p className='modal-content-hint'>{t.genreMaxHint(MAX_GENRES)}</p>}
 			<div className={`genre-grid ${isGenre ? 'genre-grid-plain' : ''}`}>
 				{getOptionsForSelector(filterType, language).map(({ text, value, emoji }) => {
@@ -32,11 +30,13 @@ export const DefaultModalContent = ({ onSelect, filterType, selectedValue }: Def
 
 					return (
 						<button
-							onClick={onSelect}
-							data-value={value}
+							type='button'
 							key={value}
+							onClick={() => onSelect(value)}
 							disabled={isDisabled}
-							className={`genre-tile ${isSelected ? 'selected' : ''} ${isDisabled ? 'tile-disabled' : ''}`}>
+							aria-pressed={isSelected}
+							className={`genre-tile ${isSelected ? 'selected' : ''} ${isDisabled ? 'tile-disabled' : ''}`}
+						>
 							{!isGenre && <span className='emoji'>{emoji}</span>}
 							{text}
 						</button>

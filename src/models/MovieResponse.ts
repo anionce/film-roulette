@@ -5,8 +5,6 @@ export type APIMovieResponse = {
 	total_results: number;
 };
 
-export type MovieArray = Movie[];
-
 export type Movie = {
 	adult: boolean;
 	backdrop_path: string;
@@ -77,12 +75,12 @@ export type CountryResults = {
 	link: string;
 };
 
-export type StreamingDetail = Movie & {
+export type StreamingDetail = {
 	id: number;
 	results: StreamingResults;
 };
 
 export type CompleteMovie = Movie & {
-	detailData: { data: MovieDetail };
-	streamingData: { data: CountryResults };
+	detail?: MovieDetail;
+	streaming?: CountryResults;
 };

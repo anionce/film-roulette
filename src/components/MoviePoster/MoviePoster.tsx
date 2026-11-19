@@ -1,91 +1,97 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useEffectEvent, useState } from 'react';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 import { useSwipeable } from 'react-swipeable';
 import { MOVIE_IMDB_PATH, MOVIE_POSTER_PATH } from '../../constants/movie';
-import { Movie } from '../../models/MovieResponse';
+import { useLanguage } from '../../i18n/useLanguage';
+import type { Movie } from '../../models/MovieResponse';
 import { MovieRating } from '../MovieRating/MovieRating';
 import './MoviePoster.scss';
 
-export type MoviePosterProps = {
-	currentMovie: Movie;
-	dataIMDB: string;
-	onButtonAction: () => void;
-	onPreviousButtonClick: () => void;
-	onEscButtonClick: () => void;
-	isDisabled: boolean;
-	isNextDisabled?: boolean;
-	hasNext?: boolean;
+type MoviePosterProps = {
+	movie: Movie;
+	imdbId?: string;
+	canGoBack: boolean;
+	canGoNext: boolean;
+	isNextBusy: boolean;
+	onNext: () => void;
+	onPrevious: () => void;
+	onExit: () => void;
+};
+
+const NEXT_KEYS = ['ArrowRight', 'Right'];
+const PREVIOUS_KEYS = ['ArrowLeft', 'Left'];
+const EXIT_KEYS = ['Escape', 'Esc'];
+
+const PosterImage = ({ movie, imdbId }: { movie: Movie; imdbId?: string }) => {
+	const [isLoaded, setIsLoaded] = useState(false);
+
+	return (
+		<div className='poster-container'>
+			{!isLoaded && <div className='poster-skeleton' />}
+			<a href={`${MOVIE_IMDB_PATH}${imdbId ?? ''}`} target='_blank' rel='noreferrer'>
+				<img
+					className='mobile-poster-img'
+					alt={movie.title}
+					style={{ display: isLoaded ? 'block' : 'none' }}
+					src={`${MOVIE_POSTER_PATH}${movie.poster_path}`}
+					onLoad={() => setIsLoaded(true)}
+				/>
+			</a>
+			{isLoaded && <MovieRating movie={movie} />}
+		</div>
+	);
 };
 
 export const MoviePoster = ({
-	currentMovie,
-	dataIMDB,
-	onButtonAction,
-	onPreviousButtonClick,
-	onEscButtonClick,
-	isDisabled,
-	isNextDisabled,
-	hasNext = true,
+	movie,
+	imdbId,
+	canGoBack,
+	canGoNext,
+	isNextBusy,
+	onNext,
+	onPrevious,
+	onExit,
 }: MoviePosterProps) => {
+	const { t } = useLanguage();
+	const goNext = () => canGoNext && !isNextBusy && onNext();
+
 	const swipeHandlers = useSwipeable({
-		onSwiped: (eventData: any) => handleKeyPress(eventData),
+		onSwipedLeft: goNext,
+		onSwipedRight: onPrevious,
 	});
 
-	const handleKeyPress = (event: any) => {
-		const { dir } = event;
-		const { key } = event;
-
-		if ((key === 'ArrowRight' || key === 'Right' || dir === 'Left') && !isNextDisabled && hasNext) {
-			onButtonAction();
-		}
-
-		if (key === 'ArrowLeft' || key === 'Left' || dir === 'Right') {
-			onPreviousButtonClick();
-		}
-
-		if (key === 'Escape' || key === 'Esc') {
-			onEscButtonClick();
-		}
-	};
+	const onKeyDown = useEffectEvent((event: KeyboardEvent) => {
+		if (NEXT_KEYS.includes(event.key)) goNext();
+		if (PREVIOUS_KEYS.includes(event.key)) onPrevious();
+		if (EXIT_KEYS.includes(event.key)) onExit();
+	});
 
 	useEffect(() => {
-		window.addEventListener('keydown', handleKeyPress);
-
-		return () => {
-			window.removeEventListener('keydown', handleKeyPress);
-		};
-		// eslint-disable-next-line
-	}, [onButtonAction, onPreviousButtonClick]);
-
-	const [isImageLoaded, setIsImageLoaded] = useState(false);
-
-	useEffect(() => {
-		setIsImageLoaded(false);
-	}, [currentMovie?.poster_path]);
+		window.addEventListener('keydown', onKeyDown);
+		return () => window.removeEventListener('keydown', onKeyDown);
+	}, []);
 
 	return (
 		<div {...swipeHandlers} className='poster-button-container'>
-			<button onClick={onPreviousButtonClick} className={`button-movie-page ${isDisabled ? 'button-disabled' : ''}`}>
+			<button
+				type='button'
+				onClick={onPrevious}
+				disabled={!canGoBack}
+				aria-label={t.previousMovieAriaLabel}
+				className={`button-movie-page ${canGoBack ? '' : 'button-disabled'}`}
+			>
 				<SkipPreviousIcon />
 			</button>
-			<div className='poster-container'>
-				{!isImageLoaded && <div className='poster-skeleton' />}
-				<a href={`${MOVIE_IMDB_PATH}${dataIMDB}`} target='_blank' rel='noreferrer'>
-					<img
-						className='mobile-poster-img'
-						alt={currentMovie?.title}
-						style={{ display: isImageLoaded ? 'block' : 'none' }}
-						src={`${MOVIE_POSTER_PATH}${currentMovie?.poster_path}`}
-						onLoad={() => setIsImageLoaded(true)}
-					/>
-				</a>
-				{isImageLoaded && <MovieRating currentMovie={currentMovie} />}
-			</div>
-			{hasNext && (
+			<PosterImage key={movie.id} movie={movie} imdbId={imdbId} />
+			{canGoNext && (
 				<button
-					onClick={() => !isNextDisabled && onButtonAction()}
-					className={`button-movie-page ${isNextDisabled ? 'button-disabled' : ''}`}>
+					type='button'
+					onClick={goNext}
+					disabled={isNextBusy}
+					aria-label={t.nextMovieAriaLabel}
+					className={`button-movie-page ${isNextBusy ? 'button-disabled' : ''}`}
+				>
 					<SkipNextIcon />
 				</button>
 			)}

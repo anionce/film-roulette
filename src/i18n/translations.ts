@@ -12,6 +12,8 @@ export type Translations = {
 	genreMaxHint: (max: number) => string;
 	streamingModalTitle: string;
 	confirmAriaLabel: string;
+	previousMovieAriaLabel: string;
+	nextMovieAriaLabel: string;
 	randomButton: string;
 	randomAriaLabel: string;
 	searchButton: string;
@@ -48,6 +50,8 @@ export const translations: Record<Language, Translations> = {
 		genreMaxHint: max => `Ya has elegido ${max} — toca uno para cambiarlo`,
 		streamingModalTitle: 'Selecciona tus plataformas:',
 		confirmAriaLabel: 'Aceptar selección',
+		previousMovieAriaLabel: 'Película anterior',
+		nextMovieAriaLabel: 'Siguiente película',
 		randomButton: '¡Random!',
 		randomAriaLabel: 'Elegir película al azar',
 		searchButton: 'Buscar',
@@ -82,6 +86,8 @@ export const translations: Record<Language, Translations> = {
 		genreMaxHint: max => `You already picked ${max} — tap one to swap it`,
 		streamingModalTitle: 'Select your platforms:',
 		confirmAriaLabel: 'Confirm selection',
+		previousMovieAriaLabel: 'Previous movie',
+		nextMovieAriaLabel: 'Next movie',
 		randomButton: 'Random!',
 		randomAriaLabel: 'Pick a random movie',
 		searchButton: 'Search',

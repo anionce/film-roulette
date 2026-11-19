@@ -1,36 +1,30 @@
-import './Streaming.scss';
-import { AvailabilityInfo, CountryResults } from '../../models/MovieResponse';
 import { MOVIE_POSTER_PATH } from '../../constants/movie';
+import { includedWithSubscription } from '../../lib/movies';
+import type { CountryResults } from '../../models/MovieResponse';
+import './Streaming.scss';
 
-export type StreamingProps = {
-	streamingData: CountryResults | undefined;
-};
-
-export const Streaming = ({ streamingData }: StreamingProps) => {
-	const { flatrate, free, ads, link: justWatchLink } = streamingData || {};
-	const streamingInfo = [...(flatrate ?? []), ...(free ?? []), ...(ads ?? [])].filter(
-		(info, index, all) => all.findIndex(other => other.provider_id === info.provider_id) === index
+export const Streaming = ({ availability }: { availability: CountryResults | undefined }) => {
+	const providers = includedWithSubscription(availability).filter(
+		(provider, index, all) => all.findIndex(other => other.provider_id === provider.provider_id) === index
 	);
 
 	return (
 		<div className='streaming-container'>
-			{streamingInfo.map((info: AvailabilityInfo) => {
-				return (
-					<a
-						key={info.provider_id}
-						className='streaming-tile'
-						href={justWatchLink}
-						target='_blank'
-						rel='noreferrer'>
-						<img
-							className='streaming-logo'
-							key={info.provider_id}
-							alt={info.provider_name}
-							src={`${MOVIE_POSTER_PATH}${info.logo_path}`}
-						/>
-					</a>
-				);
-			})}
+			{providers.map(provider => (
+				<a
+					key={provider.provider_id}
+					className='streaming-tile'
+					href={availability?.link}
+					target='_blank'
+					rel='noreferrer'
+				>
+					<img
+						className='streaming-logo'
+						alt={provider.provider_name}
+						src={`${MOVIE_POSTER_PATH}${provider.logo_path}`}
+					/>
+				</a>
+			))}
 		</div>
 	);
 };
