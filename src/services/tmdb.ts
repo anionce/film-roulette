@@ -106,6 +106,10 @@ export const discoverParams = (args: DiscoverArgs): URLSearchParams => {
 export const discoverMovies = (args: DiscoverArgs, signal?: AbortSignal) =>
 	fetchTmdb<APIMovieResponse>('discover/movie', discoverParams(args), signal);
 
+export const searchMovies = async (query: string, language: string, signal?: AbortSignal): Promise<Movie[]> =>
+	(await fetchTmdb<APIMovieResponse>('search/movie', new URLSearchParams({ query, language, include_adult: 'false' }), signal))
+		.results;
+
 const getMovieDetail = (id: number, language: string, signal?: AbortSignal) =>
 	fetchTmdb<MovieDetail>(`movie/${id}`, new URLSearchParams({ language }), signal);
 

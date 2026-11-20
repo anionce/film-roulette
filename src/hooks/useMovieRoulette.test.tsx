@@ -6,11 +6,16 @@ import { StreamingServices } from '../constants/streamingServices';
 import { LanguageProvider } from '../i18n/LanguageProvider';
 import { EMPTY_FILTERS } from '../lib/filters';
 import type { APIMovieResponse, Movie } from '../models/MovieResponse';
-import { discoverMovies, withDetails } from '../services/tmdb';
+import { RecommendationError, fetchRecommendations } from '../services/recommendations';
+import { discoverMovies, searchMovies, withDetails } from '../services/tmdb';
 import { makeMovie, toAvailability } from '../test/factories';
 import { useMovieRoulette } from './useMovieRoulette';
 
-vi.mock('../services/tmdb', () => ({ discoverMovies: vi.fn(), withDetails: vi.fn() }));
+vi.mock('../services/tmdb', () => ({ discoverMovies: vi.fn(), searchMovies: vi.fn(), withDetails: vi.fn() }));
+vi.mock('../services/recommendations', async importOriginal => ({
+	...(await importOriginal<Record<string, unknown>>()),
+	fetchRecommendations: vi.fn(),
+}));
 
 const page = (movies: Movie[], totalPages = 1): APIMovieResponse => ({
 	page: 1,
@@ -96,6 +101,65 @@ describe('useMovieRoulette', () => {
 
 		await act(async () => roulette.current.retry());
 		await waitFor(() => expect(roulette.current.status).toBe('ready'));
+	});
+
+	it('recommends the movies the AI suggested that are available', async () => {
+		vi.mocked(fetchRecommendations).mockResolvedValue([
+			{ title: 'Heat', year: 1995 },
+			{ title: 'Unknown film', year: 2001 },
+			{ title: 'Heat', year: 1995 },
+		]);
+		vi.mocked(searchMovies).mockImplementation(async title =>
+			title === 'Heat' ? [makeMovie({ id: 7, release_date: '1995-12-15' })] : []
+		);
+		const roulette = renderRoulette();
+
+		await act(() => roulette.current.recommend('heist movies'));
+
+		expect(fetchRecommendations).toHaveBeenCalledWith('heist movies', expect.any(AbortSignal));
+		expect(roulette.current.mode).toBe('ai');
+		expect(roulette.current.status).toBe('ready');
+		expect(roulette.current.movies.map(movie => movie.id)).toEqual([7]);
+		expect(roulette.current.hasNext).toBe(false);
+	});
+
+	it('is empty when none of the recommendations can be watched in Spain', async () => {
+		vi.mocked(fetchRecommendations).mockResolvedValue([{ title: 'Heat', year: 1995 }]);
+		vi.mocked(searchMovies).mockResolvedValue([makeMovie({ id: 7 })]);
+		vi.mocked(withDetails).mockImplementation(async movies => movies.map(movie => ({ ...movie })));
+		const roulette = renderRoulette();
+
+		await act(() => roulette.current.recommend('heist movies'));
+
+		expect(roulette.current.status).toBe('empty');
+		expect(roulette.current.emptyReason).toBe('aiUnavailable');
+	});
+
+	it('tells apart prompts that are not about movies and exhausted quota', async () => {
+		vi.mocked(fetchRecommendations).mockRejectedValueOnce(new RecommendationError('notMovies'));
+		const roulette = renderRoulette();
+
+		await act(() => roulette.current.recommend('capital of France'));
+		expect(roulette.current.status).toBe('empty');
+		expect(roulette.current.emptyReason).toBe('notMovies');
+
+		vi.mocked(fetchRecommendations).mockRejectedValueOnce(new RecommendationError('quotaExceeded'));
+		await act(() => roulette.current.recommend('anything'));
+		expect(roulette.current.status).toBe('error');
+		expect(roulette.current.errorReason).toBe('quotaExceeded');
+	});
+
+	it('retries an AI recommendation with the same prompt', async () => {
+		vi.mocked(fetchRecommendations).mockRejectedValueOnce(new RecommendationError('failed'));
+		const roulette = renderRoulette();
+
+		await act(() => roulette.current.recommend('space movies'));
+		expect(roulette.current.status).toBe('error');
+
+		vi.mocked(fetchRecommendations).mockResolvedValue([]);
+		await act(async () => roulette.current.retry());
+
+		expect(fetchRecommendations).toHaveBeenLastCalledWith('space movies', expect.any(AbortSignal));
 	});
 
 	it('resets back to idle', async () => {

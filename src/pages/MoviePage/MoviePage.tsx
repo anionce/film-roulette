@@ -7,10 +7,19 @@ import { MoviePlot } from '../../components/MoviePlot/MoviePlot';
 import { MoviePoster } from '../../components/MoviePoster/MoviePoster';
 import { NoResults } from '../../components/NoResults/NoResults';
 import { Streaming } from '../../components/Streaming/Streaming';
-import type { MovieRoulette } from '../../hooks/useMovieRoulette';
+import type { EmptyReason, MovieRoulette } from '../../hooks/useMovieRoulette';
 import { useLanguage } from '../../i18n/useLanguage';
+import type { Translations } from '../../i18n/translations';
 import { includedWithSubscription } from '../../lib/movies';
 import './MoviePage.scss';
+
+const emptyMessage = (reason: EmptyReason, t: Translations): string | undefined =>
+	({
+		default: undefined,
+		genreCombo: t.noResultsGenreComboMessage,
+		notMovies: t.aiNotMoviesMessage,
+		aiUnavailable: t.aiUnavailableMessage,
+	})[reason];
 
 export const MoviePage = ({ roulette }: { roulette: MovieRoulette }) => {
 	const navigate = useNavigate();
@@ -29,14 +38,14 @@ export const MoviePage = ({ roulette }: { roulette: MovieRoulette }) => {
 					<UndoIcon />
 				</button>
 			</div>
-			{status === 'error' && <ApiError onRetry={roulette.retry} />}
-			{status === 'loading' && <Loader />}
-			{status === 'empty' && (
-				<NoResults
-					message={roulette.emptyReason === 'genreCombo' ? t.noResultsGenreComboMessage : undefined}
-					onGoHome={goHome}
+			{status === 'error' && (
+				<ApiError
+					message={roulette.errorReason === 'quotaExceeded' ? t.aiQuotaMessage : undefined}
+					onRetry={roulette.retry}
 				/>
 			)}
+			{status === 'loading' && <Loader />}
+			{status === 'empty' && <NoResults message={emptyMessage(roulette.emptyReason, t)} onGoHome={goHome} />}
 			{status === 'ready' && currentMovie && (
 				<div className='movie-info-container'>
 					<div className='movie-visual'>

@@ -1,13 +1,13 @@
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import ShuffleIcon from '@mui/icons-material/Shuffle';
-import type { RouletteMode } from '../../hooks/useMovieRoulette';
+import type { StartMode } from '../../hooks/useMovieRoulette';
 import { useLanguage } from '../../i18n/useLanguage';
 import './StartButton.scss';
 
 type StartButtonProps = {
-	mode: RouletteMode;
+	mode: StartMode;
 	disabled: boolean;
-	onStart: (mode: RouletteMode) => void;
+	onStart: (mode: StartMode) => void;
 };
 
 export const StartButton = ({ mode, disabled, onStart }: StartButtonProps) => {

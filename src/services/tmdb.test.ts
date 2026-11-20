@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { makeMovie } from '../test/factories';
-import { discoverMovies, discoverParams, TmdbError, withDetails } from './tmdb';
+import { discoverMovies, discoverParams, searchMovies, TmdbError, withDetails } from './tmdb';
 
 const jsonResponse = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status });
 
@@ -60,6 +60,18 @@ describe('requests', () => {
 		fetchMock.mockReset().mockResolvedValue(jsonResponse({}, 404));
 		await expect(discoverMovies({ page: 1, language: 'es-ES' })).rejects.toEqual(new TmdbError(404));
 		expect(fetchMock).toHaveBeenCalledTimes(1);
+	});
+
+	it('searches movies by title in the requested language', async () => {
+		const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ results: [makeMovie({ id: 3 })] }));
+		vi.stubGlobal('fetch', fetchMock);
+
+		const results = await searchMovies('Heat', 'es-ES');
+
+		expect(results.map(movie => movie.id)).toEqual([3]);
+		const url = new URL(fetchMock.mock.calls[0][0]);
+		expect(url.pathname).toBe('/3/search/movie');
+		expect(Object.fromEntries(url.searchParams)).toEqual({ query: 'Heat', language: 'es-ES', include_adult: 'false' });
 	});
 
 	it('adds details and Spanish providers, tolerating failures', async () => {

@@ -17,7 +17,12 @@ export const App = () => {
 				<Route
 					index
 					element={
-						<Home filters={filters} onFiltersChange={setFilters} onStart={mode => roulette.start(mode, filters)} />
+						<Home
+							filters={filters}
+							onFiltersChange={setFilters}
+							onStart={mode => roulette.start(mode, filters)}
+							onRecommend={roulette.recommend}
+						/>
 					}
 				/>
 				<Route path='/movie' element={roulette.mode ? <MoviePage roulette={roulette} /> : <Navigate to='/' replace />} />

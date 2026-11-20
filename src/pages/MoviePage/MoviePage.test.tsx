@@ -14,12 +14,14 @@ const makeRoulette = (overrides: Partial<MovieRoulette> = {}): MovieRoulette => 
 		movies,
 		index: 0,
 		emptyReason: 'default',
+		errorReason: 'default',
 		isFetchingMore: false,
 		isCatalogExhausted: false,
 		currentMovie: movies[0],
 		hasNext: true,
 		showFewResults: false,
 		start: vi.fn(),
+		recommend: vi.fn(),
 		next: vi.fn(),
 		previous: vi.fn(),
 		reset: vi.fn(),
@@ -77,5 +79,18 @@ describe('MoviePage', () => {
 		rerender(<MoviePage roulette={roulette} />);
 		screen.getByRole('button', { name: 'Reintentar' }).click();
 		expect(roulette.retry).toHaveBeenCalled();
+	});
+
+	it('explains AI specific empty and error states', () => {
+		const { rerender } = renderWithProviders(
+			<MoviePage roulette={makeRoulette({ status: 'empty', emptyReason: 'notMovies' })} />
+		);
+		expect(screen.getByText(/Solo puedo recomendarte películas/)).toBeInTheDocument();
+
+		rerender(<MoviePage roulette={makeRoulette({ status: 'empty', emptyReason: 'aiUnavailable' })} />);
+		expect(screen.getByText(/disponible ahora mismo en España/)).toBeInTheDocument();
+
+		rerender(<MoviePage roulette={makeRoulette({ status: 'error', errorReason: 'quotaExceeded' })} />);
+		expect(screen.getByText(/límite gratuito/)).toBeInTheDocument();
 	});
 });

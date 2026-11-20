@@ -3,15 +3,17 @@ import { MovieEra } from '../constants/era';
 import type { FilterArguments } from '../constants/filters';
 import { StreamingServices } from '../constants/streamingServices';
 import type { CompleteMovie } from '../models/MovieResponse';
-import { makeCompleteMovie, toAvailability } from '../test/factories';
+import { makeCompleteMovie, makeMovie, toAvailability } from '../test/factories';
 import {
 	filterAvailableMovies,
 	filterMovies,
 	getRandomPage,
 	getRandomStartPage,
 	nextPageWindow,
+	pickSearchResult,
 	randomInt,
 	shuffle,
+	uniqueById,
 } from './movies';
 
 const buildMovie = (
@@ -241,5 +243,28 @@ describe('nextPageWindow', () => {
 
 	it('never fetches more pages than remain', () => {
 		expect(nextPageWindow({ next: 1, remaining: 2 }, 10, 4)).toEqual({ start: 1, end: 2, cursor: { next: 3, remaining: 0 } });
+	});
+});
+
+describe('pickSearchResult', () => {
+	const results = [makeMovie({ id: 1, release_date: '2009-05-01' }), makeMovie({ id: 2, release_date: '1995-12-15' })];
+
+	it('prefers the result released in the recommended year', () => {
+		expect(pickSearchResult(results, 1995)?.id).toBe(2);
+	});
+
+	it('falls back to the top result when the year is unknown or not found', () => {
+		expect(pickSearchResult(results, null)?.id).toBe(1);
+		expect(pickSearchResult(results, 1800)?.id).toBe(1);
+	});
+
+	it('returns nothing for empty results', () => {
+		expect(pickSearchResult([], 1995)).toBeUndefined();
+	});
+});
+
+describe('uniqueById', () => {
+	it('keeps one item per id', () => {
+		expect(uniqueById([{ id: 1 }, { id: 2 }, { id: 1 }])).toEqual([{ id: 1 }, { id: 2 }]);
 	});
 });

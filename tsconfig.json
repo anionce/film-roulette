@@ -19,5 +19,5 @@
 		"verbatimModuleSyntax": true,
 		"types": ["vite/client"]
 	},
-	"include": ["src", "vite.config.ts"]
+	"include": ["src", "netlify", "vite.config.ts"]
 }

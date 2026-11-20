@@ -35,6 +35,12 @@ export type Translations = {
 	appTagline: string;
 	clearFiltersButton: string;
 	clearSelectionButton: string;
+	aiPromptLabel: string;
+	aiPromptPlaceholder: string;
+	aiPromptButton: string;
+	aiNotMoviesMessage: string;
+	aiUnavailableMessage: string;
+	aiQuotaMessage: string;
 };
 
 export const translations: Record<Language, Translations> = {
@@ -73,6 +79,13 @@ export const translations: Record<Language, Translations> = {
 		appTagline: 'Descubre entre miles de películas',
 		clearFiltersButton: 'Borrar filtros',
 		clearSelectionButton: 'Borrar selección',
+		aiPromptLabel: 'O cuéntale a la IA qué te apetece',
+		aiPromptPlaceholder: 'Ej: un thriller de atracos que no dure mucho',
+		aiPromptButton: 'Recomiéndame',
+		aiNotMoviesMessage: 'Solo puedo recomendarte películas. Cuéntame qué te apetece ver.',
+		aiUnavailableMessage:
+			'Ninguna de las recomendaciones está disponible ahora mismo en España. Prueba con otra descripción.',
+		aiQuotaMessage: 'La IA ha llegado a su límite gratuito por ahora. Inténtalo de nuevo más tarde o usa los filtros.',
 	},
 	en: {
 		introGreeting: "Hi! Let's pick something awesome to watch 🤗",
@@ -109,5 +122,11 @@ export const translations: Record<Language, Translations> = {
 		appTagline: 'Discover thousands of movies',
 		clearFiltersButton: 'Clear filters',
 		clearSelectionButton: 'Clear selection',
+		aiPromptLabel: 'Or tell the AI what you feel like',
+		aiPromptPlaceholder: 'E.g. a heist thriller that is not too long',
+		aiPromptButton: 'Recommend',
+		aiNotMoviesMessage: 'I can only recommend movies. Tell me what you feel like watching.',
+		aiUnavailableMessage: 'None of the recommendations are available in Spain right now. Try a different description.',
+		aiQuotaMessage: 'The AI has reached its free limit for now. Try again later or use the filters.',
 	},
 };

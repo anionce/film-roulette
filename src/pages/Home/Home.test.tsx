@@ -7,11 +7,14 @@ import { EMPTY_FILTERS } from '../../lib/filters';
 import { renderWithProviders } from '../../test/render';
 import { Home } from './Home';
 
-const HomeWithState = ({ onStart }: { onStart: () => void }) => {
+const HomeWithState = ({ onStart, onRecommend = vi.fn() }: { onStart: () => void; onRecommend?: (prompt: string) => void }) => {
 	const [filters, setFilters] = useState<FilterArguments>(EMPTY_FILTERS);
 	return (
 		<Routes>
-			<Route index element={<Home filters={filters} onFiltersChange={setFilters} onStart={onStart} />} />
+			<Route
+				index
+				element={<Home filters={filters} onFiltersChange={setFilters} onStart={onStart} onRecommend={onRecommend} />}
+			/>
 			<Route path='/movie' element={<p>Movie page</p>} />
 		</Routes>
 	);
@@ -47,6 +50,20 @@ describe('Home', () => {
 
 		await user.click(screen.getByRole('button', { name: 'Elegir película al azar' }));
 		expect(onStart).toHaveBeenCalledWith('random');
+	});
+
+	it('sends the described movie to the AI recommender', async () => {
+		const onRecommend = vi.fn();
+		const { user } = renderWithProviders(<HomeWithState onStart={vi.fn()} onRecommend={onRecommend} />);
+
+		const submit = screen.getByRole('button', { name: 'Recomiéndame' });
+		expect(submit).toBeDisabled();
+
+		await user.type(screen.getByLabelText(/cuéntale a la IA/i), '  un thriller corto  ');
+		await user.click(submit);
+
+		expect(onRecommend).toHaveBeenCalledWith('un thriller corto');
+		expect(screen.getByText('Movie page')).toBeInTheDocument();
 	});
 
 	it('only confirms platforms once one is selected', async () => {

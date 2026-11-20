@@ -1,7 +1,7 @@
 import type { FilterArguments } from '../constants/filters';
 import { mapValueToEraRange, type MovieEra } from '../constants/era';
 import { STREAMING_ID } from '../constants/streamingServices';
-import type { AvailabilityInfo, CompleteMovie, CountryResults } from '../models/MovieResponse';
+import type { AvailabilityInfo, CompleteMovie, CountryResults, Movie } from '../models/MovieResponse';
 
 export const RANDOM_PAGE_LIMIT = 40;
 export const MIN_RANDOM_PAGE = 5;
@@ -59,6 +59,13 @@ export const filterAvailableMovies = (movies: CompleteMovie[]): CompleteMovie[] 
 
 export const filterMovies = (movies: CompleteMovie[], filters: FilterArguments): CompleteMovie[] =>
 	filterAvailableMovies(movies).filter(movie => isWithinEraRange(movie, filters.era) && isOnSelectedPlatforms(movie, filters));
+
+export const pickSearchResult = (results: Movie[], year: number | null): Movie | undefined =>
+	results.find(movie => year !== null && movie.release_date.startsWith(String(year))) ?? results[0];
+
+export const uniqueById = <T extends { id: number }>(items: T[]): T[] => [
+	...new Map(items.map(item => [item.id, item])).values(),
+];
 
 export type PageCursor = {
 	next: number;

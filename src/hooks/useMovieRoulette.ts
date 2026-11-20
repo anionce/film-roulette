@@ -5,21 +5,28 @@ import { mapValueToGenre } from '../constants/genre';
 import { mapValueToMovieRuntime } from '../constants/runtime';
 import { mapValueToStreamingService } from '../constants/streamingServices';
 import { useLanguage } from '../i18n/useLanguage';
+import { EMPTY_FILTERS } from '../lib/filters';
 import {
 	filterAvailableMovies,
 	filterMovies,
 	getRandomPage,
 	getSearchStartPage,
+	hasVODAvailability,
 	nextPageWindow,
+	pickSearchResult,
 	shuffle,
+	uniqueById,
 	type PageCursor,
 } from '../lib/movies';
-import type { CompleteMovie } from '../models/MovieResponse';
-import { discoverMovies, withDetails, type DiscoverArgs } from '../services/tmdb';
+import type { CompleteMovie, Movie } from '../models/MovieResponse';
+import { fetchRecommendations, RecommendationError } from '../services/recommendations';
+import { discoverMovies, searchMovies, withDetails, type DiscoverArgs } from '../services/tmdb';
 
-export type RouletteMode = 'filtered' | 'random';
+export type StartMode = 'filtered' | 'random';
+export type RouletteMode = StartMode | 'ai';
 export type RouletteStatus = 'idle' | 'loading' | 'ready' | 'empty' | 'error';
-export type EmptyReason = 'default' | 'genreCombo';
+export type EmptyReason = 'default' | 'genreCombo' | 'notMovies' | 'aiUnavailable';
+export type ErrorReason = 'default' | 'quotaExceeded';
 
 const PAGE_WINDOW_SIZE = 4;
 const MIN_RESULTS_TARGET = 100;
@@ -32,6 +39,7 @@ type RouletteState = {
 	movies: CompleteMovie[];
 	index: number;
 	emptyReason: EmptyReason;
+	errorReason: ErrorReason;
 	isFetchingMore: boolean;
 	isCatalogExhausted: boolean;
 };
@@ -39,6 +47,7 @@ type RouletteState = {
 type Search = {
 	mode: RouletteMode;
 	filters: FilterArguments;
+	prompt: string;
 	controller: AbortController;
 	totalPages: number;
 	cursor: PageCursor;
@@ -50,6 +59,7 @@ const INITIAL_STATE: RouletteState = {
 	movies: [],
 	index: 0,
 	emptyReason: 'default',
+	errorReason: 'default',
 	isFetchingMore: false,
 	isCatalogExhausted: false,
 };
@@ -66,6 +76,14 @@ const filteredQuery = (filters: FilterArguments, language: string, page: number)
 		releaseDateLte: eraRange?.lte,
 	};
 };
+
+const emptyReasonFor = (mode: RouletteMode, filters: FilterArguments): EmptyReason => {
+	if (mode === 'ai') return 'aiUnavailable';
+	return mode === 'filtered' && (filters.genre?.length ?? 0) > 1 ? 'genreCombo' : 'default';
+};
+
+const isRecommendationError = (error: unknown, kind: RecommendationError['kind']) =>
+	error instanceof RecommendationError && error.kind === kind;
 
 export const useMovieRoulette = () => {
 	const { language } = useLanguage();
@@ -114,19 +132,44 @@ export const useMovieRoulette = () => {
 		return results;
 	};
 
+	const fetchRecommendedMovies = async (search: Search): Promise<CompleteMovie[]> => {
+		const { signal } = search.controller;
+		const recommendations = await fetchRecommendations(search.prompt, signal);
+		const matches = await Promise.all(
+			recommendations.map(async ({ title, year }) =>
+				pickSearchResult(await searchMovies(title, tmdbLanguage, signal), year)
+			)
+		);
+		const found = uniqueById(matches.filter((movie): movie is Movie => movie !== undefined));
+		return (await withDetails(found, tmdbLanguage, signal)).filter(hasVODAvailability);
+	};
+
+	const loadFirstBatch: Record<RouletteMode, (search: Search) => Promise<CompleteMovie[]>> = {
+		filtered: fetchFirstFilteredResults,
+		random: fetchRandomBatch,
+		ai: fetchRecommendedMovies,
+	};
+
 	const run = async (search: Search, task: () => Promise<void>) => {
 		try {
 			await task();
-		} catch {
-			if (!search.controller.signal.aborted) update({ status: 'error', isFetchingMore: false });
+		} catch (error) {
+			if (search.controller.signal.aborted) return;
+			if (isRecommendationError(error, 'notMovies')) return update({ status: 'empty', emptyReason: 'notMovies' });
+			update({
+				status: 'error',
+				errorReason: isRecommendationError(error, 'quotaExceeded') ? 'quotaExceeded' : 'default',
+				isFetchingMore: false,
+			});
 		}
 	};
 
-	const start = (mode: RouletteMode, filters: FilterArguments) => {
+	const begin = (mode: RouletteMode, filters: FilterArguments, prompt: string) => {
 		searchRef.current?.controller.abort();
 		const search: Search = {
 			mode,
 			filters,
+			prompt,
 			controller: new AbortController(),
 			totalPages: 0,
 			cursor: { next: 1, remaining: 0 },
@@ -135,16 +178,20 @@ export const useMovieRoulette = () => {
 		setState({ ...INITIAL_STATE, mode, status: 'loading' });
 
 		return run(search, async () => {
-			const movies = mode === 'random' ? await fetchRandomBatch(search) : await fetchFirstFilteredResults(search);
+			const movies = await loadFirstBatch[mode](search);
 			if (search.controller.signal.aborted) return;
 			update({
 				movies,
 				status: movies.length ? 'ready' : 'empty',
-				emptyReason: mode === 'filtered' && (filters.genre?.length ?? 0) > 1 ? 'genreCombo' : 'default',
-				isCatalogExhausted: mode === 'filtered' && search.cursor.remaining <= 0,
+				emptyReason: emptyReasonFor(mode, filters),
+				isCatalogExhausted: mode === 'ai' || (mode === 'filtered' && search.cursor.remaining <= 0),
 			});
 		});
 	};
+
+	const start = (mode: StartMode, filters: FilterArguments) => begin(mode, filters, '');
+
+	const recommend = (prompt: string) => begin('ai', EMPTY_FILTERS, prompt);
 
 	const loadMore = (search: Search) => {
 		update({ isFetchingMore: true });
@@ -187,7 +234,7 @@ export const useMovieRoulette = () => {
 
 	const retry = () => {
 		const search = searchRef.current;
-		if (search) start(search.mode, search.filters);
+		if (search) begin(search.mode, search.filters, search.prompt);
 	};
 
 	const isLastMovie = state.index >= state.movies.length - 1;
@@ -202,6 +249,7 @@ export const useMovieRoulette = () => {
 			state.movies.length > 0 &&
 			state.movies.length < FEW_RESULTS_THRESHOLD,
 		start,
+		recommend,
 		next,
 		previous,
 		reset,
