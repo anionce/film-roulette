@@ -8,6 +8,14 @@ describe('parseWatchlistSource', () => {
 		expect(parseWatchlistSource('  dave ')).toEqual({ type: 'letterboxd', username: 'dave' });
 	});
 
+	it('understands Letterboxd profile and watchlist links', () => {
+		const expected = { type: 'letterboxd', username: 'dave' };
+
+		expect(parseWatchlistSource('https://letterboxd.com/dave/watchlist/')).toEqual(expected);
+		expect(parseWatchlistSource('letterboxd.com/dave')).toEqual(expected);
+		expect(parseWatchlistSource('https://www.letterboxd.com/dave/?x=1')).toEqual(expected);
+	});
+
 	it('understands the link JustWatch gives when sharing a list', () => {
 		expect(parseWatchlistSource(`https://www.justwatch.com/shared?id=${LIST_ID}`)).toEqual({
 			type: 'justwatch',
@@ -27,6 +35,7 @@ describe('parseWatchlistSource', () => {
 		expect(parseWatchlistSource('a')).toBeNull();
 		expect(parseWatchlistSource('bad name!')).toBeNull();
 		expect(parseWatchlistSource('https://example.com/lists/123')).toBeNull();
+		expect(parseWatchlistSource('https://letterboxd.com/')).toBeNull();
 		expect(parseWatchlistSource('tl-us-not-a-real-id')).toBeNull();
 	});
 });
