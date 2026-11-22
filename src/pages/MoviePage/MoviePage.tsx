@@ -7,7 +7,7 @@ import { MoviePlot } from '../../components/MoviePlot/MoviePlot';
 import { MoviePoster } from '../../components/MoviePoster/MoviePoster';
 import { NoResults } from '../../components/NoResults/NoResults';
 import { Streaming } from '../../components/Streaming/Streaming';
-import type { EmptyReason, MovieRoulette } from '../../hooks/useMovieRoulette';
+import type { EmptyReason, ErrorReason, MovieRoulette } from '../../hooks/useMovieRoulette';
 import { useLanguage } from '../../i18n/useLanguage';
 import type { Translations } from '../../i18n/translations';
 import { includedWithSubscription } from '../../lib/movies';
@@ -19,6 +19,17 @@ const emptyMessage = (reason: EmptyReason, t: Translations): string | undefined 
 		genreCombo: t.noResultsGenreComboMessage,
 		notMovies: t.aiNotMoviesMessage,
 		aiUnavailable: t.aiUnavailableMessage,
+		watchlistNoMatch: t.watchlistNoMatchMessage,
+		watchlistNotFound: t.watchlistNotFoundMessage,
+		watchlistEmpty: t.watchlistEmptyMessage,
+		watchlistNoMovies: t.watchlistNoMoviesMessage,
+	})[reason];
+
+const errorMessage = (reason: ErrorReason, t: Translations): string | undefined =>
+	({
+		default: undefined,
+		quotaExceeded: t.aiQuotaMessage,
+		rateLimited: t.watchlistRateLimitedMessage,
 	})[reason];
 
 export const MoviePage = ({ roulette }: { roulette: MovieRoulette }) => {
@@ -38,12 +49,7 @@ export const MoviePage = ({ roulette }: { roulette: MovieRoulette }) => {
 					<UndoIcon />
 				</button>
 			</div>
-			{status === 'error' && (
-				<ApiError
-					message={roulette.errorReason === 'quotaExceeded' ? t.aiQuotaMessage : undefined}
-					onRetry={roulette.retry}
-				/>
-			)}
+			{status === 'error' && <ApiError message={errorMessage(roulette.errorReason, t)} onRetry={roulette.retry} />}
 			{status === 'loading' && <Loader />}
 			{status === 'empty' && <NoResults message={emptyMessage(roulette.emptyReason, t)} onGoHome={goHome} />}
 			{status === 'ready' && currentMovie && (

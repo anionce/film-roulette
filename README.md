@@ -22,6 +22,15 @@ Below the filters there is a free-text box: describe what you feel like watching
 - Prompts are capped at 300 characters and each visitor is limited to 10 requests per minute. When the free Gemini quota runs out the app says so instead of failing silently.
 - Every suggested title is looked up in TMDB, so invented films are dropped, and only the ones available in Spain are shown, with the usual poster, details and platforms.
 
+## Your own list (Letterboxd or JustWatch)
+
+A second box lets you pick from a list you already keep, with your filters applied (genres, duration, era, platforms). Nothing is uploaded and no account or password is needed:
+
+- **Letterboxd:** type your username. The Netlify Function `/api/watchlist` reads your public watchlist (up to 10 pages) from letterboxd.com.
+- **JustWatch:** paste the link you get from _Share List_ on one of your custom lists. The function reads that list from JustWatch's web API. JustWatch has no public profiles, so the main watchlist has to be copied to a custom list first.
+- Each film is matched in TMDB (by TMDB id when JustWatch gives it, otherwise by title and year), the genre and era filters run first, and details and providers are fetched in batches as you move forward. Only films available in Spain are shown.
+- Both sources are unofficial: they read public pages and JustWatch's internal API, so they can stop working if those change. The function identifies itself, caps the pages it reads, is limited to 3 imports per minute per visitor and lets the CDN cache each list for an hour.
+
 ## Structure
 
 ```
@@ -36,8 +45,8 @@ src/
   services/     TMDB and recommendations clients
   test/         test setup, factories and render helper
 netlify/
-  functions/    recommend: serverless endpoint that calls Gemini (only function files here)
-  lib/          prompt, Gemini client and rate limiter
+  functions/    recommend and watchlist: serverless endpoints (only function files here)
+  lib/          prompt, Gemini client, Letterboxd and JustWatch readers, rate limiter
   tests/        tests for the function
   devServer.ts  serves the function in `npm run dev`
 ```
@@ -67,4 +76,4 @@ The app runs at http://localhost:3000 and `npm run dev` also serves `/api/recomm
 
 ## Tests
 
-Vitest + Testing Library on jsdom. Unit tests cover filtering, shuffling, paging, era ranges, the TMDB query builder and retries, and the recommend function (prompt validation, Gemini parsing, rate limiting) with Gemini mocked; hook tests cover the roulette flow with the TMDB client mocked; component tests cover choosing filters and browsing movies from the user's point of view. Tests never call TMDB or Gemini or read `.env`.
+Vitest + Testing Library on jsdom. Unit tests cover filtering, shuffling, paging, era ranges, the TMDB query builder and retries, and the recommend and watchlist functions (prompt validation, Gemini parsing, Letterboxd and JustWatch parsing, rate limiting) with the outside world mocked; hook tests cover the roulette flow with the TMDB client mocked; component tests cover choosing filters and browsing movies from the user's point of view. Tests never call TMDB, Gemini, Letterboxd or JustWatch or read `.env`.

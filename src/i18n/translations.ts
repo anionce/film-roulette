@@ -41,6 +41,15 @@ export type Translations = {
 	aiNotMoviesMessage: string;
 	aiUnavailableMessage: string;
 	aiQuotaMessage: string;
+	watchlistLabel: string;
+	watchlistPlaceholder: string;
+	watchlistButton: string;
+	watchlistHint: string;
+	watchlistNoMatchMessage: string;
+	watchlistNotFoundMessage: string;
+	watchlistEmptyMessage: string;
+	watchlistNoMoviesMessage: string;
+	watchlistRateLimitedMessage: string;
 };
 
 export const translations: Record<Language, Translations> = {
@@ -86,6 +95,16 @@ export const translations: Record<Language, Translations> = {
 		aiUnavailableMessage:
 			'Ninguna de las recomendaciones está disponible ahora mismo en España. Prueba con otra descripción.',
 		aiQuotaMessage: 'La IA ha llegado a su límite gratuito por ahora. Inténtalo de nuevo más tarde o usa los filtros.',
+		watchlistLabel: 'O elige de tu lista de Letterboxd o JustWatch',
+		watchlistPlaceholder: 'Usuario de Letterboxd o enlace de JustWatch',
+		watchlistButton: 'Elegir',
+		watchlistHint:
+			'Usa tus filtros sobre las películas de tu lista pública. En JustWatch, comparte una lista y pega su enlace. No hace falta contraseña.',
+		watchlistNoMatchMessage: 'Ninguna película de tu watchlist encaja con esos filtros ahora mismo. Prueba a cambiar alguno.',
+		watchlistNotFoundMessage: 'No encontramos esa lista o ese usuario. Revisa el nombre o el enlace.',
+		watchlistEmptyMessage: 'Esa lista está vacía o es privada. Hazla pública para poder usarla.',
+		watchlistNoMoviesMessage: 'Esa lista no tiene películas, solo series. Prueba con otra.',
+		watchlistRateLimitedMessage: 'Demasiados intentos seguidos. Espera un minuto y vuelve a probar.',
 	},
 	en: {
 		introGreeting: "Hi! Let's pick something awesome to watch 🤗",
@@ -128,5 +147,15 @@ export const translations: Record<Language, Translations> = {
 		aiNotMoviesMessage: 'I can only recommend movies. Tell me what you feel like watching.',
 		aiUnavailableMessage: 'None of the recommendations are available in Spain right now. Try a different description.',
 		aiQuotaMessage: 'The AI has reached its free limit for now. Try again later or use the filters.',
+		watchlistLabel: 'Or pick from your Letterboxd or JustWatch list',
+		watchlistPlaceholder: 'Letterboxd username or JustWatch link',
+		watchlistButton: 'Pick',
+		watchlistHint:
+			'Applies your filters to the films in your public list. On JustWatch, share a list and paste its link. No password needed.',
+		watchlistNoMatchMessage: 'No film in your watchlist matches those filters right now. Try changing one.',
+		watchlistNotFoundMessage: "We couldn't find that list or user. Check the name or the link.",
+		watchlistEmptyMessage: 'That list is empty or private. Make it public to use it.',
+		watchlistNoMoviesMessage: 'That list has no movies, only shows. Try another one.',
+		watchlistRateLimitedMessage: 'Too many attempts in a row. Wait a minute and try again.',
 	},
 };

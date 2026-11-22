@@ -7,11 +7,13 @@ import {
 	type StreamingDetail,
 } from '../models/MovieResponse';
 import { GENRES_EXCLUDED_UNLESS_SELECTED } from '../constants/genre';
+import { chunk, pickSearchResult, uniqueById } from '../lib/movies';
 
 const BASE_URL = 'https://api.themoviedb.org/3/';
 const TOKEN = import.meta.env.VITE_TOKEN;
 const WATCH_REGION = CountryCodes.ES;
 
+const SEARCH_BATCH_SIZE = 20;
 const MAX_RETRIES = 3;
 const RETRY_BASE_DELAY_MS = 300;
 const NOT_FOUND = 404;
@@ -21,6 +23,14 @@ const MINIMUM_VOTE = 6.0;
 const PLUTO_TV_PROVIDER_ID = '300';
 const PLUTO_TV_POPULARITY_VALUE = 20;
 const PLUTO_TV_MINIMUM_VOTE = 5.5;
+
+export type FilmQuery = {
+	title: string;
+	year: number | null;
+	tmdbId?: number;
+};
+
+type MovieByIdResponse = Omit<Movie, 'genre_ids'> & { genres: { id: number }[] };
 
 export type DiscoverArgs = {
 	page: number;
@@ -109,6 +119,25 @@ export const discoverMovies = (args: DiscoverArgs, signal?: AbortSignal) =>
 export const searchMovies = async (query: string, language: string, signal?: AbortSignal): Promise<Movie[]> =>
 	(await fetchTmdb<APIMovieResponse>('search/movie', new URLSearchParams({ query, language, include_adult: 'false' }), signal))
 		.results;
+
+const findMovie = async ({ title, year, tmdbId }: FilmQuery, language: string, signal?: AbortSignal) => {
+	const byId = tmdbId ? await unlessFailed(getMovieById(tmdbId, language, signal)) : undefined;
+	return byId ?? pickSearchResult(await searchMovies(title, language, signal), year);
+};
+
+export const findMovies = async (queries: FilmQuery[], language: string, signal?: AbortSignal): Promise<Movie[]> => {
+	const found: Movie[] = [];
+	for (const batch of chunk(queries, SEARCH_BATCH_SIZE)) {
+		const matches = await Promise.all(batch.map(query => findMovie(query, language, signal)));
+		found.push(...matches.filter((movie): movie is Movie => movie !== undefined));
+	}
+	return uniqueById(found);
+};
+
+const getMovieById = async (id: number, language: string, signal?: AbortSignal): Promise<Movie> => {
+	const { genres, ...movie } = await fetchTmdb<MovieByIdResponse>(`movie/${id}`, new URLSearchParams({ language }), signal);
+	return { ...movie, genre_ids: genres.map(genre => genre.id) };
+};
 
 const getMovieDetail = (id: number, language: string, signal?: AbortSignal) =>
 	fetchTmdb<MovieDetail>(`movie/${id}`, new URLSearchParams({ language }), signal);

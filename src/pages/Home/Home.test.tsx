@@ -7,13 +7,27 @@ import { EMPTY_FILTERS } from '../../lib/filters';
 import { renderWithProviders } from '../../test/render';
 import { Home } from './Home';
 
-const HomeWithState = ({ onStart, onRecommend = vi.fn() }: { onStart: () => void; onRecommend?: (prompt: string) => void }) => {
+type HomeWithStateProps = {
+	onStart: () => void;
+	onRecommend?: (prompt: string) => void;
+	onWatchlist?: (username: string) => void;
+};
+
+const HomeWithState = ({ onStart, onRecommend = vi.fn(), onWatchlist = vi.fn() }: HomeWithStateProps) => {
 	const [filters, setFilters] = useState<FilterArguments>(EMPTY_FILTERS);
 	return (
 		<Routes>
 			<Route
 				index
-				element={<Home filters={filters} onFiltersChange={setFilters} onStart={onStart} onRecommend={onRecommend} />}
+				element={
+					<Home
+						filters={filters}
+						onFiltersChange={setFilters}
+						onStart={onStart}
+						onRecommend={onRecommend}
+						onWatchlist={onWatchlist}
+					/>
+				}
 			/>
 			<Route path='/movie' element={<p>Movie page</p>} />
 		</Routes>
@@ -64,6 +78,38 @@ describe('Home', () => {
 
 		expect(onRecommend).toHaveBeenCalledWith('un thriller corto');
 		expect(screen.getByText('Movie page')).toBeInTheDocument();
+	});
+
+	it('picks from a Letterboxd username or a JustWatch link and remembers it', async () => {
+		const onWatchlist = vi.fn();
+		const { user, unmount } = renderWithProviders(<HomeWithState onStart={vi.fn()} onWatchlist={onWatchlist} />);
+
+		const submit = screen.getByRole('button', { name: 'Elegir' });
+		await user.type(screen.getByLabelText(/lista de Letterboxd o JustWatch/i), 'bad name!');
+		expect(submit).toBeDisabled();
+
+		await user.clear(screen.getByLabelText(/lista de Letterboxd o JustWatch/i));
+		await user.type(screen.getByLabelText(/lista de Letterboxd o JustWatch/i), 'dave');
+		await user.click(submit);
+
+		expect(onWatchlist).toHaveBeenCalledWith('dave');
+		expect(screen.getByText('Movie page')).toBeInTheDocument();
+
+		unmount();
+		renderWithProviders(<HomeWithState onStart={vi.fn()} />);
+		expect(screen.getByLabelText(/lista de Letterboxd o JustWatch/i)).toHaveValue('dave');
+	});
+
+	it('accepts a shared JustWatch link as it is', async () => {
+		const onWatchlist = vi.fn();
+		const { user } = renderWithProviders(<HomeWithState onStart={vi.fn()} onWatchlist={onWatchlist} />);
+		const link = 'https://www.justwatch.com/shared?id=tl-us-bd94f102-aef1-4887-b110-bb2674662683';
+
+		await user.click(screen.getByLabelText(/lista de Letterboxd o JustWatch/i));
+		await user.paste(link);
+		await user.click(screen.getByRole('button', { name: 'Elegir' }));
+
+		expect(onWatchlist).toHaveBeenCalledWith(link);
 	});
 
 	it('only confirms platforms once one is selected', async () => {

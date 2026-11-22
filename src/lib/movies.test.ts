@@ -8,6 +8,7 @@ import {
 	filterAvailableMovies,
 	filterMovies,
 	getRandomPage,
+	chunk,
 	getRandomStartPage,
 	nextPageWindow,
 	pickSearchResult,
@@ -266,5 +267,15 @@ describe('pickSearchResult', () => {
 describe('uniqueById', () => {
 	it('keeps one item per id', () => {
 		expect(uniqueById([{ id: 1 }, { id: 2 }, { id: 1 }])).toEqual([{ id: 1 }, { id: 2 }]);
+	});
+});
+
+describe('chunk', () => {
+	it('splits items into groups of the given size', () => {
+		expect(chunk([1, 2, 3, 4, 5], 2)).toEqual([[1, 2], [3, 4], [5]]);
+	});
+
+	it('returns no groups for an empty list', () => {
+		expect(chunk([], 3)).toEqual([]);
 	});
 });
