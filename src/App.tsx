@@ -22,6 +22,7 @@ export const App = () => {
 							onFiltersChange={setFilters}
 							onStart={mode => roulette.start(mode, filters)}
 							onRecommend={roulette.recommend}
+							onWatchlist={username => roulette.startWatchlist(username, filters)}
 						/>
 					}
 				/>

@@ -48,6 +48,7 @@ export type MovieDetail = Movie & {
 	production_companies: ProductionCompany[];
 	production_countries: ProductionCountry[];
 	revenue: number;
+	runtime: number | null;
 	spoken_languages: SpokenLanguage[];
 	status: string;
 	tagline: string;

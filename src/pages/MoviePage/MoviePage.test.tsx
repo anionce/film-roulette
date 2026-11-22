@@ -22,6 +22,7 @@ const makeRoulette = (overrides: Partial<MovieRoulette> = {}): MovieRoulette => 
 		showFewResults: false,
 		start: vi.fn(),
 		recommend: vi.fn(),
+		startWatchlist: vi.fn(),
 		next: vi.fn(),
 		previous: vi.fn(),
 		reset: vi.fn(),
@@ -92,5 +93,24 @@ describe('MoviePage', () => {
 
 		rerender(<MoviePage roulette={makeRoulette({ status: 'error', errorReason: 'quotaExceeded' })} />);
 		expect(screen.getByText(/límite gratuito/)).toBeInTheDocument();
+	});
+
+	it('explains watchlist specific empty and error states', () => {
+		const { rerender } = renderWithProviders(
+			<MoviePage roulette={makeRoulette({ status: 'empty', emptyReason: 'watchlistNoMatch' })} />
+		);
+		expect(screen.getByText(/Ninguna película de tu watchlist/)).toBeInTheDocument();
+
+		rerender(<MoviePage roulette={makeRoulette({ status: 'empty', emptyReason: 'watchlistNotFound' })} />);
+		expect(screen.getByText(/No encontramos esa lista o ese usuario/)).toBeInTheDocument();
+
+		rerender(<MoviePage roulette={makeRoulette({ status: 'empty', emptyReason: 'watchlistEmpty' })} />);
+		expect(screen.getByText(/vacía o es privada/)).toBeInTheDocument();
+
+		rerender(<MoviePage roulette={makeRoulette({ status: 'empty', emptyReason: 'watchlistNoMovies' })} />);
+		expect(screen.getByText(/no tiene películas, solo series/)).toBeInTheDocument();
+
+		rerender(<MoviePage roulette={makeRoulette({ status: 'error', errorReason: 'rateLimited' })} />);
+		expect(screen.getByText(/Demasiados intentos/)).toBeInTheDocument();
 	});
 });

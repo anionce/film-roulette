@@ -40,7 +40,7 @@ export const hasVODAvailability = (movie: CompleteMovie): boolean =>
 export const isFromPreferredOrigin = (movie: CompleteMovie): boolean =>
 	PREFERRED_ORIGIN_LANGUAGES.includes(movie.original_language) || movie.vote_count >= SUPER_POPULAR_VOTE_COUNT_THRESHOLD;
 
-export const isWithinEraRange = (movie: CompleteMovie, era: MovieEra | null): boolean => {
+export const isWithinEraRange = (movie: Movie, era: MovieEra | null): boolean => {
 	const range = mapValueToEraRange(era);
 	if (!range) return true;
 	if (!movie.release_date) return false;
@@ -48,7 +48,7 @@ export const isWithinEraRange = (movie: CompleteMovie, era: MovieEra | null): bo
 	return !(range.lte && movie.release_date > range.lte);
 };
 
-const isOnSelectedPlatforms = (movie: CompleteMovie, filters: FilterArguments): boolean => {
+export const isOnSelectedPlatforms = (movie: CompleteMovie, filters: FilterArguments): boolean => {
 	if (!filters.streaming) return true;
 	const providerIds = new Set(includedWithSubscription(movie.streaming).map(platform => platform.provider_id));
 	return filters.streaming.some(service => providerIds.has(STREAMING_ID[service]));
@@ -62,6 +62,9 @@ export const filterMovies = (movies: CompleteMovie[], filters: FilterArguments):
 
 export const pickSearchResult = (results: Movie[], year: number | null): Movie | undefined =>
 	results.find(movie => year !== null && movie.release_date.startsWith(String(year))) ?? results[0];
+
+export const chunk = <T>(items: T[], size: number): T[][] =>
+	Array.from({ length: Math.ceil(items.length / size) }, (_, index) => items.slice(index * size, (index + 1) * size));
 
 export const uniqueById = <T extends { id: number }>(items: T[]): T[] => [
 	...new Map(items.map(item => [item.id, item])).values(),

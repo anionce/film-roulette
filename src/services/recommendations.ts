@@ -4,6 +4,7 @@ import {
 	type RecommendationErrorKind,
 	type RecommendationResponse,
 } from '../models/Recommendation';
+import { readErrorKind } from './apiErrors';
 
 const RECOMMEND_ENDPOINT = '/api/recommend';
 
@@ -16,17 +17,6 @@ export class RecommendationError extends Error {
 	}
 }
 
-const isErrorKind = (value: unknown): value is RecommendationErrorKind => RECOMMENDATION_ERROR_KINDS.some(kind => kind === value);
-
-const readErrorKind = async (response: Response): Promise<RecommendationErrorKind> => {
-	try {
-		const { error } = (await response.json()) as { error?: unknown };
-		return isErrorKind(error) ? error : 'failed';
-	} catch {
-		return 'failed';
-	}
-};
-
 export const fetchRecommendations = async (prompt: string, signal?: AbortSignal): Promise<Recommendation[]> => {
 	const response = await fetch(RECOMMEND_ENDPOINT, {
 		method: 'POST',
@@ -34,6 +24,8 @@ export const fetchRecommendations = async (prompt: string, signal?: AbortSignal)
 		body: JSON.stringify({ prompt }),
 		signal,
 	});
-	if (!response.ok) throw new RecommendationError(await readErrorKind(response));
+	if (!response.ok) {
+		throw new RecommendationError(await readErrorKind(response, RECOMMENDATION_ERROR_KINDS, 'failed'));
+	}
 	return ((await response.json()) as RecommendationResponse).recommendations;
 };

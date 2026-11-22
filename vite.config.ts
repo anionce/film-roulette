@@ -1,9 +1,9 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
-import { recommendDevServer } from './netlify/devServer';
+import { functionsDevServer } from './netlify/devServer.ts';
 
 export default defineConfig({
-	plugins: [react(), recommendDevServer()],
+	plugins: [react(), functionsDevServer()],
 	envDir: process.env.VITEST ? false : undefined,
 	server: {
 		port: 3000,

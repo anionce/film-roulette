@@ -6,6 +6,7 @@ import { FiltersModal } from '../../components/FiltersModal/FiltersModal';
 import { Header } from '../../components/Header/Header';
 import { Introduction } from '../../components/Introduction/Introduction';
 import { LanguageToggle } from '../../components/LanguageToggle/LanguageToggle';
+import { WatchlistForm } from '../../components/WatchlistForm/WatchlistForm';
 import { StartButton } from '../../components/StartButton/StartButton';
 import { type FilterType, filterTypes, type FilterArguments } from '../../constants/filters';
 import type { StartMode } from '../../hooks/useMovieRoulette';
@@ -18,9 +19,10 @@ type HomeProps = {
 	onFiltersChange: (filters: FilterArguments) => void;
 	onStart: (mode: StartMode) => void;
 	onRecommend: (prompt: string) => void;
+	onWatchlist: (input: string) => void;
 };
 
-export const Home = ({ filters, onFiltersChange, onStart, onRecommend }: HomeProps) => {
+export const Home = ({ filters, onFiltersChange, onStart, onRecommend, onWatchlist }: HomeProps) => {
 	const { t } = useLanguage();
 	const navigate = useNavigate();
 	const [openFilter, setOpenFilter] = useState<FilterType | null>(null);
@@ -32,6 +34,11 @@ export const Home = ({ filters, onFiltersChange, onStart, onRecommend }: HomePro
 
 	const recommend = (prompt: string) => {
 		onRecommend(prompt);
+		navigate('/movie');
+	};
+
+	const pickFromWatchlist = (input: string) => {
+		onWatchlist(input);
 		navigate('/movie');
 	};
 
@@ -53,6 +60,7 @@ export const Home = ({ filters, onFiltersChange, onStart, onRecommend }: HomePro
 				<StartButton mode='random' disabled={!canPickRandom(filters)} onStart={start} />
 			</div>
 			<AiPrompt onSubmit={recommend} />
+			<WatchlistForm onSubmit={pickFromWatchlist} />
 			{filterTypes.map(type => (
 				<FiltersModal
 					key={type}
